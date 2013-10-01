@@ -1,5 +1,5 @@
 import unittest
-from ..discontinuityboard import *
+from app import app
 
 class DiscontinuityBoardTest(unittest.TestCase):
     """Testing the discontinuitytest module"""
@@ -7,7 +7,8 @@ class DiscontinuityBoardTest(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
         self.app = app.test_client()
+        print app
 
     def test_frontpage_load(self):
         rv = self.app.get('/')
-        assert 'Hello, world' in rv.data
+        assert 'Discontinuity Board' in rv.data
