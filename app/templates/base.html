@@ -1,0 +1,29 @@
+<!-- This is where the base html code will go - the stuff that we want to appear
+on all the pages of the application -->
+
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <title>{{title}}</title>
+  </head>
+
+  <body>
+    <h1> Welcome to Discontinuity Board!</h1>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>{{ message }} </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+
+    {% block content %}{% endblock %}
+  </body>
+
+</html>
+
