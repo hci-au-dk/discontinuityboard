@@ -1,0 +1,5 @@
+
+### FORM SETTINGS
+
+CSRF_ENABLED = True
+SECRET_KEY = 'kjiouWQN-193jau3k-oqlp4by'

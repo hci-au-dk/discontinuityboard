@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action="" method="post" name="upload">
+  {{form.hidden_tag()}}
+  <p> Upload File: {{form.photo}}<p>
+
+  <p> <input type = "submit" value = "Upload"> </p>
+
+</form>
+
+{% endblock %}
