@@ -2,3 +2,12 @@
 h1 {
     color: blue;
 }
+
+#upload {
+    border: 2px solid green;
+}
+
+#view {
+    border: 2px solid blue;
+}
+

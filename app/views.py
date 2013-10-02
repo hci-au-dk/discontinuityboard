@@ -13,6 +13,18 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+
+
+@app.route('/')
+@app.route('/index')
+def index(filename = None):
+    return render_template('index.html',
+                           title = 'Discontinuity Board',
+                           filename = filename)
+
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -20,19 +32,14 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file', filename=filename))
-    return render_template('index.html')
+            filename = 'http://127.0.0.1:5000/uploads/' + filename
+            return render_template('index.html', filename = filename)
+
+    return render_template('index.html',
+                           title = 'Discontinuity Board',
+                           filename = None)
 
 
-@app.route("/index")
-def index():
-    return render_template('index.html',  # if you change the title, change the test!
-                           title = 'Discontinuity Board')  
-
-@app.route('/show/<filename>')
-def uploaded_file(filename):
-    filename = 'http://127.0.0.1:5000/uploads/' + filename
-    return render_template('show.html', filename=filename)
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
