@@ -33,7 +33,9 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             filename = 'http://127.0.0.1:5000/uploads/' + filename
-            return render_template('index.html', filename = filename)
+            return render_template('index.html', 
+                                   title = 'Discontinuity Board', 
+                                   filename = filename)
 
     return render_template('index.html',
                            title = 'Discontinuity Board',
