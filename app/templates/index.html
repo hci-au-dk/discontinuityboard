@@ -6,14 +6,20 @@
 
 <div id="view">
 
-  {% if filename %}
+  {% include "tools.html" %}
 
-  <p> <img src="{{filename}}" alt="uploaded photo"></p>
-  {% else %}
-  <h1>no image here :(! </h1>
+  <div id="photocontainer">
+    {% if filename %}
 
-  {% endif %}
+    <span id="imagefile"> <img src="{{filename}}" alt="uploaded photo"> </span>
+    <canvas id="imagecanvas">
 
+    </canvas>
+    {% else %}
+    <h1>no image here :(! </h1>
+
+    {% endif %}
+  </div>
 </div>
 
 {% endblock %}

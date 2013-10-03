@@ -9,5 +9,26 @@ h1 {
 
 #view {
     border: 2px solid blue;
+    overflow: hidden;
 }
 
+#tools {
+    border: 2px solid red;
+    height: 500px;
+    float: left;
+    overflow: hidden;
+}
+
+#photocontainer {
+    border: 2px solid fuchsia;
+    overflow: hidden;
+}
+
+div {
+    margin: 2px;
+    padding: 5px;
+}
+
+#imagecanvas {
+    border: 1px solid black;
+}
