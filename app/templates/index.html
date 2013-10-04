@@ -11,13 +11,15 @@
   <div id="photocontainer">
     {% if filename %}
 
+
     <span id="imagefile"> <img src="{{filename}}" alt="uploaded photo"> </span>
-    <canvas id="imagecanvas">
+    <div id="imageeditparent">
+      <div id="imagelayer">
 
-    </canvas>
-    {% else %}
-    <h1>no image here :(! </h1>
-
+      </div>
+      <div id="toolscanvas">
+      </div>
+    </div>
     {% endif %}
   </div>
 </div>
