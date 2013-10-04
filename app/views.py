@@ -14,7 +14,6 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
-
 @app.route('/')
 @app.route('/index')
 def index(filename = None):
@@ -23,27 +22,25 @@ def index(filename = None):
                            filename = filename)
 
 
-
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/upload/', methods=['GET', 'POST'])
 def upload_file():
+    filename = None
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             filename = 'http://127.0.0.1:5000/uploads/' + filename
-            return render_template('index.html', 
-                                   title = 'Discontinuity Board', 
-                                   filename = filename)
 
-    return render_template('index.html',
-                           title = 'Discontinuity Board',
-                           filename = None)
-
-
+    return index(filename)
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+#@app.route('/transform/<filename>', methods = ['GET', 'POST'])
+#def transform_file:
+#    if request.method == 'POST':
+#        file = request.files['file']
+#        coordinates = request.form['coordinates']
+    

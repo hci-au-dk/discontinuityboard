@@ -12,9 +12,12 @@ on all the pages of the application -->
     <meta name="description" content="A whiteboard capture system with discontinuity built in.">
     <meta name="viewport" content="width=device-width">
 
-    <link rel="stylesheet" type="text/css" href="static/base.css">
-    <script src="//code.jquery.com/jquery.js"></script>
-    <script type="text/javascript" src="static/tools.js"></script>
+{% assets "css_all" %}
+<link rel="stylesheet" href="{{ ASSET_URL }}">
+{% endassets %}
+{% assets "js_all" %}
+<script rel="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
 
   </head>
 
