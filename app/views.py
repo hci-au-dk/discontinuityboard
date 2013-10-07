@@ -38,9 +38,12 @@ def upload_file():
 def send_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-#@app.route('/transform/<filename>', methods = ['GET', 'POST'])
-#def transform_file:
-#    if request.method == 'POST':
-#        file = request.files['file']
-#        coordinates = request.form['coordinates']
-    
+@app.route('/transform/', methods = ['GET', 'POST'])
+def transform_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        coordinates = request.form['coordinates']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            filename = 'http://127.0.0.1:5000/uploads/' + filename

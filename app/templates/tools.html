@@ -2,5 +2,29 @@
 <div id="tools">
     <h2>Photo manipulation tools</h2>
     <button type="button" id="cornerselect">Corner Select Tool</button>
-    <button type="button" id="transformimage">Transform Image</button>
+
+    <form action="/transform/" method="post" enctype="multipart/form-data">
+      <div class="coordpair">
+	Corner 1: </br>
+	x: <input id="corner1x" type="text" class="coordinput" size="5">
+	y: <input id="corner1y" type="text" class="coordinput" size="5">
+      </div>
+      <div class="coordpair">
+	Corner 2: </br>
+	x: <input id="corner2x" type="text" class="coordinput" size="5">
+	y: <input id="corner2y" type="text" class="coordinput" size="5">
+      </div>
+      <div class="coordpair">
+	Corner 3: </br>
+	x: <input id="corner3x" type="text" class="coordinput" size="5">
+	y: <input id="corner3y" type="text" class="coordinput" size="5">
+      </div>
+      <div class="coordpair">
+	Corner 4: </br>
+	x: <input id="corner4x" type="text" class="coordinput" size="5">
+	y: <input id="corner4y" type="text" class="coordinput" size="5">
+      </div>
+
+      <input id="transformimage" type="submit" value="Transform Image">
+    </form>
 </div>

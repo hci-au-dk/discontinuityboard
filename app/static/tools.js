@@ -3,7 +3,10 @@
 cornerTool = false;
 cornerCount = 0;
 
-cornerSize = 20;  // This should be an even number
+cornerSize = 20 + 4;  // This should be an even number
+cornerBorderSize = 2;  // this will be added to all sides of the corner
+cornerBorderColor = "red";
+cornerBorderStyle = "dashed";
 
 $(document).ready(function() {
     // do stuff when DOM is ready
@@ -15,8 +18,6 @@ function setUpListeners() {
     // the buttons should be listening to the proper thing
     $("#cornerselect").bind("click", cornerSelectClick);
     $("#transformimage").bind("click", transformImageClick);
-    // canvas needs to be listening too
-    $("#imageeditparent").bind("click", canvasClick);
 }
 
 function setUpCanvasAndPhoto() {
@@ -26,15 +27,20 @@ function setUpCanvasAndPhoto() {
 	var width = image.clientWidth;
 	var height = image.clientHeight;
 
-	var layersToSetSize = [$("#imageeditparent"),
-			       $("#imagelayer"),
-			       $("#toolslayer")]
+	var layersToSetSize = [$("#imagelayer"),
+			       $("#toolscanvas")]
 
 	for (var i = 0; i < layersToSetSize.length; i++) {
 	    var div = layersToSetSize[i];
 	    div.css("width", width);
 	    div.css("height", height);
 	}
+
+	$("#imageeditparent").css("width", width + cornerSize);
+	$("#imageeditparent").css("height", height + cornerSize);
+
+	// now set the proper margins
+	$("#imagelayer").css("margin", cornerSize / 2);
 
 	$("#imagelayer").css("background-image", "url(" + image.src + ")");
 	$("#imagefile").hide();
@@ -45,63 +51,79 @@ function cornerSelectClick() {
     cornerTool = !cornerTool;
     if (cornerTool) {
 	$("#view").css("cursor", "crosshair");
+
+	// We want to automatically populate four corner selection boxes
+	populateCorners();
+
     } else {
 	$("#view").css("cursor", "default");
     }
 }
 
-function canvasClick(e) {
+function populateCorners() {
+    var parentX = $("#toolscanvas").position().left;
+    var parentY = $("#toolscanvas").position().top;
+    var parentWidth = $("#toolscanvas").width();
+    var parentHeight = $("#toolscanvas").height();
 
-    if (cornerTool) {
-	var ev = e || window.event; //Moz || IE
+    for (var i = 0; i < 4; i++) {
+	var x = parentX;
+	var y = parentY;
 
-        var x = getX(e);
-	var y = getY(e);
+	// draw a box
+	var layer = $("#toolscanvas");
 
-	var corners = $(".corner");
+	var div = $(document.createElement('div'));
 
-	if (corners.length < 4) {
-	    // draw a box
-	    var layer = $("#toolscanvas");
+	cornerCount += 1;  // Because we want to use 1-based indexing for the corners
 
-	    var div = $(document.createElement('div'));
-
-	    div.css("left", (x - (cornerSize / 2)) + "px");
-	    div.css("top", (y - (cornerSize / 2)) + "px");
-	    div.addClass("corner");
-
-	    div.css("width", cornerSize + "px");
-	    div.css("height" , cornerSize + "px");
-	    div.css("cursor", "pointer");
-	    div.attr("id", "corner" + cornerCount);
-	    div.draggable();
-
-	    layer.append(div);
-	   // $("#corner" + cornerCount).draggable();
-
-	    cornerCount += 1;
-	} else {
-	    // find the nearest box and move it to where the user clicked
-	    var minBox = null;
-	    var minDist = -1;
-	    // we're going to use Euclidean distance
-	    for(var i = 0; i < corners.length; i++) {
-		var corner = $(corners[i]);
-		var cornerX = corner.position().left;
-		var cornerY = corner.position().top;
-
-		var dist = Math.sqrt(Math.pow(x - cornerX, 2) + 
-				     Math.pow(y - cornerY, 2));
-		if (dist < minDist || minDist < 0) {
-		    minBox = corner;
-		    minDist = dist;
-		}
-	    }
-	    // now, move the minBox to where the user clicked
-	    minBox.css("left", (x - (cornerSize / 2)) + "px");
-	    minBox.css("top", (y - (cornerSize / 2)) + "px");
+	if (cornerCount == 2 || cornerCount == 4) {  // top right || bottom right
+	    x = x + parentWidth;
+	} 
+	if (cornerCount == 3 || cornerCount == 4) {  // bottom left || bottom right
+	    y = y + parentHeight;
 	}
+	x = x - (cornerSize / 2);
+	y = y - (cornerSize / 2);
+
+	// Corner 1 should be in the top left
+	div.css("left", x + "px");
+	div.css("top", y + "px");
+	div.addClass("corner");
+
+	div.css("width", (cornerSize - (2 * cornerBorderSize)) + "px");
+	div.css("height" , (cornerSize - (2 * cornerBorderSize)) + "px");
+	div.css("cursor", "pointer");
+	div.attr("id", "corner" + cornerCount);
+	div.draggable({containment: "#imageeditparent"});
+	div.bind("mousemove", populateCoordinates);  // listen for future updates
+
+	layer.append(div);
+
+	div.trigger("mousemove");
     }
+    // set our borders for the boxes
+    var borderStr = cornerBorderSize + "px " + 
+		     cornerBorderStyle + " " + 
+		     cornerBorderColor;
+    $(".corner").css("border", borderStr); 
+
+}
+
+
+function populateCoordinates(e) {
+    // Get the div that moved
+    var corner = $(this);
+    var x = corner.position().left;
+    var y = corner.position().left;
+    
+    var cornerId = corner.attr("id");
+    // The matching coordinate input boxes have ids of cornerId + [x|y]
+    x = x - (cornerSize / 2);
+    y = y - (cornerSize / 2);
+
+    $("#" + cornerId + "x").attr("value", x);
+    $("#" + cornerId + "y").attr("value", y);
 }
 
 
@@ -109,7 +131,24 @@ function transformImageClick(){
     // We'll make a post request to the server with the coordinates of the
     // selected corners
     var corners = $(".corner");
+    if (corners.length != 4) {
+	// get angry
+	alert("You must set 4 corners before correcting perspective.");
+	return;
+    }
+    var parameters = {};
+    for (var i = 0; i < corners.length; i++) {
+	var corner = $(corners[i]);
 
+	var cornerX = corner.position().left;
+	var cornerY = corner.position().top;
+
+	var middleX = cornerX + (cornerSize / 2);
+	var middleY = cornerY + (cornerSize / 2);
+	var coords = {'x': middleX, 'y': middleY};
+    }
+
+    //postToUrl("/transform",
 
 }
 	
