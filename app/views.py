@@ -42,4 +42,3 @@ def transform_file():
     if request.method == 'POST':
         coordinates = request.form['coord1']
         print coordinates
-
