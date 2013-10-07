@@ -1,6 +1,6 @@
 // This is where the functionality for the buttons will go
 
-cornerTool = false;
+cornerTool = true;  // meaning that we haven't populated them yet
 cornerCount = 0;
 
 cornerSize = 20 + 4;  // This should be an even number
@@ -48,16 +48,11 @@ function setUpCanvasAndPhoto() {
 }
 
 function cornerSelectClick() {
-    cornerTool = !cornerTool;
     if (cornerTool) {
-	$("#view").css("cursor", "crosshair");
-
 	// We want to automatically populate four corner selection boxes
 	populateCorners();
-
-    } else {
-	$("#view").css("cursor", "default");
     }
+    cornerTool = false;
 }
 
 function populateCorners() {

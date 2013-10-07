@@ -3,10 +3,12 @@
     <h2>Photo manipulation tools</h2>
     <button type="button" id="cornerselect">Corner Select Tool</button>
 
-    <form action="/transform/" method="post" enctype="multipart/form-data">
+    <form action="/transform/" method="post" enctype="text/plain">
+
+
       <div class="coordpair">
 	Corner 1: </br>
-	x: <input id="corner1x" type="text" class="coordinput" size="5">
+	x: <input id="corner1x" type="text" class="coordinput" name="coord1" size="5">
 	y: <input id="corner1y" type="text" class="coordinput" size="5">
       </div>
       <div class="coordpair">
