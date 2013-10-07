@@ -34,7 +34,7 @@ def upload_file():
 @app.route('/uploads/<filename>')
 def send_file(filename):
     print 'uploading: %s' % (filename)
-    basepath = app.root_path + app.config['UPLOAD_FOLDER']
+    basepath = app.root_path + '/' + app.config['UPLOAD_FOLDER']
     return send_from_directory(basepath, filename)
 
 @app.route('/transform/', methods = ['GET', 'POST'])
