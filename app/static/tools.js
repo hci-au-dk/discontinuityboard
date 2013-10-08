@@ -44,6 +44,8 @@ function setUpCanvasAndPhoto() {
 
 	$("#imagelayer").css("background-image", "url(" + image.src + ")");
 	$("#imagefile").hide();
+
+	// set the file id in the tools form
     }
 }
 
@@ -110,12 +112,16 @@ function populateCoordinates(e) {
     // Get the div that moved
     var corner = $(this);
     var x = corner.position().left;
-    var y = corner.position().left;
+    var y = corner.position().top;
     
     var cornerId = corner.attr("id");
     // The matching coordinate input boxes have ids of cornerId + [x|y]
     x = x - (cornerSize / 2);
     y = y - (cornerSize / 2);
+
+    // We need to adjust for the placement of the tool canvas
+    x = x - ($("#toolscanvas").position().left - (cornerSize));
+    y = y - ($("#toolscanvas").position().top - (cornerSize));
 
     $("#" + cornerId + "x").attr("value", x);
     $("#" + cornerId + "y").attr("value", y);

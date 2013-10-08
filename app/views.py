@@ -5,6 +5,9 @@ from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
 from PIL import Image
 
+
+
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
@@ -33,12 +36,20 @@ def upload_file():
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
-    print 'uploading: %s' % (filename)
     basepath = app.root_path + '/' + app.config['UPLOAD_FOLDER']
     return send_from_directory(basepath, filename)
 
 @app.route('/transform/', methods = ['GET', 'POST'])
 def transform_file():
     if request.method == 'POST':
-        coordinates = request.form['coord1']
-        print coordinates
+        coordinates = []
+        for i in range(1, 5):
+            namex = 'corner' + str(i) + 'x'
+            namey = 'corner' + str(i) + 'y'
+            coordinates.append((request.form[namex], request.form[namey]))
+
+        # Now, we get the photo and then run the transform perspective script
+        
+
+    return index()
+
