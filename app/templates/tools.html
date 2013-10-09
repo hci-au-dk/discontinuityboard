@@ -6,27 +6,28 @@
     <form action="/transform/" method="post" enctype="multipart/form-data">
 
       <div class="coordpair">
-	Corner 1: </br>
+	Corner 1 (upper left): </br>
 	x: <input id="corner1x" type="text" class="coordinput" name="corner1x" size="5">
 	y: <input id="corner1y" type="text" class="coordinput" name="corner1y" size="5">
       </div>
       <div class="coordpair">
-	Corner 2: </br>
+	Corner 2 (lower left): </br>
 	x: <input id="corner2x" type="text" class="coordinput" name="corner2x" size="5">
 	y: <input id="corner2y" type="text" class="coordinput" name="corner2y" size="5">
       </div>
       <div class="coordpair">
-	Corner 3: </br>
+	Corner 3 (lower right): </br>
 	x: <input id="corner3x" type="text" class="coordinput" name="corner3x" size="5">
 	y: <input id="corner3y" type="text" class="coordinput" name="corner3y" size="5">
       </div>
       <div class="coordpair">
-	Corner 4: </br>
+	Corner 4 (upper right): </br>
 	x: <input id="corner4x" type="text" class="coordinput" name="corner4x" size="5">
 	y: <input id="corner4y" type="text" class="coordinput" name="corner4y" size="5">
       </div>
-
-      <input id="currentfileid" type="text" name="filepath" size="3">
+      {% if photoid %}
+      <input id="currentphotoid" type="text" name="currentphotoid" size="3" value="{{ photoid }}">
+      {% endif %}
       <input id="transformimage" type="submit" value="Transform Image">
     </form>
 </div>

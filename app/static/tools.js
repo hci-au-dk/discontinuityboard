@@ -74,10 +74,10 @@ function populateCorners() {
 
 	cornerCount += 1;  // Because we want to use 1-based indexing for the corners
 
-	if (cornerCount == 2 || cornerCount == 4) {  // top right || bottom right
+	if (cornerCount == 4 || cornerCount == 3) {  // top right || bottom right
 	    x = x + parentWidth;
 	} 
-	if (cornerCount == 3 || cornerCount == 4) {  // bottom left || bottom right
+	if (cornerCount == 2 || cornerCount == 3) {  // bottom left || bottom right
 	    y = y + parentHeight;
 	}
 	x = x - (cornerSize / 2);
