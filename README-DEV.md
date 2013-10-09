@@ -35,3 +35,18 @@ that is complaining about missing decoders, you need to install `jpeg`. If you a
 (venv)$ pip uninstall pillow
 (venv)$ pip install pillow
 ```
+
+## Database
+
+There are a few database helper scripts now. Their names should be self-explanatory. If you haven't created your database before, you should do the following:
+
+```
+(venv)$ python db_create.py
+(venv)$ python db_migrate.py
+New migration saved as /Users/golux/Desktop/discontinuitydbtest/discontinuityboard/db_repository/versions/001_migration.py
+Current database version: 1
+```
+
+Everytime you change the database model (`app/models.py`), you'll want to run a migration. This means that you need to remember to migrate your local db if someone else changes the model as well.
+
+The `db_downgrade.py` and `db_upgrade.py` scripts will downgrade and upgrade one migration, respectively.
