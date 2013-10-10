@@ -45,4 +45,4 @@ venv
 # database stuff
 
 app.db
-db_respository
+db_repository/*
