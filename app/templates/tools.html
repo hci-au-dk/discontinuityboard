@@ -26,7 +26,7 @@
 	y: <input id="corner4y" type="text" class="coordinput" name="corner4y" size="5">
       </div>
       {% if photoid %}
-      <input id="currentphotoid" type="text" name="currentphotoid" size="3" value="{{ photoid }}">
+      <input id="currentphotoid" type="text" name="currentphotoid" size="3" value="{{ photoid }}" hidden="true">
       {% endif %}
       <input id="transformimage" type="submit" value="Transform Image">
     </form>

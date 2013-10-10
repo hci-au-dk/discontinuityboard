@@ -4,7 +4,7 @@ from flask.ext.assets import Bundle
 ### STATIC FILES TO LOAD WITH ASSETS
 
 CSS_ALL = Bundle('base.css')
-JS_ALL = Bundle('jquery-2.0.2.min.js', 'jquery-ui-1.10.3.js', 'tools.js')
+JS_ALL = Bundle('jquery-2.0.2.min.js', 'jquery-ui-1.10.3.js', 'processphoto.js', 'messenger.js', 'browser.js')
 
 ### FORM SETTINGS
 

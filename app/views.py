@@ -1,6 +1,6 @@
 import os
 from app import app, db, models
-from flask import render_template, flash, redirect, request, url_for, send_from_directory
+from flask import render_template, flash, redirect, request, url_for, send_from_directory, make_response, json
 from sqlalchemy.exc import IntegrityError
 from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
@@ -14,6 +14,11 @@ def allowed_file(filename):
 @app.route('/')
 @app.route('/index')
 def index(filename = None, photoid = None):
+
+
+    if filename:
+        filename = app.config['FILENAME_BASE'] + filename
+
     return render_template('index.html',
                            title = 'Discontinuity Board',
                            filename = filename,
@@ -29,9 +34,17 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             photoid = save_photo(file, filename)
-            filename = app.config['FILENAME_BASE'] + filename
 
     return index(filename, photoid)
+
+@app.route('/show/', methods=['GET', 'POST'])
+def show_photo():
+    if request.method == 'POST':
+        photoid = request.form['photoid']
+        filename = get_photo_filename(photoid)
+
+    return index(filename, photoid)
+            
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
@@ -97,3 +110,55 @@ def get_photo_path(id):
     photo = models.Photo.query.filter(models.Photo.id==id).first()
     db.session.close()
     return photo.path
+
+def get_photo_filename(id):
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    db.session.close()
+    filename = os.path.basename(photo.path)
+    return filename
+
+
+
+
+@app.route('/get-all-photos/', methods = ['GET'])
+def get_all_photos():
+    if request.method == 'POST':
+        return make_response(400);
+
+    photos = models.Photo.query.all()
+    data = []
+    for photo in photos:
+        name = app.config['FILENAME_BASE'] + os.path.basename(photo.path)
+        data.append({'path': name, 'id': photo.id})
+
+    returnobj = {}
+    returnobj["photos"] = data
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+
+    return response
+
+@app.route('/get-photo/', methods = ['GET'])
+def get_photo():
+
+    if request.method == 'POST':
+        return make_response(400);
+
+    id = request.args.get('id')
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+
+    name = app.config['FILENAME_BASE'] + os.path.basename(photo.path)
+
+    returnobj = {}
+    returnobj['path'] = name
+    returnobj['id'] = photo.id
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+
+    return response
+
+
+
+

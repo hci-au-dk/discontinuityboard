@@ -3,8 +3,28 @@ h1 {
     color: blue;
 }
 
-#upload {
+.thumbnail {
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    float: left;
+    margin: 3px;
+    border: 2px solid black;
+}
+
+#upload, #browse, #tools {
+    padding: 5px;
+}
+
+#upload, #browse {
     border: 2px solid green;
+    float: left;
+    clear: left;
+    width: 100%;
+}
+
+#navigate {
+    width: 15%;
 }
 
 #view {
@@ -41,5 +61,10 @@ div {
 }
 
 #imageeditparent {
+    overflow: hidden;
+}
+
+#content {
+    border: 2px solid blue;
     overflow: hidden;
 }
