@@ -1,10 +1,11 @@
-import os
+import datetime, os, requests
 from app import app, db, models
 from flask import render_template, flash, redirect, request, url_for, send_from_directory, make_response, json
 from sqlalchemy.exc import IntegrityError
 from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
 from PIL import Image
+from StringIO import StringIO
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -21,8 +22,7 @@ def index(filename = None, photoid = None):
 
     return render_template('index.html',
                            title = 'Discontinuity Board',
-                           filename = filename,
-                           photoid = photoid)
+                           filename = filename)
 
 
 @app.route('/upload/', methods=['GET', 'POST'])
@@ -35,56 +35,48 @@ def upload_file():
             filename = secure_filename(file.filename)
             photoid = save_photo(file, filename)
 
-    return index(filename, photoid)
-
-@app.route('/show/', methods=['GET', 'POST'])
-def show_photo():
-    if request.method == 'POST':
-        photoid = request.form['photoid']
-        filename = get_photo_filename(photoid)
-
-    return index(filename, photoid)
-            
+    return index(filename)
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
     basepath = app.root_path + '/' + app.config['UPLOAD_FOLDER']
     return send_from_directory(basepath, filename)
 
-@app.route('/transform/', methods = ['GET', 'POST'])
+@app.route('/transform/', methods = ['POST'])
 def transform_file():
-    if request.method == 'POST':
-        coordinates = []
-        coordstr = ""
-        for i in range(1, 5):
-            namex = 'corner' + str(i) + 'x'
-            namey = 'corner' + str(i) + 'y'
-            x = request.form[namex]
-            y = request.form[namey]
-            coordstr = coordstr = x + y
-            coordinates.append((float(x), float(y)))
+    if request.method == 'GET':
+        return make_response(400)
 
-        # Now, we get the photo and then run the transform perspective script
-        photoid = request.form['currentphotoid']
-        path = get_photo_path(photoid)
+    photoid = request.form['photoid']
 
-        img = Image.open(path)
-        filename = os.path.basename(path)
-        filename = secure_filename("transformed" + coordstr + filename)
+    # Now, we get the photo and then run the transform perspective script
+    path = get_photo_path(photoid)
 
-        transformed = transform_perspective(img, coordinates[0][0],
-                                            coordinates[0][1],
-                                            coordinates[1][0],
-                                            coordinates[1][1],
-                                            coordinates[2][0],
-                                            coordinates[2][1],
-                                            coordinates[3][0],
-                                            coordinates[3][1])
+    img = Image.open(path)
+    filename = os.path.basename(path)
+    filename = secure_filename("transformed" + filename)
 
-        photoid = save_photo(transformed, filename)
-        filename = app.config['FILENAME_BASE'] + filename
+    transformed = transform_perspective(img, int(request.form['coordinates[x1]']),
+                                        int(request.form['coordinates[y1]']),
+                                        int(request.form['coordinates[x2]']),
+                                        int(request.form['coordinates[y2]']),
+                                        int(request.form['coordinates[x3]']),
+                                        int(request.form['coordinates[y3]']),
+                                        int(request.form['coordinates[x4]']),
+                                        int(request.form['coordinates[y4]']))
 
-    return index(filename, photoid)
+    trans_photoid = save_photo(transformed, filename)
+    
+    name = app.config['FILENAME_BASE'] + filename
+
+    returnobj = {}
+    returnobj['path'] = name
+    returnobj['id'] = trans_photoid
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+
+    return response
 
 
 def save_photo(file, filename):
@@ -96,11 +88,10 @@ def save_photo(file, filename):
     db.session.add(photo)
     try:
         db.session.commit()
-        flash("saved :" + str(photo))
+
     except:
         IntegrityError
         db.session.rollback()
-        flash("Didn't save, not unique. Maybe the photo already exists?")
     
     photo = models.Photo.query.filter(models.Photo.path==savename).first()
     db.session.close()
@@ -116,8 +107,6 @@ def get_photo_filename(id):
     db.session.close()
     filename = os.path.basename(photo.path)
     return filename
-
-
 
 
 @app.route('/get-all-photos/', methods = ['GET'])
@@ -141,7 +130,6 @@ def get_all_photos():
 
 @app.route('/get-photo/', methods = ['GET'])
 def get_photo():
-
     if request.method == 'POST':
         return make_response(400);
 
@@ -156,8 +144,36 @@ def get_photo():
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
-
     return response
+
+
+@app.route('/take-photo/', methods = ['GET'])
+def take_photo():
+    if request.method == 'POST':
+        return make_response(400);
+
+    # We need to make a request to the raspberry pi
+    pilocation = app.config['PI_BASE'] + 'snapshot'
+    r = requests.get(pilocation)
+
+    img = Image.open(StringIO(r.content))
+
+    # Generate a filename based on timestamp
+    now = datetime.datetime.now()
+    filename = '%i%i%i_%i%i%i' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
+    filename = filename + ".jpg"
+
+    photoid = save_photo(img, filename)
+
+    returnobj = {}
+    returnobj['id'] = photoid
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
+    
+    
 
 
 

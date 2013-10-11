@@ -4,161 +4,71 @@
 
 var Tools = function() {
 
-    $("#cornerselect").bind("click", cornerSelectClick);
+    var cornerCount = 0;
     
     var cornerSelectClick = function() {
-	var parentX = $("#toolscanvas").position().left;
-	var parentY = $("#toolscanvas").position().top;
-	var parentWidth = $("#toolscanvas").width();
-	var parentHeight = $("#toolscanvas").height();
+	$("#selectcornerform").show();
 
-	for (var i = 0; i < 4; i++) {
-	    var x = parentX;
-	    var y = parentY;
+	var parentX = $("#photocontainer").position().left;
+	var parentY = $("#photocontainer").position().top;
+	var parentWidth = $("#photocontainer").width();
+	var parentHeight = $("#photocontainer").height();
 
-	    // draw a box
-	    var layer = $("#toolscanvas");
+	for (var i = 0; i < 4 && cornerCount < 4; i++) {
+	    var x = parentX + CORNER_BORDER_SIZE;
+	    var y = parentY + CORNER_BORDER_SIZE;
 
 	    var div = $(document.createElement('div'));
-
 	    cornerCount += 1;  // Because we want to use 1-based indexing for the corners
 
 	    if (cornerCount == 4 || cornerCount == 3) {  // top right || bottom right
-		x = x + parentWidth;
+		x = x + parentWidth - (CORNER_SIZE);
 	    } 
 	    if (cornerCount == 2 || cornerCount == 3) {  // bottom left || bottom right
-		y = y + parentHeight;
+		y = y + parentHeight - (CORNER_SIZE);
 	    }
-	    x = x - (cornerSize / 2);
-	    y = y - (cornerSize / 2);
-
-	    // Corner 1 should be in the top left
 	    div.css("left", x + "px");
 	    div.css("top", y + "px");
 	    div.addClass("corner");
 
-	    div.css("width", (cornerSize - (2 * cornerBorderSize)) + "px");
-	    div.css("height" , (cornerSize - (2 * cornerBorderSize)) + "px");
-	    div.css("cursor", "pointer");
+	    div.css("width", (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
+	    div.css("height" , (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
 	    div.attr("id", "corner" + cornerCount);
-	    div.draggable({containment: "#imageeditparent"});
+	    div.draggable({containment: "#photocontainer"});
 	    div.bind("mousemove", populateCoordinates);  // listen for future updates
 
-	    layer.append(div);
+	    $("#toolsdiv").append(div);
 
 	    div.trigger("mousemove");
 	}
 	// set our borders for the boxes
-	var borderStr = cornerBorderSize + "px " + 
-	    cornerBorderStyle + " " + 
-	    cornerBorderColor;
+	var borderStr = CORNER_BORDER_SIZE + "px dashed red";
 	$(".corner").css("border", borderStr); 
+
+	// show the coordinate selection boxes
+	$("selectCornerForm").show();
     }
 
+    $("#cornerselect").bind("click", cornerSelectClick);
 
-    function setUpListeners() {
-	// the buttons should be listening to the proper thing
+    $("#transformimage").bind("click", function() {
+	var photoId = currentPhotoId;
+	var coordinates = {'x1': $("#corner1x").val(),
+			   'y1': $("#corner1y").val(),
+			   'x2': $("#corner2x").val(),
+			   'y2': $("#corner2y").val(),
+			   'x3': $("#corner3x").val(),
+			   'y3': $("#corner3y").val(),
+			   'x4': $("#corner4x").val(),
+			   'y4': $("#corner4y").val()};
 
-	$("#transformimage").bind("click", transformImageClick);
-	var thumbs = $(".thumbnailInfo")
-	for (var i = 0; i < thumbs.length; i++) {
-	    $(thumbs[i]).bind("click", thumbnailClick);
-	}
-    }
+	messenger.transformImage(coordinates, photoId);
+	messenger.getAllPhotos(initializeBrowser);
+    });
+
+    $("#selectcornerform").hide();
 
 }
-
-
-cornerBorderColor = "red";
-cornerBorderStyle = "dashed";
-
-$(document).ready(function() {
-    // do stuff when DOM is ready
-    setUpListeners();
-    setUpCanvasAndPhoto();
-});
-
-
-function setUpCanvasAndPhoto() {
-    var images = $("#imagefile").children("img");
-    if (images.length == 1) {
-	var image = images[0];
-	var width = image.clientWidth;
-	var height = image.clientHeight;
-
-	var layersToSetSize = [$("#imagelayer"),
-			       $("#toolscanvas")]
-
-	for (var i = 0; i < layersToSetSize.length; i++) {
-	    var div = layersToSetSize[i];
-	    div.css("width", width);
-	    div.css("height", height);
-	}
-
-	$("#imageeditparent").css("width", width + CORNER_SIZE);
-	$("#imageeditparent").css("height", height + CORNER_SIZE);
-
-	// now set the proper margins
-	$("#imagelayer").css("margin", CORNER_SIZE / 2);
-
-	$("#imagelayer").css("background-image", "url(" + image.src + ")");
-	$("#imagefile").hide();
-
-	// set the file id in the tools form
-    }
-}
-
-
-function populateCorners() {
-    var parentX = $("#toolscanvas").position().left;
-    var parentY = $("#toolscanvas").position().top;
-    var parentWidth = $("#toolscanvas").width();
-    var parentHeight = $("#toolscanvas").height();
-
-    for (var i = 0; i < 4; i++) {
-	var x = parentX;
-	var y = parentY;
-
-	// draw a box
-	var layer = $("#toolscanvas");
-
-	var div = $(document.createElement('div'));
-
-	cornerCount += 1;  // Because we want to use 1-based indexing for the corners
-
-	if (cornerCount == 4 || cornerCount == 3) {  // top right || bottom right
-	    x = x + parentWidth;
-	} 
-	if (cornerCount == 2 || cornerCount == 3) {  // bottom left || bottom right
-	    y = y + parentHeight;
-	}
-	x = x - (CORNER_SIZE / 2);
-	y = y - (CORNER_SIZE / 2);
-
-	// Corner 1 should be in the top left
-	div.css("left", x + "px");
-	div.css("top", y + "px");
-	div.addClass("corner");
-
-	div.css("width", (CORNER_SIZE - (2 * cornerBorderSize)) + "px");
-	div.css("height" , (CORNER_SIZE - (2 * cornerBorderSize)) + "px");
-	div.css("cursor", "pointer");
-	div.attr("id", "corner" + cornerCount);
-	div.draggable({containment: "#imageeditparent"});
-	div.bind("mousemove", populateCoordinates);  // listen for future updates
-
-	layer.append(div);
-
-	div.trigger("mousemove");
-    }
-    // set our borders for the boxes
-    var borderStr = cornerBorderSize + "px " + 
-		     cornerBorderStyle + " " + 
-		     cornerBorderColor;
-    $(".corner").css("border", borderStr); 
-
-}
-
 
 function populateCoordinates(e) {
     // Get the div that moved
@@ -168,15 +78,15 @@ function populateCoordinates(e) {
     
     var cornerId = corner.attr("id");
     // The matching coordinate input boxes have ids of cornerId + [x|y]
-    x = x - (CORNER_SIZE / 2);
-    y = y - (CORNER_SIZE / 2);
+    x = x - (CORNER_SIZE);
+    y = y - (CORNER_SIZE);
 
     // We need to adjust for the placement of the tool canvas
-    x = x - ($("#toolscanvas").position().left - (CORNER_SIZE));
-    y = y - ($("#toolscanvas").position().top - (CORNER_SIZE));
+    x = x - ($("#toolsdiv").position().left - (CORNER_SIZE));
+    y = y - ($("#toolsdiv").position().top - (CORNER_SIZE));
 
-    $("#" + cornerId + "x").attr("value", x);
-    $("#" + cornerId + "y").attr("value", y);
+    $("#" + cornerId + "x").attr("value", Math.round(x));
+    $("#" + cornerId + "y").attr("value", Math.round(y));
 }
 
 function getX(e) {
@@ -201,34 +111,4 @@ function getY(e) {
 	y = ev.clientY;
     }
     return y;
-}
-
-function thumbnailClick(e) {
-    var photoid = $(this).children().filter(".photoid")[0].innerHTML;
-    var params = {"photoid" : photoid}
-    postToUrl("/show/", params, "post")
-}
-
-function postToUrl(path, params, method) {
-    method = method || "post"; // Set method to post by default if not specified.
-
-    // The rest of this code assumes you are not using a library.
-    // It can be made less wordy if you use one.
-    var form = document.createElement("form");
-    form.setAttribute("method", method);
-    form.setAttribute("action", path);
-
-    for(var key in params) {
-        if(params.hasOwnProperty(key)) {
-            var hiddenField = document.createElement("input");
-            hiddenField.setAttribute("type", "hidden");
-            hiddenField.setAttribute("name", key);
-            hiddenField.setAttribute("value", params[key]);
-
-            form.appendChild(hiddenField);
-         }
-    }
-
-    document.body.appendChild(form);
-    form.submit();
 }

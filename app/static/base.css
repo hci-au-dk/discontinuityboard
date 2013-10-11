@@ -12,30 +12,24 @@ h1 {
     border: 2px solid black;
 }
 
-#upload, #browse, #tools {
-    padding: 5px;
-}
-
 #upload, #browse {
     border: 2px solid green;
     float: left;
     clear: left;
-    width: 100%;
 }
 
-#navigate {
+#navigate, #toolcontainer {
     width: 15%;
+    float: left;
+    overflow: hidden;
 }
 
 #view {
-    border: 2px solid blue;
     overflow: hidden;
 }
 
 #tools {
     border: 2px solid red;
-    height: 500px;
-    float: left;
     overflow: hidden;
 }
 
@@ -53,15 +47,12 @@ div {
     position: absolute;
     margin: 0px;
     padding: 0px;
+    cursor: pointer;
 }
 
 .coordpair {
     float: left;
     clear: left;
-}
-
-#imageeditparent {
-    overflow: hidden;
 }
 
 #content {

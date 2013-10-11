@@ -3,7 +3,7 @@
     <h2>Photo manipulation tools</h2>
     <button type="button" id="cornerselect">Corner Select Tool</button>
 
-    <form action="/transform/" method="post" enctype="multipart/form-data">
+    <div id="selectcornerform">
 
       <div class="coordpair">
 	Corner 1 (upper left): </br>
@@ -25,9 +25,6 @@
 	x: <input id="corner4x" type="text" class="coordinput" name="corner4x" size="5">
 	y: <input id="corner4y" type="text" class="coordinput" name="corner4y" size="5">
       </div>
-      {% if photoid %}
-      <input id="currentphotoid" type="text" name="currentphotoid" size="3" value="{{ photoid }}" hidden="true">
-      {% endif %}
-      <input id="transformimage" type="submit" value="Transform Image">
-    </form>
+      <button id="transformimage" type="button"> Set Transform Image Coordinates</button>
+    </div>
 </div>

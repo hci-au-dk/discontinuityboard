@@ -4,7 +4,7 @@ from flask.ext.assets import Bundle
 ### STATIC FILES TO LOAD WITH ASSETS
 
 CSS_ALL = Bundle('base.css')
-JS_ALL = Bundle('jquery-2.0.2.min.js', 'jquery-ui-1.10.3.js', 'processphoto.js', 'messenger.js', 'browser.js')
+JS_ALL = Bundle('jquery-2.0.2.min.js', 'jquery-ui-1.10.3.js', 'processphoto.js', 'messenger.js', 'browser.js', 'tools.js')
 
 ### FORM SETTINGS
 
@@ -16,6 +16,10 @@ SECRET_KEY = 'kjiouW#(*$QN-1klaj)%&N93jaset%32u3k-o324[qlp4by'
 UPLOAD_FOLDER = 'tmp/'
 ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
 FILENAME_BASE = 'http://127.0.0.1:5000/uploads/'
+HOST_BASE = 'http://127.0.0.1:5000/'
+
+### RASPBERRY PI SETTINGS
+PI_BASE = 'http://10.11.110.122/'
 
 ### DATABASE SETTINGS
 
