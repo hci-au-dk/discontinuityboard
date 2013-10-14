@@ -33,7 +33,7 @@ def upload_file():
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            photoid = save_photo(file, filename)
+            photoid = save_photo(file, filename, False)
 
     return index(filename)
 
@@ -43,12 +43,12 @@ def send_file(filename):
     return send_from_directory(basepath, filename)
 
 
-def save_photo(file, filename):
+def save_photo(file, filename, raw):
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
     file.save(savename)
     
     # Now, we want to insert it into our database
-    photo = models.Photo(path=savename)
+    photo = models.Photo(path=savename, raw=raw)
     db.session.add(photo)
     try:
         db.session.commit()
@@ -109,6 +109,7 @@ def get_photo():
     returnobj['id'] = photo.id
     returnobj['width'] = img.size[0]
     returnobj['height'] = img.size[1]
+    returnobj['raw'] = photo.raw
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -121,12 +122,11 @@ def take_photo():
         return make_response(400);
 
     # We need to make a request to the raspberry pi
+    raw = True
     pilocation = app.config['PI_BASE'] + 'rawimage'
     if request.args.get('configured') == 'true':
         pilocation = app.config['PI_BASE'] + 'snapshot'
-
-    print "location"
-    print pilocation
+        raw = False
 
     r = requests.get(pilocation)
 
@@ -142,7 +142,7 @@ def take_photo():
                                   now.second)
     filename = filename + ".jpg"
 
-    photoid = save_photo(img, filename)
+    photoid = save_photo(img, filename, raw)
 
     returnobj = {}
     returnobj['id'] = photoid

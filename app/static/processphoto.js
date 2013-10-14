@@ -24,7 +24,6 @@ $(window).load(function() {
     messenger.getAllPhotos(initializeBrowser);
 
     tools = new Tools();
-    hideTools();
 
     $("#takephoto").bind("click", takePhotoClick);
 });
@@ -36,14 +35,6 @@ function takePhotoClick() {
 
 function initializeBrowser(data) {
     browser = new Browser(data);
-}
-
-function showTools() {
-    $("#tools").show();
-}
-
-function hideTools() {
-    $("#tools").hide();
 }
 
 function setNewPhoto(data) {
@@ -62,6 +53,7 @@ function setNewPhoto(data) {
 
     var owidth = data.width;
     var oheight = data.height;
+    var raw = data.raw;
 
     img.attr("id", "imagefile");
 
@@ -94,6 +86,5 @@ function setNewPhoto(data) {
 
     toolsCan.append(imgSpan);
 
-    // set the tools for this photo
-    showTools();
+    tools.showCornerTools(raw);
 }

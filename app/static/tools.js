@@ -2,10 +2,13 @@
 
 
 var Tools = function() {
-
-    var cornerCount = 0;
     
+    var cornersFunction = false;
+
     var cornerSelectClick = function() {
+	if (!cornersFunction) {
+	    return;
+	}
 	$("#selectcornerform").show();
 
 	var parentX = $("#photocontainer").position().left;
@@ -13,17 +16,19 @@ var Tools = function() {
 	var parentWidth = $("#photocontainer").width();
 	var parentHeight = $("#photocontainer").height();
 
-	for (var i = 0; i < 4 && cornerCount < 4; i++) {
+	for (var i = 1; i <= 4; i++) {
+	    if ($(".corner").length >= 4) {
+		break;
+	    }
 	    var x = parentX + CORNER_BORDER_SIZE;
 	    var y = parentY + CORNER_BORDER_SIZE;
 
 	    var div = $(document.createElement('div'));
-	    cornerCount += 1;  // Because we want to use 1-based indexing for the corners
 
-	    if (cornerCount == 4 || cornerCount == 3) {  // top right || bottom right
+	    if (i == 4 || i == 3) {  // top right || bottom right
 		x = x + parentWidth - (CORNER_SIZE);
 	    } 
-	    if (cornerCount == 2 || cornerCount == 3) {  // bottom left || bottom right
+	    if (i == 2 || i == 3) {  // bottom left || bottom right
 		y = y + parentHeight - (CORNER_SIZE);
 	    }
 	    div.css("left", x + "px");
@@ -32,7 +37,7 @@ var Tools = function() {
 
 	    div.css("width", (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
 	    div.css("height" , (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
-	    div.attr("id", "corner" + cornerCount);
+	    div.attr("id", "corner" + i);
 	    div.draggable({containment: "#photocontainer"});
 	    div.bind("mousemove", populateCoordinates);  // listen for future updates
 
@@ -49,6 +54,7 @@ var Tools = function() {
     }
 
     $("#cornerselect").bind("click", cornerSelectClick);
+    $("#cornerselectdiv").hide();
 
     $("#transformimage").bind("click", function() {
 	var coordinates = {'x1': $("#corner1x").val(),
@@ -65,6 +71,16 @@ var Tools = function() {
     });
 
     $("#selectcornerform").hide();
+
+    this.showCornerTools = function(rawImage) {
+	if (!rawImage) {  // We should not show the tools
+	    $("#cornerselectdiv").hide();
+	    cornersFunction = false;
+	} else {
+	    $("#cornerselectdiv").show();
+	    cornersFunction = true;
+	}
+    }
 
 }
 
