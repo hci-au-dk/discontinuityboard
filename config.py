@@ -19,7 +19,7 @@ FILENAME_BASE = 'http://127.0.0.1:5000/uploads/'
 HOST_BASE = 'http://127.0.0.1:5000/'
 
 ### RASPBERRY PI SETTINGS
-PI_BASE = 'http://10.11.110.122/'
+PI_BASE = 'http://10.11.109.34/'
 
 ### DATABASE SETTINGS
 
