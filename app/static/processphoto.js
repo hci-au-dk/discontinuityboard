@@ -10,14 +10,13 @@ var currentPhotoRatio = 1;
 var configsSet = false;
 
 // size constants
-CORNER_BORDER_SIZE = 2;
-CORNER_SIZE = 20 + (2 * CORNER_BORDER_SIZE);
+var CORNER_BORDER_SIZE = 2;
+var CORNER_SIZE = 20 + (2 * CORNER_BORDER_SIZE);
+var MAX_PHOTO_WIDTH = 500;
 
 $(window).load(function() {
     // because IE tries to cache all the things
     $.ajaxSetup({cache:false});
-
-    // set up listeners and such things
 
     messenger = new Messenger();
 
@@ -29,12 +28,17 @@ $(window).load(function() {
 });
 
 function takePhotoClick() {
-    messenger.takePhotoWithPi(configsSet);
+    console.log("coords set:" + configsSet);
+    messenger.takePhotoWithPi(configsSet, getPhotoToDisplay);
     messenger.getAllPhotos(initializeBrowser);
 }
 
 function initializeBrowser(data) {
     browser = new Browser(data);
+}
+
+function getPhotoToDisplay(data) {
+    messenger.getPhoto(data.id);
 }
 
 function setNewPhoto(data) {
@@ -61,14 +65,23 @@ function setNewPhoto(data) {
     photoCont.append(imgSpan);
     $("#view").append(photoCont);
 
-    var width = $(imgSpan.children()[0]).width();
-    var height = $(imgSpan.children()[0]).height();
     
-    // reset the ratio so that we can send accurate coordinates to the pi
-    var ratio = owidth / width;
-    currentPhotoRatio = ratio;
+    var width = owidth;
+    var height = oheight;
+    currentPhotoRatio = 1;
 
-    imgSpan.remove()
+    // reset the ratio so that we can send accurate coordinates to the pi
+    if (owidth > MAX_PHOTO_WIDTH) {
+	var ratio = MAX_PHOTO_WIDTH / owidth;   // get ratio for scaling image
+	currentPhotoRatio = ratio;
+
+	width = MAX_PHOTO_WIDTH;
+	height = oheight * ratio;
+    }
+   
+    img.css("width", width); // Set new width
+    img.css("height", height);  // Scale height based on ratio
+
 
     // now set the proper margins
     var toolsCan = $(document.createElement("div"));

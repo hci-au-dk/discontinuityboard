@@ -36,15 +36,15 @@ var Messenger = function() {
 	});
     }
 
-    this.takePhotoWithPi = function(configsSet) {
+    this.takePhotoWithPi = function(configsSet, successFn) {
 
 	$.ajax({
 	    url: "/take-photo/",
 	    type: "GET",
 	    dataType:"json",
 	    data: {"configured": configsSet},
-	    success: function() {
-		alert("succes taking photo");
+	    success: function(data) {
+		successFn(data);
 	    },
 	    error: function(data) {
 		if (DEBUG)

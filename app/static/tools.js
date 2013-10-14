@@ -100,8 +100,8 @@ function populateCoordinates(e) {
     y = y - ($("#toolsdiv").position().top - (CORNER_SIZE));
 
     // We want the "true" coordinates - immune to any resizing that happens
-    $("#" + cornerId + "x").attr("value", Math.round(x * currentPhotoRatio));
-    $("#" + cornerId + "y").attr("value", Math.round(y * currentPhotoRatio));
+    $("#" + cornerId + "x").attr("value", Math.round(x / currentPhotoRatio));
+    $("#" + cornerId + "y").attr("value", Math.round(y / currentPhotoRatio));
 }
 
 function getX(e) {
