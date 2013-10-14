@@ -42,42 +42,6 @@ def send_file(filename):
     basepath = app.root_path + '/' + app.config['UPLOAD_FOLDER']
     return send_from_directory(basepath, filename)
 
-@app.route('/transform/', methods = ['POST'])
-def transform_file():
-    if request.method == 'GET':
-        return make_response(400)
-
-    photoid = request.form['photoid']
-
-    # Now, we get the photo and then run the transform perspective script
-    path = get_photo_path(photoid)
-
-    img = Image.open(path)
-    filename = os.path.basename(path)
-    filename = secure_filename("transformed" + filename)
-
-    transformed = transform_perspective(img, int(request.form['coordinates[x1]']),
-                                        int(request.form['coordinates[y1]']),
-                                        int(request.form['coordinates[x2]']),
-                                        int(request.form['coordinates[y2]']),
-                                        int(request.form['coordinates[x3]']),
-                                        int(request.form['coordinates[y3]']),
-                                        int(request.form['coordinates[x4]']),
-                                        int(request.form['coordinates[y4]']))
-
-    trans_photoid = save_photo(transformed, filename)
-    
-    name = app.config['FILENAME_BASE'] + filename
-
-    returnobj = {}
-    returnobj['path'] = name
-    returnobj['id'] = trans_photoid
-
-    response = make_response(json.dumps(returnobj), 200)
-    response.headers['Content-type'] = 'application/json'
-
-    return response
-
 
 def save_photo(file, filename):
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
@@ -137,10 +101,14 @@ def get_photo():
     photo = models.Photo.query.filter(models.Photo.id==id).first()
 
     name = app.config['FILENAME_BASE'] + os.path.basename(photo.path)
+    
+    img = Image.open(photo.path)
 
     returnobj = {}
     returnobj['path'] = name
     returnobj['id'] = photo.id
+    returnobj['width'] = img.size[0]
+    returnobj['height'] = img.size[1]
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -153,14 +121,25 @@ def take_photo():
         return make_response(400);
 
     # We need to make a request to the raspberry pi
-    pilocation = app.config['PI_BASE'] + 'snapshot'
+    pilocation = app.config['PI_BASE'] + 'rawimage'
+    if request.args.get('configured') == 'true':
+        pilocation = app.config['PI_BASE'] + 'snapshot'
+
+    print "location"
+    print pilocation
+
     r = requests.get(pilocation)
 
     img = Image.open(StringIO(r.content))
 
     # Generate a filename based on timestamp
     now = datetime.datetime.now()
-    filename = '%i%i%i_%i%i%i' % (now.year, now.month, now.day, now.hour, now.minute, now.second)
+    filename = '%i%i%i_%i%i%i' % (now.year,
+                                  now.month,
+                                  now.day,
+                                  now.hour,
+                                  now.minute,
+                                  now.second)
     filename = filename + ".jpg"
 
     photoid = save_photo(img, filename)
@@ -173,8 +152,31 @@ def take_photo():
     return response
 
     
-    
+@app.route('/set-transform-coords/', methods = ['POST'])
+def transform_file():
+    if request.method == 'GET':
+        return make_response(400)
 
+    piobj = {}
+    for i in range(1, 5):
+        strX = 'coordinates[x' + str(i) + ']'
+        strY = 'coordinates[y' + str(i) + ']'
+        piobj['x' + str(i - 1)] = request.form[strX]
+        piobj['y' + str(i - 1)] = request.form[strY]
 
+    pilocation = app.config['PI_BASE'] + 'configuration'
 
+    headers = {'Content-type': 'application/json'}
 
+    r = requests.post(pilocation, data=json.dumps(piobj), headers=headers)
+
+    returnobj = {}
+    # then go and get the next picture
+    if r.text == 'Configuration saved':
+        returnobj['saved'] = True
+    else:
+        returnobj['saved'] = False
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response

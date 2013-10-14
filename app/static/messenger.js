@@ -36,13 +36,15 @@ var Messenger = function() {
 	});
     }
 
-    this.takePhotoWithPi = function() {
+    this.takePhotoWithPi = function(configsSet) {
 
 	$.ajax({
 	    url: "/take-photo/",
 	    type: "GET",
+	    dataType:"json",
+	    data: {"configured": configsSet},
 	    success: function() {
-
+		alert("succes taking photo");
 	    },
 	    error: function(data) {
 		if (DEBUG)
@@ -53,23 +55,27 @@ var Messenger = function() {
 
 
 
-    this.transformImage = function(coordinates, photoId) {
-	var params = {"photoid": photoId,
-		      "coordinates" : coordinates};
+    this.transformImage = function(coordinates) {
+	var params = {"coordinates" : coordinates};
+
 	$.ajax({
-            url: "/transform/",
+            url: "/set-transform-coords/",
             type: "POST",
             dataType: "json",
 	    headers: "application/json",
             data: params,
             success: function(data) {
-		setNewPhoto(data);
+		if (data.saved) {
+		    configsSet = true;
+		} else {
+		    configsSet = false;
+		}
+		console.log(configsSet);
 	    },
-            error: function(data) {
+            error: function() {
                 if (DEBUG)
                     alert("transform image ajax error");
             }
         });
     }
-    
 }

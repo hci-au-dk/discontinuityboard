@@ -1,7 +1,6 @@
 // This is where the functionality for the buttons will go
 
 
-
 var Tools = function() {
 
     var cornerCount = 0;
@@ -52,7 +51,6 @@ var Tools = function() {
     $("#cornerselect").bind("click", cornerSelectClick);
 
     $("#transformimage").bind("click", function() {
-	var photoId = currentPhotoId;
 	var coordinates = {'x1': $("#corner1x").val(),
 			   'y1': $("#corner1y").val(),
 			   'x2': $("#corner2x").val(),
@@ -62,8 +60,8 @@ var Tools = function() {
 			   'x4': $("#corner4x").val(),
 			   'y4': $("#corner4y").val()};
 
-	messenger.transformImage(coordinates, photoId);
-	messenger.getAllPhotos(initializeBrowser);
+	messenger.transformImage(coordinates);
+	configsSet = true;
     });
 
     $("#selectcornerform").hide();
@@ -85,8 +83,9 @@ function populateCoordinates(e) {
     x = x - ($("#toolsdiv").position().left - (CORNER_SIZE));
     y = y - ($("#toolsdiv").position().top - (CORNER_SIZE));
 
-    $("#" + cornerId + "x").attr("value", Math.round(x));
-    $("#" + cornerId + "y").attr("value", Math.round(y));
+    // We want the "true" coordinates - immune to any resizing that happens
+    $("#" + cornerId + "x").attr("value", Math.round(x * currentPhotoRatio));
+    $("#" + cornerId + "y").attr("value", Math.round(y * currentPhotoRatio));
 }
 
 function getX(e) {
