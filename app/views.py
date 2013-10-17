@@ -14,12 +14,9 @@ def allowed_file(filename):
 
 @app.route('/')
 @app.route('/index')
-def index(filename = None):
-    if filename:
-        filename = app.config['FILENAME_BASE'] + os.path.basename(filename)
+def index():
     return render_template('index.html',
-                           title = 'Discontinuity Board',
-                           filename = filename)
+                           title = 'Discontinuity Board')
 
 
 @app.route('/upload/', methods=['POST'])

@@ -9,7 +9,7 @@ var Tools = function() {
 	if (!cornersFunction) {
 	    return;
 	}
-	$("#selectcornerform").show();
+	$("#cornerselectform").show();
 
 	var parentX = $("#photocontainer").position().left;
 	var parentY = $("#photocontainer").position().top;
@@ -50,7 +50,7 @@ var Tools = function() {
 	$(".corner").css("border", borderStr); 
 
 	// show the coordinate selection boxes
-	$("selectCornerForm").show();
+	$("cornerselectform").show();
     }
 
     $("#cornerselect").bind("click", cornerSelectClick);
@@ -97,24 +97,38 @@ var Tools = function() {
     $("#deletephoto").hide();
 
 
+    // Creates a cut tool to cut the photo into blocks
+    var cutTool = function() {
+	$("body").css("cursor", "crosshair");
+    }
+    
+    $("#cut").bind("click", cutTool);
+
+    hideTools();
+
     this.showCornerTools = function(rawImage) {
 	if (!rawImage) {  // We should not show the tools
 	    $("#cornerselectdiv").hide();
 	    cornersFunction = false;
 	} else {
 	    $("#cornerselectdiv").show();
+	    $("#cornerselectform").hide();
 	    cornersFunction = true;
 	}
 	// always show the delete button if there is a photo shown
 	if ($("#view").children().length > 0) {
 	    $("#deletephoto").show();
+	    $("#cut").show();
+	    $("#annotate").show();
 	}
     }
 }
 
 function hideTools() {
-    $("#selectcornerform").hide();
+    $("#cornerselectform").hide();
     $("#deletephoto").hide();
+    $("#cut").hide();
+    $("#annotate").hide();
 }
 
 function populateCoordinates(e) {
