@@ -80,13 +80,22 @@ var Tools = function() {
 	// if there is one, set it as the photo that is currently
 	// being viewed
 	var thumbs = $(".thumbnail");
-	for (var i = 0; i < thumbs.length; i++) {
+	var reset = false;
+	for (var i = 0; i < thumbs.length && !reset; i++) {
 	    var id = $(thumbs[i]).attr("id");
-	    if (id > currentPhotoId || (i == thumbs.length - 1 && id != currentPhotoId)) {
+	    if (id > currentPhotoId) {
 		messenger.getPhoto(id);
-		break;
+		reset = true;
 	    }
 	}
+	/*if (!reset) {
+	    // Needs to be > 1 because we don't want to try to
+	    // serve the photo we are deleting
+	    if (thumbs.length > 1) {
+		var id = $(thumbs[0]).attr("id");
+		//messenger.getPhoto(id);
+	    }
+	}*/
 
 	messenger.getAllPhotos(initializeBrowser);
     }
