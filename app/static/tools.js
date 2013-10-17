@@ -83,7 +83,6 @@ var Tools = function() {
 	for (var i = 0; i < thumbs.length; i++) {
 	    var id = $(thumbs[i]).attr("id");
 	    if (id > currentPhotoId || (i == thumbs.length - 1 && id != currentPhotoId)) {
-		alert(id);
 		messenger.getPhoto(id);
 		break;
 	    }
@@ -103,6 +102,13 @@ var Tools = function() {
     }
     
     $("#cut").bind("click", cutTool);
+
+    // Creates the annotation tool to annotate different parts of the photo
+    var annotateTool = function() {
+	$("body").css("cursor", "text");
+    }
+    
+    $("#annotate").bind("click", annotateTool);
 
     hideTools();
 
