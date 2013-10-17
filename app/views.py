@@ -14,28 +14,23 @@ def allowed_file(filename):
 
 @app.route('/')
 @app.route('/index')
-def index(filename = None, photoid = None):
-
-
+def index(filename = None):
     if filename:
-        filename = app.config['FILENAME_BASE'] + filename
-
+        filename = app.config['FILENAME_BASE'] + os.path.basename(filename)
     return render_template('index.html',
                            title = 'Discontinuity Board',
                            filename = filename)
 
 
-@app.route('/upload/', methods=['GET', 'POST'])
+@app.route('/upload/', methods=['POST'])
 def upload_file():
     filename = None
-    photoid = None
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             photoid = save_photo(file, filename, False)
-
-    return index(filename)
+    return index()
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
@@ -76,7 +71,7 @@ def get_photo_filename(id):
 @app.route('/get-all-photos/', methods = ['GET'])
 def get_all_photos():
     if request.method == 'POST':
-        return make_response(400);
+        return make_response(400)
 
     photos = models.Photo.query.all()
     data = []
@@ -95,10 +90,14 @@ def get_all_photos():
 @app.route('/get-photo/', methods = ['GET'])
 def get_photo():
     if request.method == 'POST':
-        return make_response(400);
+        return make_response(400)
 
     id = request.args.get('id')
     photo = models.Photo.query.filter(models.Photo.id==id).first()
+
+    # See if the photo does not exist
+    if photo is None:
+        return make_response(404)
 
     name = app.config['FILENAME_BASE'] + os.path.basename(photo.path)
     
@@ -115,11 +114,29 @@ def get_photo():
     response.headers['Content-type'] = 'application/json'
     return response
 
+@app.route('/delete-photo/', methods = ['GET'])
+def delete_photo():
+    if request.method == 'POST':
+        return make_response(400)
+
+    id = request.args.get('id')
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    db.session.delete(photo)
+    db.session.commit()
+
+
+    returnobj = {}
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
+
 
 @app.route('/take-photo/', methods = ['GET'])
 def take_photo():
     if request.method == 'POST':
-        return make_response(400);
+        return make_response(400)
 
     # We need to make a request to the raspberry pi
     raw = True
@@ -151,9 +168,25 @@ def take_photo():
     response.headers['Content-type'] = 'application/json'
     return response
 
+@app.route('/get-configured/', methods = ['GET'])
+def get_configured():
+    if request.method == 'POST':
+        return make_response(400)
+
+    pilocation = app.config['PI_BASE'] + 'configuration'
+    r = requests.get(pilocation)
+    
+
+    returnobj = {}
+    returnobj['configs'] = r.json()
+    
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
     
 @app.route('/set-transform-coords/', methods = ['POST'])
-def transform_file():
+def transform_coords():
     if request.method == 'GET':
         return make_response(400)
 
@@ -176,6 +209,21 @@ def transform_file():
         returnobj['saved'] = True
     else:
         returnobj['saved'] = False
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
+@app.route('/delete-configs/', methods = ['GET'])
+def delete_configs():
+    pilocation = app.config['PI_BASE'] + 'configuration'   
+    
+    r = requests.delete(pilocation)
+    print "DELETE"
+    print r.text
+
+    returnobj = {}
+    returnobj['saved'] = True
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'

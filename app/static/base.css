@@ -1,51 +1,33 @@
-/*img {
-    width: 500px;
-    height: auto;
-}*/
-
-h1 {
-    color: blue;
-}
-
-.thumbnail {
-    height: 50px;
-    width: 50px;
-    cursor: pointer;
-    float: left;
-    margin: 3px;
-    border: 2px solid black;
-}
-
-#upload, #browse {
-    border: 2px solid green;
-    float: left;
-    clear: left;
-}
-
-#navigate, #toolcontainer {
-    width: 15%;
-    float: left;
-    overflow: hidden;
-}
-
-#view {
-    overflow: hidden;
-}
-
-#tools {
-    border: 2px solid red;
-    overflow: hidden;
-}
-
-#photocontainer {
-    border: 2px solid fuchsia;
-    overflow: hidden;
+html {
+    width: 100%;
+    body: 100%;
 }
 
 div {
     margin: 0px;
     padding: 0px;
+    overflow: hidden;
 }
+
+body {
+    background-color: #E8E8E8;
+    font-family: sans-serif;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;
+}
+
+button {
+    margin: 2px;
+    width: 95%;
+}
+
+.left {
+    float: left;
+    clear: both;
+    display: inline-block;
+}
+
 
 .corner {
     position: absolute;
@@ -59,7 +41,63 @@ div {
     clear: left;
 }
 
+.thumbnail {
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    float: left;
+    margin: 3px;
+    border: 2px solid black;
+}
+
+#main > div, #navigate > div {
+    margin-left: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#navigate > div {
+    border: 2px solid green;
+    float: left;
+    clear: left;
+}
+
+#picontrols {
+    position: relative;  /*so that we can center the loading icon */
+    text-align: center;
+}
+
+#loadingspan {
+    position: absolute;
+    top: 50%;
+    margin-top: -8px;
+}
+
+#buttons {
+    width: 75%;
+}
+
+#navigate, #toolcontainer {
+    width: 15%;
+    float: left;
+}
+
+#tools {
+    border: 2px solid red;
+}
+
+#photocontainer {
+    border: 2px solid fuchsia;
+}
+
 #content {
     border: 2px solid blue;
-    overflow: hidden;
+    background-color: white;
+    margin: 5px;
 }
+
+
+#header {
+    text-align: center;
+}
+

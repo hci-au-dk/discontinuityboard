@@ -8,3 +8,15 @@ class Photo(db.Model):
     # Tells python how to print the photo object
     def __repr__(self):
         return 'Photo: %i, path: %r, raw:%r' % (self.id, self.path, self.raw)
+
+
+class Pi(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(100), unique = True)  # A unique, human-readable name
+    address = db.Column(db.String(200))  # The pi's ip address
+
+    # Tells python how to print the photo object
+    def __repr__(self):
+        return 'Pi: %i, name: %r, address:%r' % (self.id, self.name, self.address)
+
+    

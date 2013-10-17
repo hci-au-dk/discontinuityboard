@@ -29,15 +29,48 @@ var Messenger = function() {
 	    success: function(data) {
 		setNewPhoto(data);
 	    },
-	    error: function(data) {
+	    error: function(jqxhr, data) {
+		console.log(jqxhr);
 		if (DEBUG)
 		    alert("get one photo error");
 	    }
 	});
     }
 
-    this.takePhotoWithPi = function(configsSet, successFn) {
+    this.deletePhoto = function(photoId, successFn) {
+	$.ajax({
+	    url: "/delete-photo/",
+	    type: "GET",
+	    dataType: "json",
+	    data: {"id": photoId},
+	    success: function() {
+		successFn();
+	    },
+	    error: function() {
+		if (DEBUG)
+		    alert("delete photo error");
+	    }
+	});
 
+    }
+
+    this.getConfigured = function(successFn) {
+	$.ajax({
+	    url: "/get-configured/",
+	    type: "GET",
+	    success: function(data) {
+		successFn(data);
+	    },
+	    error: function() {
+		if (DEBUG) {
+		    alert("get configured error");
+		}
+	    }
+	});
+    }
+
+    this.takePhotoWithPi = function(configsSet, successFn) {
+	$("#loading").show();
 	$.ajax({
 	    url: "/take-photo/",
 	    type: "GET",
@@ -45,6 +78,7 @@ var Messenger = function() {
 	    data: {"configured": configsSet},
 	    success: function(data) {
 		successFn(data);
+		$("#loading").hide();
 	    },
 	    error: function(data) {
 		if (DEBUG)
@@ -52,8 +86,6 @@ var Messenger = function() {
 	    }
 	});
     }
-
-
 
     this.transformImage = function(coordinates) {
 	var params = {"coordinates" : coordinates};
@@ -77,5 +109,24 @@ var Messenger = function() {
                     alert("transform image ajax error");
             }
         });
+    }
+
+    this.deleteConfigs = function() {
+	$.ajax({
+	    url: "/delete-configs/",
+	    type: "GET",
+	    success: function(data) {
+		if (data.saved) {
+		    configsSet = false;
+		} else {
+		    configsSet = true;
+		}
+		console.log(configsSet);
+	    },
+	    error: function(data) {
+		if (DEBUG)
+		    alert("delete configs error");
+	    }
+	});	
     }
 }

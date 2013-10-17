@@ -70,7 +70,30 @@ var Tools = function() {
 	configsSet = true;
     });
 
-    $("#selectcornerform").hide();
+    // Deletes the current photo, and, if there is a next photo,
+    // sets it to be viewed.
+    var deletePhoto = function() {
+	messenger.deletePhoto(currentPhotoId, removePhoto);
+	hideTools();
+
+	// get the id of the next photo in the browser
+	// if there is one, set it as the photo that is currently
+	// being viewed
+	var thumbs = $(".thumbnail");
+	for (var i = 0; i < thumbs.length; i++) {
+	    var id = $(thumbs[i]).attr("id");
+	    if (id > currentPhotoId) {
+		messenger.getPhoto(id);
+		break;
+	    }
+	}
+
+	messenger.getAllPhotos(initializeBrowser);
+    }
+
+
+    $("#deletephoto").bind("click", deletePhoto);
+
 
     this.showCornerTools = function(rawImage) {
 	if (!rawImage) {  // We should not show the tools
@@ -80,8 +103,14 @@ var Tools = function() {
 	    $("#cornerselectdiv").show();
 	    cornersFunction = true;
 	}
+	// always show the delete button
+	$("#deletephoto").show()
     }
+}
 
+function hideTools() {
+    $("#selectcornerform").hide();
+    $("#deletephoto").hide();
 }
 
 function populateCoordinates(e) {

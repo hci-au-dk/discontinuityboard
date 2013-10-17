@@ -4,28 +4,48 @@
 
 {% block content %}
 
+
+
 <div id="modal">
 </div>
 
 
 <div id="navigate">
 
-<button id="takephoto">Take Photo With Pi</button>
+  <div id="picontrols">
+    <div class="left" id="buttons">
+      <div>
+      <button id="takephoto">Take Photo With Pi</button>
+      <button id="takerawphoto">Take Unmanipulated Photo With Pi</button>
+      <button id="deleteconfigs">Delete Pi Configuration</button>
+      </div>
+    </div>
+    <span id="loadingspan"><img id="loading" src="{{ url_for('static', filename='ajax-loader.gif') }}" alt="loading" hidden="true"></span>
+  </div>
 
-{% include "upload.html" %}
+  {% include "upload.html" %}
 
-{% include "browse.html" %}
+  {% include "browse.html" %}
+
 </div>
 
-<div id="toolcontainer">
+<div id="main">
+  <div id="toolcontainer">
 
-{% include "tools.html" %}
+    {% include "tools.html" %}
 
-</div>
+  </div>
 
-<div id="view">
+  <div id="view">
+    {% if filename %}
+    <div id="photocontainer">
+      <div id="toolsdiv">
+	<span><img id="imagefile" src="{{filename}}" alt="uploaded"></span>
+      </div>
+    </div>
+    {% endif %}
 
-
+  </div>
 </div>
 
 {% endblock %}

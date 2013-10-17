@@ -20,18 +20,63 @@ $(window).load(function() {
 
     messenger = new Messenger();
 
+    // Must get the photos before we get the configuration
     messenger.getAllPhotos(initializeBrowser);
+
+    messenger.getConfigured(setConfigured);
 
     tools = new Tools();
 
-    $("#takephoto").bind("click", takePhotoClick);
+    $("#takephoto").bind("click", takeRegularPhotoClick);
+    $("#takerawphoto").bind("click", takeRawPhotoClick);
+    $("#deleteconfigs").bind("click", deleteConfigs);
+    $("#uploadphotobutton").bind("click", showUpload);
 });
 
-function takePhotoClick() {
-    console.log("coords set:" + configsSet);
-    messenger.takePhotoWithPi(configsSet, getPhotoToDisplay);
+function deleteConfigs() {
+    messenger.deleteConfigs();
+    messenger.getConfigured(setConfigured);
+}
+
+function setConfigured(data) {
+    console.log(data.configs);
+    if (data.configs.x0.length > 0) {
+	configsSet = true;
+    }
+    console.log("after check: " + configsSet);
+}
+
+
+function showUpload() {
+    var upload = $("#filename").val()
+    
+    // now get the proper thumbnail by the name
+    var thumbs = $(".thumbnail");
+    for (var i = 0; i < thumbs.length; i++) {
+	var name = $(thumbs[i]).attr("src");
+	// split on '/'
+	var parts = name.split("/");
+	// the name should be the last piece
+	if (upload == parts[parts.length - 1]) {
+	    var id = $(thumbs[i]).attr("id");
+	    messenger.getPhoto(id);
+	}
+    }
+}
+
+function takeRegularPhotoClick() {
+    takePhotoClick(configsSet);
+}
+
+function takeRawPhotoClick() {
+    takePhotoClick(false);
+}
+
+function takePhotoClick(configs) {
+    messenger.takePhotoWithPi(configs, getPhotoToDisplay);
     messenger.getAllPhotos(initializeBrowser);
 }
+
 
 function initializeBrowser(data) {
     browser = new Browser(data);
@@ -39,6 +84,10 @@ function initializeBrowser(data) {
 
 function getPhotoToDisplay(data) {
     messenger.getPhoto(data.id);
+}
+
+function removePhoto() {
+    $("#photocontainer").remove()
 }
 
 function setNewPhoto(data) {

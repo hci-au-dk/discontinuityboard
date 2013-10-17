@@ -13,24 +13,23 @@ var Browser = function (data) {
 
 	var img = $(document.createElement('img'));
 	img.attr("src", data.photos[index]["path"]);
+	img.attr("id", data.photos[index]["id"]);
 	img.addClass("thumbnail");
 	thumbnail.append(img);
 
-	var photoid = $(document.createElement("p"));
-	photoid.addClass("photoid");
-	photoid.attr("hidden", "true");
-	photoid.html(data.photos[index]["id"]);
-	thumbnail.append(photoid);
 
-	thumbnail.bind("click", getPhoto);
-	bb.append(thumbnail);
+	img.bind("click", getPhoto);
+	bb.append(img);
     });
     
     $("#browse").append(bb);
 
+    if (data.photos.length == 0) {
+	$("#browse").hide();
+    }
 
     function getPhoto(e) {
-	var id = $(this).children().filter(".photoid")[0].innerHTML;
+	var id = $(this).attr("id");
 	messenger.getPhoto(id);
     }
 }
