@@ -87,6 +87,26 @@ var Messenger = function() {
 	});
     }
 
+    this.uploadPhoto = function(file, successFn) {
+	var fd = new FormData();    
+	fd.append( 'file', file );
+
+	$.ajax({
+	    url: '/upload/',
+	    data: fd,
+	    processData: false,
+	    contentType: false,
+	    type: 'POST',
+	    success: function(data){
+		successFn(data);
+	    },
+	    error: function(data) {
+		if (DEBUG)
+		    alert("upload photo error");
+	    }
+	}); 
+    }
+
     this.transformImage = function(coordinates) {
 	var params = {"coordinates" : coordinates};
 

@@ -48,20 +48,10 @@ function setConfigured(data) {
 
 
 function showUpload() {
-    var upload = $("#filename").val()
-    
-    // now get the proper thumbnail by the name
-    var thumbs = $(".thumbnail");
-    for (var i = 0; i < thumbs.length; i++) {
-	var name = $(thumbs[i]).attr("src");
-	// split on '/'
-	var parts = name.split("/");
-	// the name should be the last piece
-	if (upload == parts[parts.length - 1]) {
-	    var id = $(thumbs[i]).attr("id");
-	    messenger.getPhoto(id);
-	}
-    }
+    // first, get the file
+    var file = $("#filename")[0].files[0]
+    messenger.uploadPhoto(file, getPhotoToDisplay);
+    messenger.getAllPhotos(initializeBrowser);
 }
 
 function takeRegularPhotoClick() {

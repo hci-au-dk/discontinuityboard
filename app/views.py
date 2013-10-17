@@ -25,12 +25,19 @@ def index(filename = None):
 @app.route('/upload/', methods=['POST'])
 def upload_file():
     filename = None
+    returnobj = {}
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             photoid = save_photo(file, filename, False)
-    return index()
+            returnobj['id'] = photoid
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
+    
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
@@ -66,7 +73,6 @@ def get_photo_filename(id):
     db.session.close()
     filename = os.path.basename(photo.path)
     return filename
-
 
 @app.route('/get-all-photos/', methods = ['GET'])
 def get_all_photos():
@@ -124,9 +130,7 @@ def delete_photo():
     db.session.delete(photo)
     db.session.commit()
 
-
     returnobj = {}
-
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
     return response
