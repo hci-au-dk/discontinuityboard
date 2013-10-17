@@ -32,4 +32,17 @@ var Browser = function (data) {
 	var id = $(this).attr("id");
 	messenger.getPhoto(id);
     }
+
+    this.setSelected = function(photoId) {
+	var thumbs = $(".thumbnail");
+	for (var i = 0; i < thumbs.length; i++) {
+	    var id = $(thumbs[i]).attr("id");
+	    if (id == photoId) {
+		$(thumbs[i]).addClass("selected");
+	    } else {
+		$(thumbs[i]).removeClass("selected");
+	    }
+	}
+	
+    }
 }

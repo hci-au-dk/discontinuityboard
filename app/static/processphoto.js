@@ -52,6 +52,8 @@ function showUpload() {
     var file = $("#filename")[0].files[0]
     messenger.uploadPhoto(file, getPhotoToDisplay);
     messenger.getAllPhotos(initializeBrowser);
+    // clear the filename from the form
+    $("#filename").val("");
 }
 
 function takeRegularPhotoClick() {
@@ -138,5 +140,6 @@ function setNewPhoto(data) {
 
     toolsCan.append(imgSpan);
 
+    browser.setSelected(data.id);
     tools.showCornerTools(raw);
 }
