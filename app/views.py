@@ -50,7 +50,7 @@ def save_photo(file, filename, raw):
     file.save(savename)
     
     # Now, we want to insert it into our database
-    photo = models.Photo(path=savename, raw=raw)
+    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now())
     db.session.add(photo)
     try:
         db.session.commit()

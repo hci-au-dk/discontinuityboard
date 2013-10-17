@@ -82,7 +82,8 @@ var Tools = function() {
 	var thumbs = $(".thumbnail");
 	for (var i = 0; i < thumbs.length; i++) {
 	    var id = $(thumbs[i]).attr("id");
-	    if (id > currentPhotoId) {
+	    if (id > currentPhotoId || (i == thumbs.length - 1 && id != currentPhotoId)) {
+		alert(id);
 		messenger.getPhoto(id);
 		break;
 	    }
@@ -93,6 +94,7 @@ var Tools = function() {
 
 
     $("#deletephoto").bind("click", deletePhoto);
+    $("#deletephoto").hide();
 
 
     this.showCornerTools = function(rawImage) {
@@ -103,8 +105,10 @@ var Tools = function() {
 	    $("#cornerselectdiv").show();
 	    cornersFunction = true;
 	}
-	// always show the delete button
-	$("#deletephoto").show()
+	// always show the delete button if there is a photo shown
+	if ($("#view").children().length > 0) {
+	    $("#deletephoto").show();
+	}
     }
 }
 

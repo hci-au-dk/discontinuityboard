@@ -26,6 +26,8 @@ var Browser = function (data) {
 
     if (data.photos.length == 0) {
 	$("#browse").hide();
+    } else {
+	$("#browse").show();
     }
 
     function getPhoto(e) {
