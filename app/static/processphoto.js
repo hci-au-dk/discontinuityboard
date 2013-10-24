@@ -27,11 +27,25 @@ $(window).load(function() {
 
     tools = new Tools();
 
+    attachListeners();
+});
+
+function attachListeners() {
+    // Photo taking/uploading
     $("#takephoto").bind("click", takeRegularPhotoClick);
     $("#takerawphoto").bind("click", takeRawPhotoClick);
     $("#deleteconfigs").bind("click", deleteConfigs);
     $("#uploadphotobutton").bind("click", showUpload);
-});
+
+    // Tools buttons
+    $("#deletephoto").bind("click", tools.deletePhoto);
+    $("#cornerselect").bind("click", tools.cornerSelectClick);
+    $("#transformimage").bind("click", tools.transformClick);
+    $("#cut").bind("click", tools.cutClick);
+
+    $("#view").bind("mousedown", tools.routeToolClick);
+    $("#view").bind("mouseup", tools.makeCut);
+}
 
 function deleteConfigs() {
     messenger.deleteConfigs();
@@ -101,11 +115,11 @@ function setNewPhoto(data) {
     var raw = data.raw;
 
     img.attr("id", "imagefile");
+    img.addClass("unselectable");
 
     imgSpan.append(img)
     photoCont.append(imgSpan);
     $("#view").append(photoCont);
-
     
     var width = owidth;
     var height = oheight;
@@ -113,15 +127,15 @@ function setNewPhoto(data) {
 
     // reset the ratio so that we can send accurate coordinates to the pi
     if (owidth > MAX_PHOTO_WIDTH) {
-	var ratio = MAX_PHOTO_WIDTH / owidth;   // get ratio for scaling image
-	currentPhotoRatio = ratio;
+        var ratio = MAX_PHOTO_WIDTH / owidth; // get ratio for scaling image
+        currentPhotoRatio = ratio;
 
-	width = MAX_PHOTO_WIDTH;
-	height = oheight * ratio;
+        width = MAX_PHOTO_WIDTH;
+        height = oheight * ratio;
     }
    
     img.css("width", width); // Set new width
-    img.css("height", height);  // Scale height based on ratio
+    img.css("height", height); // Scale height based on ratio
 
 
     // now set the proper margins

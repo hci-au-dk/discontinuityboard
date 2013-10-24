@@ -1,11 +1,12 @@
 // This is where the functionality for the buttons will go
 
+var MIN_SIZE = 10;
 
 var Tools = function() {
     
     var cornersFunction = false;
 
-    var cornerSelectClick = function() {
+    this.cornerSelectClick = function() {
 	if (!cornersFunction) {
 	    return;
 	}
@@ -53,10 +54,9 @@ var Tools = function() {
 	$("cornerselectform").show();
     }
 
-    $("#cornerselect").bind("click", cornerSelectClick);
-    $("#cornerselectdiv").hide();
-
-    $("#transformimage").bind("click", function() {
+    // If the user is setting the coordinates for how this image should
+    // be transformed
+    this.transformClick = function() {
 	var coordinates = {'x1': $("#corner1x").val(),
 			   'y1': $("#corner1y").val(),
 			   'x2': $("#corner2x").val(),
@@ -68,13 +68,15 @@ var Tools = function() {
 
 	messenger.transformImage(coordinates);
 	configsSet = true;
-    });
+    }
 
     // Deletes the current photo, and, if there is a next photo,
     // sets it to be viewed.
-    var deletePhoto = function() {
+    this.deletePhoto = function() {
 	messenger.deletePhoto(currentPhotoId, removePhoto);
 	hideTools();
+
+	messenger.getAllPhotos(initializeBrowser);
 
 	// get the id of the next photo in the browser
 	// if there is one, set it as the photo that is currently
@@ -88,33 +90,35 @@ var Tools = function() {
 		reset = true;
 	    }
 	}
-	/*if (!reset) {
-	    // Needs to be > 1 because we don't want to try to
-	    // serve the photo we are deleting
-	    if (thumbs.length > 1) {
-		var id = $(thumbs[0]).attr("id");
-		//messenger.getPhoto(id);
-	    }
-	}*/
-
-	messenger.getAllPhotos(initializeBrowser);
-    }
-
-
-    $("#deletephoto").bind("click", deletePhoto);
-    $("#deletephoto").hide();
-
-
-    // Creates a cut tool to cut the photo into blocks
-    var cutTool = function() {
-	$("body").css("cursor", "crosshair");
     }
     
-    $("#cut").bind("click", cutTool);
+    var cutTool = false;
+
+    // Creates a cut tool to cut the photo into blocks
+    this.cutClick = function() {
+	// TODO: make it so that you can't use other tools at the same time
+
+	cutTool = !cutTool;
+	console.log(cutTool);
+	if (cutTool) {
+	    $("#view").css("cursor", "crosshair");
+	} else {
+	    $("#view").css("cursor", "default");
+	}
+    }
+
+    // properly routes a click on the view area depending on what tool is selected
+    this.routeToolClick = function(e) {
+	if (cutTool) {
+	    useCutTool(e);
+	    cutTool = false;
+	}
+    }
+    
 
     // Creates the annotation tool to annotate different parts of the photo
     var annotateTool = function() {
-	$("body").css("cursor", "text");
+	$("#view").css("cursor", "text");
     }
     
     $("#annotate").bind("click", annotateTool);
@@ -137,13 +141,137 @@ var Tools = function() {
 	    $("#annotate").show();
 	}
     }
+    
+    this.makeCut = function() {
+
+    }
 }
+
+function useCutTool(e) {
+    var x = getX(e);
+    var y = getY(e);
+
+    var div = $(document.createElement('div'));
+
+    div.css("left", x + "px");
+    div.css("top", y + "px");
+    div.css("width", "30px");
+    div.css("height", "30px");
+
+    div.attr("id", "cutBox");
+
+    // add corners to the div (grabbers)
+    for (var i = 1; i <= 4; i++) {
+	var grab = $(document.createElement("div"));
+	grab.attr("id" , "grabber" + i);
+	grab.addClass("grabber");
+	if (i == 4 || i == 3) {  // top right || bottom right
+	    grab.css("right", "0");
+	} 
+	if (i == 2 || i == 3) {  // bottom left || bottom right
+	    grab.css("bottom", "0")
+	}
+	if (i == 1 || i == 4) {  // top left || top right
+	    grab.css("top", "0");
+	}
+	if (i == 1 || i == 2) {  // top left || bottom left
+	    grab.css("left", "0");
+	}
+	grab.bind("mousedown", grabClick);
+	div.append(grab);
+    }
+    
+    $("#photocontainer").append(div);
+}
+
+function grabClick(e) {
+    var grab = $(this);
+    var args = {};
+    if (grab.css("left") == "0px") {  // top right || bottom right
+	args.side1 = "left";
+    } else {
+	args.side1 = "right";
+    }
+    if (grab.css("top") == "0px") {
+	args.side2 = "top";
+    } else {
+	args.side2 = "bottom";
+    }
+    $("#cutBox").bind("mousemove", args, resizeDiv);
+    $("body").bind("mouseup", function() {
+	$("#cutBox").unbind("mousemove");
+	$("body").unbind("mouseup");
+    });
+}
+
+function resizeDiv(e) {
+    // e.data.side1 is the first side we need to move
+    // e.data.side2 is the second side we need to move
+    var x = getX(e);
+    var y = getY(e);
+
+    var top = $("#cutBox").position().top;
+    var left = $("#cutBox").position().left;
+    var w = $("#cutBox").width();
+    var h = $("#cutBox").height();
+
+    // we want some constraints, like that the box can't get too small    
+    var width = x - left;
+    if (e.data.side1 == "left") {
+	width = (left - x) + w;
+	if (isOK(width)) {
+	    $("#cutBox").css("left", x);
+	}
+    }
+    if (isOK(width)) {
+	$("#cutBox").css("width", width); 
+    }
+
+    var height = y - top;
+    if (e.data.side2 == "top") {
+	height = (top - y) + h;
+	if (isOK(height)) {
+	    $("#cutBox").css("top", y);
+	}
+    }
+    if (isOK(height)) {
+	$("#cutBox").css("height", height);
+    }
+}
+
+function isOK(num) {
+    return num >= MIN_SIZE;
+}
+
 
 function hideTools() {
     $("#cornerselectform").hide();
     $("#deletephoto").hide();
     $("#cut").hide();
     $("#annotate").hide();
+    $("#cornerselectdiv").hide();
+}
+
+function moveBox(e) {
+    var box = $(this);
+    var x = box.position().left - CORNER_SIZE;
+    var y = box.position().top - CORNER_SIZE;
+
+    // We need to adjust for the placement of the tool canvas
+    x = x - ($("#toolsdiv").position().left - (CORNER_SIZE));
+    y = y - ($("#toolsdiv").position().top - (CORNER_SIZE));
+
+    // now get the coordinates of the other box
+    var box2 = $("#cutBox2");
+    var x2 = box2.position().left - CORNER_SIZE;
+    var y2 = box2.position().top - CORNER_SIZE;
+
+    // We need to adjust for the placement of the tool canvas
+    x2 = x2 - ($("#toolsdiv").position().left - (CORNER_SIZE));
+    y2 = y2 - ($("#toolsdiv").position().top - (CORNER_SIZE));
+
+    // now, redraw the line that connects the boxes on the convas
+
 }
 
 function populateCoordinates(e) {
