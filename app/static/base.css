@@ -36,12 +36,6 @@ button {
     cursor: pointer;
 }
 
-.cutBox {
-    position: absolute;
-    margin: 0px;
-    padding: 0px;
-}
-
 .coordpair {
     float: left;
     clear: left;
@@ -50,7 +44,7 @@ button {
 .grabber {
     width: 8px;
     height: 8px;
-    background-color: fuchsia;
+    background-color: black;
     position: absolute;
 }
 
@@ -93,7 +87,7 @@ button {
 }
 
 #cutBox {
-    border: 2px dashed blue;
+    border: 1px dotted black;
 }
 
 #picontrols {

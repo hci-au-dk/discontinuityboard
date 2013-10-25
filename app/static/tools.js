@@ -1,7 +1,5 @@
 // This is where the functionality for the buttons will go
 
-var MIN_SIZE = 10;
-
 var Tools = function() {
     
     var cornersFunction = false;
@@ -93,28 +91,21 @@ var Tools = function() {
     }
     
     var cutTool = false;
+    var inUse = null;
 
     // Creates a cut tool to cut the photo into blocks
     this.cutClick = function() {
 	// TODO: make it so that you can't use other tools at the same time
-
 	cutTool = !cutTool;
-	console.log(cutTool);
 	if (cutTool) {
 	    $("#view").css("cursor", "crosshair");
+	    useCutTool();
+	    inUse = "cut";
+	    cutTool = false;
 	} else {
 	    $("#view").css("cursor", "default");
 	}
     }
-
-    // properly routes a click on the view area depending on what tool is selected
-    this.routeToolClick = function(e) {
-	if (cutTool) {
-	    useCutTool(e);
-	    cutTool = false;
-	}
-    }
-    
 
     // Creates the annotation tool to annotate different parts of the photo
     var annotateTool = function() {
@@ -143,21 +134,22 @@ var Tools = function() {
     }
     
     this.makeCut = function() {
-
+	inUse = null;
     }
 }
 
-function useCutTool(e) {
-    var x = getX(e);
-    var y = getY(e);
-
+function useCutTool() {
     var div = $(document.createElement('div'));
+
+    var x = $("#toolsdiv").position().left + ((CORNER_SIZE / 2) - CORNER_BORDER_SIZE);
+    var y = $("#toolsdiv").position().top + ((CORNER_SIZE / 2) - CORNER_BORDER_SIZE);
+    var parentWidth = $("#toolsdiv").width();
+    var parentHeight = $("#toolsdiv").height();
 
     div.css("left", x + "px");
     div.css("top", y + "px");
-    div.css("width", "30px");
-    div.css("height", "30px");
-
+    div.css("width", parentWidth);
+    div.css("height", parentHeight);
     div.attr("id", "cutBox");
 
     // add corners to the div (grabbers)
@@ -240,9 +232,8 @@ function resizeDiv(e) {
 }
 
 function isOK(num) {
-    return num >= MIN_SIZE;
+    return num >= MIN_SELECT_SIZE;
 }
-
 
 function hideTools() {
     $("#cornerselectform").hide();
@@ -250,28 +241,6 @@ function hideTools() {
     $("#cut").hide();
     $("#annotate").hide();
     $("#cornerselectdiv").hide();
-}
-
-function moveBox(e) {
-    var box = $(this);
-    var x = box.position().left - CORNER_SIZE;
-    var y = box.position().top - CORNER_SIZE;
-
-    // We need to adjust for the placement of the tool canvas
-    x = x - ($("#toolsdiv").position().left - (CORNER_SIZE));
-    y = y - ($("#toolsdiv").position().top - (CORNER_SIZE));
-
-    // now get the coordinates of the other box
-    var box2 = $("#cutBox2");
-    var x2 = box2.position().left - CORNER_SIZE;
-    var y2 = box2.position().top - CORNER_SIZE;
-
-    // We need to adjust for the placement of the tool canvas
-    x2 = x2 - ($("#toolsdiv").position().left - (CORNER_SIZE));
-    y2 = y2 - ($("#toolsdiv").position().top - (CORNER_SIZE));
-
-    // now, redraw the line that connects the boxes on the convas
-
 }
 
 function populateCoordinates(e) {

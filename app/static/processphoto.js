@@ -14,6 +14,8 @@ var CORNER_BORDER_SIZE = 2;
 var CORNER_SIZE = 20 + (2 * CORNER_BORDER_SIZE);
 var MAX_PHOTO_WIDTH = 500;
 
+var MIN_SELECT_SIZE = 10;
+
 $(window).load(function() {
     // because IE tries to cache all the things
     $.ajaxSetup({cache:false});
@@ -43,7 +45,7 @@ function attachListeners() {
     $("#transformimage").bind("click", tools.transformClick);
     $("#cut").bind("click", tools.cutClick);
 
-    $("#view").bind("mousedown", tools.routeToolClick);
+    //$("#view").bind("mousedown", tools.routeToolClick);
     $("#view").bind("mouseup", tools.makeCut);
 }
 
