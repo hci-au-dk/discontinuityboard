@@ -122,7 +122,6 @@ var Messenger = function() {
 		} else {
 		    configsSet = false;
 		}
-		console.log(configsSet);
 	    },
             error: function() {
                 if (DEBUG)
@@ -148,5 +147,25 @@ var Messenger = function() {
 		    alert("delete configs error");
 	    }
 	});	
+    }
+
+    this.makeCut = function(photoId, x1, y1, x2, y2) {
+	$.ajax({
+	    url: "/make-cut/",
+	    type: "GET",
+	    dataType: "json",
+	    data: {"id": photoId,
+		  "x1": x1,
+		  "x2": x2,
+		  "y1": y1,
+		  "y2": y2},
+	    success: function(data) {
+		alert(data);
+	    },
+	    error: function(data) {
+		if (DEBUG)
+		    alert("make cut error");
+	    }
+	});
     }
 }

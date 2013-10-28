@@ -10,7 +10,7 @@ var currentPhotoRatio = 1;
 var configsSet = false;
 
 // size constants
-var CORNER_BORDER_SIZE = 2;
+var CORNER_BORDER_SIZE = 0;
 var CORNER_SIZE = 20 + (2 * CORNER_BORDER_SIZE);
 var MAX_PHOTO_WIDTH = 500;
 
@@ -44,9 +44,8 @@ function attachListeners() {
     $("#cornerselect").bind("click", tools.cornerSelectClick);
     $("#transformimage").bind("click", tools.transformClick);
     $("#cut").bind("click", tools.cutClick);
-
-    //$("#view").bind("mousedown", tools.routeToolClick);
-    $("#view").bind("mouseup", tools.makeCut);
+    $("#makecut").bind("click", tools.makeCut);
+    $("#annotate").bind("click", tools.annotateTool);
 }
 
 function deleteConfigs() {

@@ -1,6 +1,12 @@
 // This is where the functionality for the buttons will go
 
 var Tools = function() {
+
+    var buttons = new Array();
+    buttons[0] = $("#cornerselect");
+    buttons[1] = $("#transformimage");
+    buttons[2] = $("#cut");
+    buttons[3] = $("#annotate");
     
     var cornersFunction = false;
 
@@ -10,43 +16,52 @@ var Tools = function() {
 	}
 	$("#cornerselectform").show();
 
-	var parentX = $("#photocontainer").position().left;
-	var parentY = $("#photocontainer").position().top;
-	var parentWidth = $("#photocontainer").width();
-	var parentHeight = $("#photocontainer").height();
+	var parentX = $("#toolsdiv").offset().left;
+	var parentY = $("#toolsdiv").offset().top;
+	var parentWidth = $("#toolsdiv").width();
+	var parentHeight = $("#toolsdiv").height();
 
 	for (var i = 1; i <= 4; i++) {
 	    if ($(".corner").length >= 4) {
 		break;
 	    }
-	    var x = parentX + CORNER_BORDER_SIZE;
-	    var y = parentY + CORNER_BORDER_SIZE;
+	    var x = 0;
+	    var y = 0;
 
 	    var div = $(document.createElement('div'));
 
 	    if (i == 4 || i == 3) {  // top right || bottom right
-		x = x + parentWidth - (CORNER_SIZE);
+		div.css("right", "0");
 	    } 
 	    if (i == 2 || i == 3) {  // bottom left || bottom right
-		y = y + parentHeight - (CORNER_SIZE);
+		div.css("bottom", "0")
 	    }
-	    div.css("left", x + "px");
-	    div.css("top", y + "px");
+	    if (i == 1 || i == 4) {  // top left || top right
+		div.css("top", "0");
+	    }
+	    if (i == 1 || i == 2) {  // top left || bottom left
+		div.css("left", "0");
+	    }
 	    div.addClass("corner");
+
+	    if (i == 4) {  // top right
+		div.addClass("upperright");
+	    } else if (i == 3) {  // bottom right
+		div.addClass("lowerright");
+	    } else if (i == 2) {  // bottom left
+		div.addClass("lowerleft");
+	    }
 
 	    div.css("width", (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
 	    div.css("height" , (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
 	    div.attr("id", "corner" + i);
-	    div.draggable({containment: "#photocontainer"});
-	    div.bind("mousemove", populateCoordinates);  // listen for future updates
+	    div.draggable({containment: "#toolsdiv"});
+	    div.bind("drag", populateCoordinates);  // listen for future updates
 
 	    $("#toolsdiv").append(div);
 
-	    div.trigger("mousemove");
+	    div.trigger("drag");
 	}
-	// set our borders for the boxes
-	var borderStr = CORNER_BORDER_SIZE + "px dashed red";
-	$(".corner").css("border", borderStr); 
 
 	// show the coordinate selection boxes
 	$("cornerselectform").show();
@@ -90,7 +105,7 @@ var Tools = function() {
 	}
     }
     
-    var cutTool = false;
+    var cutTool = false;  // TODO: see if this variable is necessary
     var inUse = null;
 
     // Creates a cut tool to cut the photo into blocks
@@ -99,8 +114,11 @@ var Tools = function() {
 	cutTool = !cutTool;
 	if (cutTool) {
 	    $("#view").css("cursor", "crosshair");
-	    useCutTool();
-	    inUse = "cut";
+	    for (var i = 0; i < buttons.length; i++) {
+		//buttons[i].attr("disabled", true);
+	    }
+	    $("#cutoptions").toggle();
+	    inUse = useCutTool(inUse);
 	    cutTool = false;
 	} else {
 	    $("#view").css("cursor", "default");
@@ -108,12 +126,10 @@ var Tools = function() {
     }
 
     // Creates the annotation tool to annotate different parts of the photo
-    var annotateTool = function() {
+    this.annotateTool = function() {
 	$("#view").css("cursor", "text");
     }
     
-    $("#annotate").bind("click", annotateTool);
-
     hideTools();
 
     this.showCornerTools = function(rawImage) {
@@ -134,15 +150,65 @@ var Tools = function() {
     }
     
     this.makeCut = function() {
-	inUse = null;
+	if (inUse == "cut") {  // making a cut is a valid thing to do
+	    // get the coordinates of the cutBox
+	    var box = $("#cutBox");
+	    var td = $("#toolsdiv");
+	    var x = box.position().left;
+	    var y = box.position().top;
+	    
+	    // We need to get them in relation to the placement of the tool canvas
+	    x = x - td.offset().left;
+	    y = y - td.offset().top;
+	    var botX = x + box.width();
+	    var botY = y + box.height();
+
+	    // If any of these coordinates are outside the bounds of the picture,
+	    // we need to correct this
+	    if (x < 0) {
+		x = 0;
+	    }
+	    if (y < 0) {
+		y = 0;
+	    }
+	    if (botX > td.width()) {
+		botX = td.width();
+	    }
+	    if (botY > td.height()) {
+		botY = td.height();
+	    }
+
+	    // Correct for the ratio that the picture is being displayed at
+	    x = Math.round(x / currentPhotoRatio);
+	    y = Math.round(y / currentPhotoRatio);
+	    botX = Math.round(botX / currentPhotoRatio);
+	    botY = Math.round(botY / currentPhotoRatio);
+
+	    // send them to a service
+	    messenger.makeCut(currentPhotoId, x, y, botX, botY);
+	}
+	//inUse = null;  // TODO: uncomment this
     }
 }
 
-function useCutTool() {
+function hideTools() {
+    $("#cornerselectform").hide();
+    $("#deletephoto").hide();
+    $("#cut").hide();
+    $("#annotate").hide();
+    $("#cornerselectdiv").hide();
+    $("#cutoptions").hide();
+}
+
+
+function useCutTool(inUse) {
+    if (inUse != null) {
+	return inUse;
+    }
     var div = $(document.createElement('div'));
 
-    var x = $("#toolsdiv").position().left + ((CORNER_SIZE / 2) - CORNER_BORDER_SIZE);
-    var y = $("#toolsdiv").position().top + ((CORNER_SIZE / 2) - CORNER_BORDER_SIZE);
+    var x = $("#toolsdiv").position().left + ((CORNER_SIZE / 2));
+    var y = $("#toolsdiv").position().top + ((CORNER_SIZE / 2));
     var parentWidth = $("#toolsdiv").width();
     var parentHeight = $("#toolsdiv").height();
 
@@ -174,6 +240,8 @@ function useCutTool() {
     }
     
     $("#photocontainer").append(div);
+    // indicate that we are now using the cut tool
+    return "cut";
 }
 
 function grabClick(e) {
@@ -235,13 +303,6 @@ function isOK(num) {
     return num >= MIN_SELECT_SIZE;
 }
 
-function hideTools() {
-    $("#cornerselectform").hide();
-    $("#deletephoto").hide();
-    $("#cut").hide();
-    $("#annotate").hide();
-    $("#cornerselectdiv").hide();
-}
 
 function populateCoordinates(e) {
     // Get the div that moved
@@ -250,13 +311,14 @@ function populateCoordinates(e) {
     var y = corner.position().top;
     
     var cornerId = corner.attr("id");
-    // The matching coordinate input boxes have ids of cornerId + [x|y]
-    x = x - (CORNER_SIZE);
-    y = y - (CORNER_SIZE);
-
-    // We need to adjust for the placement of the tool canvas
-    x = x - ($("#toolsdiv").position().left - (CORNER_SIZE));
-    y = y - ($("#toolsdiv").position().top - (CORNER_SIZE));
+    // depending on which div it is, we want different values for x and y
+    var i = cornerId.substring(cornerId.length - 1);
+    if (i == 4 || i == 3) {  // top right || bottom right
+	x = x + corner.width();
+    } 
+    if (i == 2 || i == 3) {  // bottom left || bottom right
+	y = y + corner.height();
+    }
 
     // We want the "true" coordinates - immune to any resizing that happens
     $("#" + cornerId + "x").attr("value", Math.round(x / currentPhotoRatio));

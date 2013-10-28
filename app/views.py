@@ -229,3 +229,24 @@ def delete_configs():
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
     return response
+
+@app.route('/make-cut/', methods = ['GET'])
+def make_cut():
+    # Load the image into a PIL Image first
+    photoid = request.args.get('id')
+    photo = Image.open(get_photo_path(photoid))
+
+    cropped = photo.copy()
+    x1 = int(request.args.get('x1'))
+    y1 = int(request.args.get('y1'))
+    x2 = int(request.args.get('x2'))
+    y2 = int(request.args.get('y2'))
+    cropped = cropped.crop((x1, y1,
+                            x2, y2))
+
+    returnobj = {}
+    returnobj['saved'] = True
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
