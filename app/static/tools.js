@@ -52,8 +52,8 @@ var Tools = function() {
 		div.addClass("lowerleft");
 	    }
 
-	    div.css("width", (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
-	    div.css("height" , (CORNER_SIZE - (2 * CORNER_BORDER_SIZE)) + "px");
+	    div.css("width", "20px");
+	    div.css("height" , "20px");
 	    div.attr("id", "corner" + i);
 	    div.draggable({containment: "#toolsdiv"});
 	    div.bind("drag", populateCoordinates);  // listen for future updates
@@ -146,7 +146,9 @@ var Tools = function() {
 	    $("#deletephoto").show();
 	    $("#cut").show();
 	    $("#annotate").show();
+	    $("#cutoptions").hide();
 	}
+	inUse = null;
     }
     
     this.makeCut = function() {
@@ -154,8 +156,8 @@ var Tools = function() {
 	    // get the coordinates of the cutBox
 	    var box = $("#cutBox");
 	    var td = $("#toolsdiv");
-	    var x = box.position().left;
-	    var y = box.position().top;
+	    var x = box.offset().left;
+	    var y = box.offset().top;
 	    
 	    // We need to get them in relation to the placement of the tool canvas
 	    x = x - td.offset().left;
@@ -185,9 +187,11 @@ var Tools = function() {
 	    botY = Math.round(botY / currentPhotoRatio);
 
 	    // send them to a service
-	    messenger.makeCut(currentPhotoId, x, y, botX, botY);
+	    console.log(currentPhotoRatio);
+	    console.log(x + ", " + y + " : " + botX + ", " + botY);
+	    messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
 	}
-	//inUse = null;  // TODO: uncomment this
+	inUse = null;  // TODO: uncomment this
     }
 }
 
@@ -207,8 +211,8 @@ function useCutTool(inUse) {
     }
     var div = $(document.createElement('div'));
 
-    var x = $("#toolsdiv").position().left + ((CORNER_SIZE / 2));
-    var y = $("#toolsdiv").position().top + ((CORNER_SIZE / 2));
+    var x = $("#toolsdiv").position().left;
+    var y = $("#toolsdiv").position().top;
     var parentWidth = $("#toolsdiv").width();
     var parentHeight = $("#toolsdiv").height();
 

@@ -10,7 +10,7 @@
 </div>
 
 
-<div id="navigate">
+<div id="navigate" class="column">
 
   <div id="picontrols">
     <div class="left" id="buttons">
@@ -29,15 +29,18 @@
 
 </div>
 
-<div id="main">
-  <div id="toolcontainer">
 
-    {% include "tools.html" %}
+<div id="toolcontainer" class="column">
 
-  </div>
+  {% include "tools.html" %}
 
-  <div id="view">
-  </div>
 </div>
+
+<div id="view" class="column">
+</div>
+<div id="notes" contentEditable="true" class="column">
+
+</div>
+
 
 {% endblock %}

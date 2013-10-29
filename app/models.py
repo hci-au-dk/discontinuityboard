@@ -5,7 +5,7 @@ class Photo(db.Model):
     path = db.Column(db.String(200), unique = True)  # where the photo is stored
     raw = db.Column(db.Boolean) # whether or not the photo comes from pi/rawimage
     time_submitted = db.Column(db.DateTime)  # time the photo was submitted
-    children = db.relationship('Selection', backref='parent')
+    children = db.relationship('Selection', backref='photo')
 
     # Tells python how to print the photo object
     def __repr__(self):
@@ -15,8 +15,9 @@ class Selection(db.Model):
     id = db.Column(db.Integer, primary_key = True)  # Unique identifier
     path = db.Column(db.String(200), unique = True)  # where stored
     parent_id = db.Column(db.Integer, db.ForeignKey('photo.id'))  # photo the selection came from
+    parent = db.relationship('Photo', primaryjoin='Photo.id==Selection.parent_id')
     comments = db.Column(db.String(1000))
 
     def __repr__(self):
-        return 'Selection: %i, path: %r, parent:%r, comments:%r' % (self.id, self.path, self.parent_id, self.comments)
+        return 'Selection: %i, path: %r, parent: %i, comments:%r' % (self.id, self.path, self.parent_id, self.comments)
     

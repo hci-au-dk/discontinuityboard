@@ -10,10 +10,6 @@ var currentPhotoRatio = 1;
 var configsSet = false;
 
 // size constants
-var CORNER_BORDER_SIZE = 0;
-var CORNER_SIZE = 20 + (2 * CORNER_BORDER_SIZE);
-var MAX_PHOTO_WIDTH = 500;
-
 var MIN_SELECT_SIZE = 10;
 
 $(window).load(function() {
@@ -30,7 +26,21 @@ $(window).load(function() {
     tools = new Tools();
 
     attachListeners();
+
+    // make all the columns have equal height
+    
+    $(window).bind("resize", fixDimensions);
+    $(window).trigger("resize");
 });
+
+// to deal with sizing
+function fixDimensions() {
+    $(".column").height($("#content").height());
+    // and the centering of the content
+    var width = $("#content").width();
+    $("#content").css("margin-left", (-1 * (width / 2)) + "px");
+}
+
 
 function attachListeners() {
     // Photo taking/uploading
@@ -48,17 +58,16 @@ function attachListeners() {
     $("#annotate").bind("click", tools.annotateTool);
 }
 
+// TODO: fix configuration deletion service
 function deleteConfigs() {
     messenger.deleteConfigs();
     messenger.getConfigured(setConfigured);
 }
 
 function setConfigured(data) {
-    console.log(data.configs);
     if (data.configs.x0.length > 0) {
 	configsSet = true;
     }
-    console.log("after check: " + configsSet);
 }
 
 
@@ -125,28 +134,27 @@ function setNewPhoto(data) {
     var width = owidth;
     var height = oheight;
     currentPhotoRatio = 1;
+    // max width is width of the view portal, plus some to allow for margins
+    var maxWidth = $("#view").width();
 
     // reset the ratio so that we can send accurate coordinates to the pi
-    if (owidth > MAX_PHOTO_WIDTH) {
-        var ratio = MAX_PHOTO_WIDTH / owidth; // get ratio for scaling image
+    if (owidth > maxWidth) {
+        var ratio = maxWidth / owidth; // get ratio for scaling image
         currentPhotoRatio = ratio;
 
-        width = MAX_PHOTO_WIDTH;
+        width = maxWidth;
         height = oheight * ratio;
     }
    
     img.css("width", width); // Set new width
     img.css("height", height); // Scale height based on ratio
 
-
     // now set the proper margins
     var toolsCan = $(document.createElement("div"));
     toolsCan.attr("id", "toolsdiv");
 
-    photoCont.css("width", width + CORNER_SIZE);
-    photoCont.css("height", height + CORNER_SIZE);
-
-    toolsCan.css("margin", CORNER_SIZE / 2);
+    photoCont.css("width", width);
+    photoCont.css("height", height);
 
     toolsCan.css("width", width);
     toolsCan.css("height", height);
@@ -157,4 +165,11 @@ function setNewPhoto(data) {
 
     browser.setSelected(data.id);
     tools.showCornerTools(raw);
+    console.log(currentPhotoRatio);
+}
+
+function appendSelection(data) {
+    var img = $(document.createElement("img"));
+    img.attr("src", data.path);
+    $("#notes").append(img);
 }

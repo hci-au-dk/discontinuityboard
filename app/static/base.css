@@ -15,6 +15,7 @@ body {
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
     box-sizing: border-box;
+    margin: 0;
 }
 
 button {
@@ -72,12 +73,6 @@ button {
     user-select: none;
 }
 
-#main > div, #navigate > div {
-    margin-left: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
 #navigate > div {
     border: 2px solid green;
     float: left;
@@ -116,19 +111,30 @@ button {
     border: 2px solid red;
 }
 
-#photocontainer {
-    border: 2px solid fuchsia;
-}
-
 #content {
     border: 2px solid blue;
     background-color: white;
-    margin: 5px;
+    width: 98%;
+    height: 100%;
+    position: absolute;
+    left: 50%;  /* for centering, which is also set dynamically */
 }
-
 
 #header {
     text-align: center;
+}
+
+#view {
+    float: left;
+    width: 40%;
+    padding: 10px;
+    border: 2px solid blue;
+}
+
+#notes {
+    border: 2px solid black;
+    width: 25%;
+    float: left;
 }
 
 .upperright {

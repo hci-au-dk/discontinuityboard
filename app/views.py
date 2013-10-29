@@ -60,6 +60,28 @@ def save_photo(file, filename, raw):
     db.session.close()
     return photo.id
 
+def save_selection(image, filename, parent, comments=None):
+    savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
+    image.save(savename)
+    
+    # Now, we want to insert it into our database
+    selection = models.Selection(path=savename, parent=parent)
+    if comments:
+        selection.comments = comments
+
+    db.session.add(selection)
+    try:
+        db.session.commit()
+
+    except:
+        IntegrityError
+        db.session.rollback()
+    
+    selection = models.Selection.query.filter(models.Selection.path==savename).first()
+    db.session.close()
+    return selection.id
+
+
 def get_photo_path(id):
     photo = models.Photo.query.filter(models.Photo.id==id).first()
     db.session.close()
@@ -243,9 +265,22 @@ def make_cut():
     y2 = int(request.args.get('y2'))
     cropped = cropped.crop((x1, y1,
                             x2, y2))
+    # Get the parent
+    parent = models.Photo.query.filter(models.Photo.id==photoid).first()
+    
+    filename = str(x1) + str(y1) + str(x2) + str(y2) + '_' + get_photo_filename(photoid)
+
+    success = save_selection(cropped, filename, parent)
+
+    selection = models.Selection.query.filter(models.Selection.id==success).first()
+
+    name = app.config['FILENAME_BASE'] + os.path.basename(selection.path)
 
     returnobj = {}
-    returnobj['saved'] = True
+    returnobj['path'] = name
+    returnobj['id'] = selection.id
+    returnobj['width'] = cropped.size[0]
+    returnobj['height'] = cropped.size[1]
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'

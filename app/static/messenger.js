@@ -149,7 +149,7 @@ var Messenger = function() {
 	});	
     }
 
-    this.makeCut = function(photoId, x1, y1, x2, y2) {
+    this.makeCut = function(photoId, x1, y1, x2, y2, successFn) {
 	$.ajax({
 	    url: "/make-cut/",
 	    type: "GET",
@@ -160,7 +160,7 @@ var Messenger = function() {
 		  "y1": y1,
 		  "y2": y2},
 	    success: function(data) {
-		alert(data);
+		successFn(data);
 	    },
 	    error: function(data) {
 		if (DEBUG)
