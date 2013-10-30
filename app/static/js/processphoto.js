@@ -28,14 +28,16 @@ $(window).load(function() {
     attachListeners();
 
     // make all the columns have equal height
-    
     $(window).bind("resize", fixDimensions);
     $(window).trigger("resize");
+
+    
 });
 
 // to deal with sizing
 function fixDimensions() {
-    $(".column").height($("#content").height());
+    var height = $("#content").height();
+    $(".column").height(height);
     // and the centering of the content
     var width = $("#content").width();
     $("#content").css("margin-left", (-1 * (width / 2)) + "px");
@@ -165,7 +167,6 @@ function setNewPhoto(data) {
 
     browser.setSelected(data.id);
     tools.showCornerTools(raw);
-    console.log(currentPhotoRatio);
 }
 
 function appendSelection(data) {

@@ -3,8 +3,8 @@ from flask.ext.assets import Bundle
 
 ### STATIC FILES TO LOAD WITH ASSETS
 
-CSS_ALL = Bundle('base.css')
-JS_ALL = Bundle('jquery-2.0.2.min.js', 'jquery-ui-1.10.3.js', 'processphoto.js', 'messenger.js', 'browser.js', 'tools.js')
+CSS_ALL = Bundle('css/discontinuityboard.css')
+JS_ALL = Bundle('js/jquery-2.0.2.min.js', 'js/jquery-ui-1.10.3.js', 'js/processphoto.js', 'js/messenger.js', 'js/browser.js', 'js/tools.js', 'js/modals.js')
 
 ### FORM SETTINGS
 

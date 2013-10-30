@@ -13,12 +13,11 @@ on all the pages of the application -->
     <meta name="viewport" content="width=device-width">
 
     <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}">
-{% assets "css_all" %}
-<link rel="stylesheet" href="{{ ASSET_URL }}">
-{% endassets %}
-{% assets "js_all" %}
-<script rel="text/javascript" src="{{ ASSET_URL }}"></script>
-{% endassets %}
+
+
+    {% assets "css_all" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+    {% endassets %}
 
   </head>
 
@@ -33,17 +32,15 @@ on all the pages of the application -->
     {% endif %}
     {% endwith %}
 
-    <div id="header">
-      <h1>{{title}}</h1>
-    </div>
 
-    <div id="modalBlock">
-    </div>
+    {% block content %}{% endblock %}
 
 
-      <div id="content">
-	{% block content %}{% endblock %}
-      </div>
+    <!-- faster loading with js at the end -->
+    {% assets "js_all" %}
+    <script rel="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+
 
   </body>
 

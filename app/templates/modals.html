@@ -1,0 +1,29 @@
+<!-- Modals -->
+<div id="overlay">
+</div>
+
+    <div id="register-modal" class="modal">
+      <div class="modal-header">
+        <button type="button" class="modal-close" data-dismiss="modal">close</button>
+        <h3>Register a Pi</h3>
+      </div>
+
+      {{ rform.hidden_tag() }}
+      <form action="{{ url_for('register') }}" method="post" name="registerpi">
+
+        <div class="modal-body">
+	  <p>
+	    Pi ip address: {{rform.ip_address(size=45)}}<br>
+	    Human-readable name: {{rform.human_name}}<br>
+	    {% for error in rform.errors.ip_address %}
+	    <span style="color: red;">[{{error}}]</span>
+	    {% endfor %}<br>
+	  </p>
+          <hr />
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" name="finish" value="ok">Register Pi</button>
+        </div>
+      </form>
+    </div>

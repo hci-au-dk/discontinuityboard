@@ -113,7 +113,6 @@ var Tools = function() {
 	// TODO: make it so that you can't use other tools at the same time
 	cutTool = !cutTool;
 	if (cutTool) {
-	    $("#view").css("cursor", "crosshair");
 	    for (var i = 0; i < buttons.length; i++) {
 		//buttons[i].attr("disabled", true);
 	    }
@@ -190,6 +189,8 @@ var Tools = function() {
 	    console.log(currentPhotoRatio);
 	    console.log(x + ", " + y + " : " + botX + ", " + botY);
 	    messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
+	    $("#cutBox").remove();
+	    $("#cutoptions").toggle();
 	}
 	inUse = null;  // TODO: uncomment this
     }

@@ -6,6 +6,7 @@ from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
 from PIL import Image
 from StringIO import StringIO
+from forms import RegisterPiForm
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -15,8 +16,23 @@ def allowed_file(filename):
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html',
-                           title = 'Discontinuity Board')
+    # prepare the forms
+    rform = RegisterPiForm()
+    
+    return render_template('discontinuityboard.html',
+                           title = 'Discontinuity Board',
+                           rform = rform)
+
+@app.route('/register-pi/', methods=['POST'])
+def register():
+    form = RegisterPiForm(request.form)
+    ip_address = None
+    if request.method == 'POST' and form.validate():
+        # Everything is great
+        ip_address = form.ip_address.data
+
+    # Now we just need to redirect back to the index
+    return redirect(url_for('index'))
 
 
 @app.route('/upload/', methods=['POST'])
