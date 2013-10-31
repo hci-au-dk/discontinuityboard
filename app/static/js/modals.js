@@ -2,9 +2,14 @@ $(function () {
 
     $("#overlay").hide();
     $("#register-modal").hide();
+    $("#login-modal").hide();
 
     $("#register-button").bind("click", function() {
 	showModal($("#register-modal"), $("#overlay"));
+    });
+
+    $("#login-button").bind("click", function() {
+	showModal($("#login-modal"), $("#overlay"));
     });
 
     // bind all modal closing buttons to the modal close function

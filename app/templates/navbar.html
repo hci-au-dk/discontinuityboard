@@ -6,7 +6,22 @@
   </span>
   <span class="right">
     <button id="register-button" data-toggle="modal" type="button">Register</button>
-    <span>
+  </span>
+  <span class="right">
+    <button id="login-button" data-toggle="modal" type="button">Login</button>
+  </span>
+  <span class="right">
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </span>
+
+  <span class="right">
+    {% if user %}
+    <p>{{user}}</p>
+    {% else %}
+    <p> No user </p>
+    {% endif %}
+  </span>
+  
 
 </div>
 

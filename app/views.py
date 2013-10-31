@@ -1,12 +1,14 @@
 import datetime, os, requests
-from app import app, db, models
+from app import app, db, models, login_manager
 from flask import render_template, flash, redirect, request, url_for, send_from_directory, make_response, json
 from sqlalchemy.exc import IntegrityError
 from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
 from PIL import Image
 from StringIO import StringIO
-from forms import RegisterPiForm
+from forms import RegisterPiForm, LoginForm
+from flask.ext.login import login_user, current_user, logout_user
+from wtforms.validators import ValidationError
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -18,22 +20,63 @@ def allowed_file(filename):
 def index():
     # prepare the forms
     rform = RegisterPiForm()
+    lform = LoginForm()
+    user = None
+    if current_user.is_authenticated():
+        user = current_user
     
     return render_template('discontinuityboard.html',
                            title = 'Discontinuity Board',
-                           rform = rform)
+                           rform = rform,
+                           lform = lform,
+                           user = user)
 
 @app.route('/register-pi/', methods=['POST'])
 def register():
     form = RegisterPiForm(request.form)
-    ip_address = None
     if request.method == 'POST' and form.validate():
         # Everything is great
         ip_address = form.ip_address.data
+        human_name = form.human_name.data
+        password = form.password.data
 
-    # Now we just need to redirect back to the index
+        # save the pi in the database
+        pi = models.Pi(ip=ip_address, human_name=human_name, password=password)
+        db.session.add(pi)
+        try:
+            db.session.commit()
+        except:
+            IntegrityError
+            db.session.rollback()
+        return login_help(form)
+
     return redirect(url_for('index'))
 
+
+@app.route('/login/', methods=['POST'])
+def login():
+    form = LoginForm()
+    return login_help(form)
+
+def login_help(form):
+    if form.validate_on_submit():
+        user = form.get_user()
+        #try:
+        form.validate_login()
+        print "logging in"
+        login_user(user, remember=True)
+        #except:
+        #    ValidationError
+        #    redirect(url_for('index'))
+        return redirect(request.args.get("next") or url_for('index'))
+    return redirect(url_for('index'))
+
+
+
+@app.route('/logout/')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 @app.route('/upload/', methods=['POST'])
 def upload_file():
@@ -49,8 +92,6 @@ def upload_file():
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
     return response
-
-    
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
@@ -301,3 +342,12 @@ def make_cut():
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
     return response
+
+
+### Authentication services ###
+
+@login_manager.user_loader
+def load_user(userid):
+    # Should return None if the user doesn't exist
+    return models.Pi.query.get(int(userid))
+    

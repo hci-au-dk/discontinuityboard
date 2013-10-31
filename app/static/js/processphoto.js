@@ -57,7 +57,6 @@ function attachListeners() {
     $("#transformimage").bind("click", tools.transformClick);
     $("#cut").bind("click", tools.cutClick);
     $("#makecut").bind("click", tools.makeCut);
-    $("#annotate").bind("click", tools.annotateTool);
 }
 
 // TODO: fix configuration deletion service
