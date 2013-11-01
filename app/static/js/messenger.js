@@ -20,14 +20,13 @@ var Messenger = function() {
         });
     }
 
-    this.getPhoto = function(photoId) {
+    this.getPhoto = function(photoId, successFn) {
 	$.ajax({
 	    url: "/get-photo/",
 	    type: "GET",
-	    dataType: "json",
 	    data: {"id": photoId},
 	    success: function(data) {
-		setNewPhoto(data);
+		successFn(data);
 	    },
 	    error: function(jqxhr, data) {
 		console.log(jqxhr);
@@ -105,29 +104,6 @@ var Messenger = function() {
 		    alert("upload photo error");
 	    }
 	}); 
-    }
-
-    this.transformImage = function(coordinates) {
-	var params = {"coordinates" : coordinates};
-
-	$.ajax({
-            url: "/set-transform-coords/",
-            type: "POST",
-            dataType: "json",
-	    headers: "application/json",
-            data: params,
-            success: function(data) {
-		if (data.saved) {
-		    configsSet = true;
-		} else {
-		    configsSet = false;
-		}
-	    },
-            error: function() {
-                if (DEBUG)
-                    alert("transform image ajax error");
-            }
-        });
     }
 
     this.deleteConfigs = function() {

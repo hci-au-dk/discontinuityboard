@@ -17,8 +17,6 @@ var Browser = function (data) {
 	img.addClass("thumbnail");
 	thumbnail.append(img);
 
-
-	img.bind("click", getPhoto);
 	bb.append(img);
     });
     
@@ -30,9 +28,9 @@ var Browser = function (data) {
 	$("#browse").show();
     }
 
-    function getPhoto(e) {
+    this.getPhotoClick = function(e) {
 	var id = $(this).attr("id");
-	messenger.getPhoto(id);
+	messenger.getPhoto(id, setNewPhotoMainView);
     }
 
     this.setSelected = function(photoId) {
@@ -45,6 +43,9 @@ var Browser = function (data) {
 		$(thumbs[i]).removeClass("selected");
 	    }
 	}
-	
+    }
+
+    this.getPhoto = function(data) {
+	messenger.getPhoto(data.id, setNewPhotoMainView)
     }
 }

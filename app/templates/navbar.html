@@ -4,6 +4,11 @@
   <span class="left">
        DiscontinuityBoard
   </span>
+  {% if user %}
+  <span class="right">
+    <button id="configure-button" data-toggle="modal" type="button">Configure</button>
+  </span>
+  {% endif %}
   <span class="right">
     <button id="register-button" data-toggle="modal" type="button">Register</button>
   </span>

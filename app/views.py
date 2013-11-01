@@ -6,7 +6,7 @@ from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
 from PIL import Image
 from StringIO import StringIO
-from forms import RegisterPiForm, LoginForm
+from forms import RegisterPiForm, LoginForm, ConfigurePiForm
 from flask.ext.login import login_user, current_user, logout_user
 from wtforms.validators import ValidationError
 
@@ -21,6 +21,8 @@ def index():
     # prepare the forms
     rform = RegisterPiForm()
     lform = LoginForm()
+    cform = ConfigurePiForm()
+
     user = None
     if current_user.is_authenticated():
         user = current_user
@@ -29,6 +31,7 @@ def index():
                            title = 'Discontinuity Board',
                            rform = rform,
                            lform = lform,
+                           cform = cform,
                            user = user)
 
 @app.route('/register-pi/', methods=['POST'])
@@ -42,41 +45,39 @@ def register():
 
         # save the pi in the database
         pi = models.Pi(ip=ip_address, human_name=human_name, password=password)
-        db.session.add(pi)
-        try:
-            db.session.commit()
-        except:
-            IntegrityError
-            db.session.rollback()
-        return login_help(form)
+        if models.Pi.query.filter(models.Pi.human_name==form.human_name.data).count() == 0:
+            db.session.add(pi)
+            try:
+                db.session.commit()
+                user = form.get_user()
+                login_user(user, remember = True)
+            except:
+                IntegrityError
+                db.session.rollback()
+        else:
+            # TODO: Make a sensible reaction to trying to register a name twice
+            print "DUPLICATE USERNAME"
+        return redirect(request.args.get("next") or url_for('index'))
 
     return redirect(url_for('index'))
 
 
 @app.route('/login/', methods=['POST'])
 def login():
-    form = LoginForm()
-    return login_help(form)
-
-def login_help(form):
+    form = LoginForm(request.form)
     if form.validate_on_submit():
         user = form.get_user()
-        #try:
-        form.validate_login()
-        print "logging in"
-        login_user(user, remember=True)
-        #except:
-        #    ValidationError
-        #    redirect(url_for('index'))
+        if form.validate_login():
+            login_user(user, remember=True)
         return redirect(request.args.get("next") or url_for('index'))
     return redirect(url_for('index'))
-
 
 
 @app.route('/logout/')
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
 
 @app.route('/upload/', methods=['POST'])
 def upload_file():
@@ -104,7 +105,7 @@ def save_photo(file, filename, raw):
     file.save(savename)
     
     # Now, we want to insert it into our database
-    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now())
+    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now(), pi_id=current_user.id)
     db.session.add(photo)
     try:
         db.session.commit()
@@ -255,7 +256,6 @@ def get_configured():
 
     pilocation = app.config['PI_BASE'] + 'configuration'
     r = requests.get(pilocation)
-    
 
     returnobj = {}
     returnobj['configs'] = r.json()
@@ -264,35 +264,41 @@ def get_configured():
     response.headers['Content-type'] = 'application/json'
     return response
 
-    
-@app.route('/set-transform-coords/', methods = ['POST'])
-def transform_coords():
-    if request.method == 'GET':
-        return make_response(400)
+@app.route('/configure/', methods=['POST'])
+def configure():
+    form = ConfigurePiForm()
+    if form.validate_on_submit():
+        piobj = {}
+        piobj['x0'] = form.x0.data
+        piobj['x1'] = form.x1.data
+        piobj['x2'] = form.x2.data
+        piobj['x3'] = form.x3.data
+        piobj['y0'] = form.y0.data
+        piobj['y1'] = form.y1.data
+        piobj['y2'] = form.y2.data
+        piobj['y3'] = form.y3.data
+        
+        pilocation = app.config['PI_BASE'] + 'configuration'
+        headers = {'Content-type': 'application/json'}
 
-    piobj = {}
-    for i in range(1, 5):
-        strX = 'coordinates[x' + str(i) + ']'
-        strY = 'coordinates[y' + str(i) + ']'
-        piobj['x' + str(i - 1)] = request.form[strX]
-        piobj['y' + str(i - 1)] = request.form[strY]
+        r = requests.post(pilocation, data=json.dumps(piobj), headers=headers)
 
-    pilocation = app.config['PI_BASE'] + 'configuration'
+        # TODO: indicate to the user that their coordinates were saved/set 
+        returnobj = {}
+        if r.text == 'Configuration saved':
+            returnobj['saved'] = True
+        else:
+            returnobj['saved'] = False
+        print returnobj
 
-    headers = {'Content-type': 'application/json'}
+        #then delete all unconfigured photos from this pi
+        pi = models.Pi.query.filter(models.Pi.id==current_user.id).first()
+        for photo in pi.photos:
+            if photo.raw:
+                db.session.delete(photo)
+        db.session.commit()
 
-    r = requests.post(pilocation, data=json.dumps(piobj), headers=headers)
-
-    returnobj = {}
-    # then go and get the next picture
-    if r.text == 'Configuration saved':
-        returnobj['saved'] = True
-    else:
-        returnobj['saved'] = False
-
-    response = make_response(json.dumps(returnobj), 200)
-    response.headers['Content-type'] = 'application/json'
-    return response
+    return redirect(url_for('index'))
 
 @app.route('/delete-configs/', methods = ['GET'])
 def delete_configs():

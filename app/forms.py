@@ -5,7 +5,7 @@ from flask.ext.wtf import Form
 from werkzeug import secure_filename
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import Required, ValidationError
-from wtforms import TextField
+from wtforms import TextField, HiddenField
 
 #images = UploadSet('images', IMAGES)
 
@@ -17,10 +17,6 @@ class RegisterPiForm(Form):
     human_name = TextField('human_name', validators = [Required()])
     password = TextField('password', validators = [Required()])
 
-    def validate_login(self):
-        if models.Pi.query.filter(models.Pi.human_name==self.human_name.data).count() != 1:
-            raise ValidationError('Duplicate username')
-
     def get_user(self):
         return models.Pi.query.filter(models.Pi.human_name==self.human_name.data).first()
 
@@ -30,12 +26,17 @@ class LoginForm(Form):
     
     def validate_login(self):
         user = self.get_user()
-
-        if user is None:
-            raise ValidationError('Invalid user')
-
-        if user.password != self.password.data:
-            raise ValidationError('Invalid password')
+        return user is not None and user.password == self.password.data
 
     def get_user(self):
         return models.Pi.query.filter(models.Pi.human_name==self.human_name.data).first()
+
+class ConfigurePiForm(Form):
+    x0 = TextField('x0', validators = [Required()])
+    x1 = TextField('x1', validators = [Required()])
+    x2 = TextField('x2', validators = [Required()])
+    x3 = TextField('x3', validators = [Required()])
+    y0 = TextField('y0', validators = [Required()])
+    y1 = TextField('y1', validators = [Required()])
+    y2 = TextField('y2', validators = [Required()])
+    y3 = TextField('y3', validators = [Required()])

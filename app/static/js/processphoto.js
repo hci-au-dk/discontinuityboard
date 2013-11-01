@@ -47,14 +47,11 @@ function fixDimensions() {
 function attachListeners() {
     // Photo taking/uploading
     $("#takephoto").bind("click", takeRegularPhotoClick);
-    $("#takerawphoto").bind("click", takeRawPhotoClick);
     $("#deleteconfigs").bind("click", deleteConfigs);
     $("#uploadphotobutton").bind("click", showUpload);
 
     // Tools buttons
     $("#deletephoto").bind("click", tools.deletePhoto);
-    $("#cornerselect").bind("click", tools.cornerSelectClick);
-    $("#transformimage").bind("click", tools.transformClick);
     $("#cut").bind("click", tools.cutClick);
     $("#makecut").bind("click", tools.makeCut);
 }
@@ -71,43 +68,44 @@ function setConfigured(data) {
     }
 }
 
-
 function showUpload() {
     // first, get the file
     var file = $("#filename")[0].files[0]
-    messenger.uploadPhoto(file, getPhotoToDisplay);
+    messenger.uploadPhoto(file, browser.getPhoto);
     messenger.getAllPhotos(initializeBrowser);
     // clear the filename from the form
     $("#filename").val("");
 }
 
 function takeRegularPhotoClick() {
-    takePhotoClick(configsSet);
-}
-
-function takeRawPhotoClick() {
-    takePhotoClick(false);
+    takePhotoClick(true);
 }
 
 function takePhotoClick(configs) {
-    messenger.takePhotoWithPi(configs, getPhotoToDisplay);
+    messenger.takePhotoWithPi(configs, browser.getPhoto);
     messenger.getAllPhotos(initializeBrowser);
 }
 
 
 function initializeBrowser(data) {
     browser = new Browser(data);
-}
-
-function getPhotoToDisplay(data) {
-    messenger.getPhoto(data.id);
+    $(".thumbnail").bind("click", browser.getPhotoClick);
 }
 
 function removePhoto() {
     $("#photocontainer").remove()
 }
 
-function setNewPhoto(data) {
+function setNewPhotoMainView(data) {
+    setNewPhoto($("#view"), data);
+}
+
+function setNewPhotoConfigureView(data) {
+    $("#configure-loading").hide();
+    setNewPhoto($("#configure-display"), data);
+}
+
+function setNewPhoto($parent, data) {
     // change the current photo id to the one that is being displayed
     currentPhotoId = data.id;
 
@@ -130,23 +128,24 @@ function setNewPhoto(data) {
 
     imgSpan.append(img)
     photoCont.append(imgSpan);
-    $("#view").append(photoCont);
+    $parent.append(photoCont);
     
     var width = owidth;
     var height = oheight;
     currentPhotoRatio = 1;
     // max width is width of the view portal, plus some to allow for margins
-    var maxWidth = $("#view").width();
+    var maxWidth = $parent.width();
+    var maxHeight = $parent.height();
 
     // reset the ratio so that we can send accurate coordinates to the pi
-    if (owidth > maxWidth) {
-        var ratio = maxWidth / owidth; // get ratio for scaling image
+    if (owidth > maxWidth || oheight > maxHeight) {
+	// get ratio for scaling image
+        var ratio = Math.min((maxWidth / owidth), (maxHeight / oheight));
         currentPhotoRatio = ratio;
 
-        width = maxWidth;
+        width = owidth * ratio;
         height = oheight * ratio;
     }
-   
     img.css("width", width); // Set new width
     img.css("height", height); // Scale height based on ratio
 

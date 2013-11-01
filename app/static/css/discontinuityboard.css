@@ -28,7 +28,7 @@ button {
     margin: 0px;
     padding: 0px;
     cursor: pointer;
-    background: url('arrow.png') no-repeat;
+    background: url('../arrow.png') no-repeat;
     background-size: 100%;
 }
 
@@ -185,4 +185,10 @@ button {
     border-radius:8px;
     background:#fff;
     padding:20px;
+}
+
+#configure-display {
+    width: 500px;
+    height: 200px;
+    border: 2px solid black;
 }

@@ -6,10 +6,12 @@ class Photo(db.Model):
     raw = db.Column(db.Boolean) # whether or not the photo comes from pi/rawimage
     time_submitted = db.Column(db.DateTime)  # time the photo was submitted
     children = db.relationship('Selection', backref='photo')
+    pi_id = db.Column(db.Integer, db.ForeignKey('pi.id'))
+    parent = db.relationship('Pi', primaryjoin='Pi.id==Photo.pi_id')
 
     # Tells python how to print the photo object
     def __repr__(self):
-        return 'Photo: %i, path: %r, raw:%r, time_submitted:%r' % (self.id, self.path, self.raw, self.time_submitted)
+        return 'Photo: %i, path: %r, raw:%r, time_submitted:%r, pi:%i' % (self.id, self.path, self.raw, self.time_submitted, self.pi_id)
 
 class Selection(db.Model):
     id = db.Column(db.Integer, primary_key = True)  # Unique identifier
@@ -26,6 +28,7 @@ class Pi(db.Model):
     ip = db.Column(db.String(45))
     human_name = db.Column(db.String(30), unique = True)  # a memorable name for the user's sake
     password = db.Column(db.String(30))
+    photos = db.relationship('Photo', backref='pi')
 
     def is_authenticated(self):
         return True
@@ -40,4 +43,4 @@ class Pi(db.Model):
         return unicode(self.id)
 
     def __repr__(self):
-        return 'Pi: %i, ipaddress: %r, name: %r' % (self.id, self.ip, self.human_name)
+        return 'Pi: %i, ipaddress: %r, name: %r, pass:%r' % (self.id, self.ip, self.human_name, self.password)

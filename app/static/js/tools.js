@@ -1,27 +1,14 @@
 // This is where the functionality for the buttons will go
 
-var Tools = function() {
+var Tools = function() {    
 
-    var buttons = new Array();
-    buttons[0] = $("#cornerselect");
-    buttons[1] = $("#transformimage");
-    buttons[2] = $("#cut");
-    buttons[3] = $("#annotate");
-    
-    var cornersFunction = false;
+    this.cornerSelectClick = function($parent) {
+	var parentX = $parent.offset().left;
+	var parentY = $parent.offset().top;
+	var parentWidth = $parent.width();
+	var parentHeight = $parent.height();
 
-    this.cornerSelectClick = function() {
-	if (!cornersFunction) {
-	    return;
-	}
-	$("#cornerselectform").show();
-
-	var parentX = $("#toolsdiv").offset().left;
-	var parentY = $("#toolsdiv").offset().top;
-	var parentWidth = $("#toolsdiv").width();
-	var parentHeight = $("#toolsdiv").height();
-
-	for (var i = 1; i <= 4; i++) {
+	for (var i = 0; i < 4; i++) {
 	    if ($(".corner").length >= 4) {
 		break;
 	    }
@@ -30,57 +17,39 @@ var Tools = function() {
 
 	    var div = $(document.createElement('div'));
 
-	    if (i == 4 || i == 3) {  // top right || bottom right
+	    if (i == 3 || i == 2) {  // top right || bottom right
 		div.css("right", "0");
 	    } 
-	    if (i == 2 || i == 3) {  // bottom left || bottom right
+	    if (i == 1 || i == 2) {  // bottom left || bottom right
 		div.css("bottom", "0")
 	    }
-	    if (i == 1 || i == 4) {  // top left || top right
+	    if (i == 0 || i == 3) {  // top left || top right
 		div.css("top", "0");
 	    }
-	    if (i == 1 || i == 2) {  // top left || bottom left
+	    if (i == 0 || i == 1) {  // top left || bottom left
 		div.css("left", "0");
 	    }
 	    div.addClass("corner");
 
-	    if (i == 4) {  // top right
+	    if (i == 3) {  // top right
 		div.addClass("upperright");
-	    } else if (i == 3) {  // bottom right
+	    } else if (i == 2) {  // bottom right
 		div.addClass("lowerright");
-	    } else if (i == 2) {  // bottom left
+	    } else if (i == 1) {  // bottom left
 		div.addClass("lowerleft");
 	    }
 
 	    div.css("width", "20px");
 	    div.css("height" , "20px");
 	    div.attr("id", "corner" + i);
-	    div.draggable({containment: "#toolsdiv"});
+	    div.draggable({containment: "#" + $parent.attr("id")});
 	    div.bind("drag", populateCoordinates);  // listen for future updates
-
-	    $("#toolsdiv").append(div);
+	    
+	    $parent.append(div);
 
 	    div.trigger("drag");
 	}
 
-	// show the coordinate selection boxes
-	$("cornerselectform").show();
-    }
-
-    // If the user is setting the coordinates for how this image should
-    // be transformed
-    this.transformClick = function() {
-	var coordinates = {'x1': $("#corner1x").val(),
-			   'y1': $("#corner1y").val(),
-			   'x2': $("#corner2x").val(),
-			   'y2': $("#corner2y").val(),
-			   'x3': $("#corner3x").val(),
-			   'y3': $("#corner3y").val(),
-			   'x4': $("#corner4x").val(),
-			   'y4': $("#corner4y").val()};
-
-	messenger.transformImage(coordinates);
-	configsSet = true;
     }
 
     // Deletes the current photo, and, if there is a next photo,
@@ -88,7 +57,6 @@ var Tools = function() {
     this.deletePhoto = function() {
 	messenger.deletePhoto(currentPhotoId, removePhoto);
 	hideTools();
-
 	messenger.getAllPhotos(initializeBrowser);
 
 	// get the id of the next photo in the browser
@@ -99,7 +67,7 @@ var Tools = function() {
 	for (var i = 0; i < thumbs.length && !reset; i++) {
 	    var id = $(thumbs[i]).attr("id");
 	    if (id > currentPhotoId) {
-		messenger.getPhoto(id);
+		messenger.getPhoto(id, setNewPhotoMainView);
 		reset = true;
 	    }
 	}
@@ -113,9 +81,6 @@ var Tools = function() {
 	// TODO: make it so that you can't use other tools at the same time
 	cutTool = !cutTool;
 	if (cutTool) {
-	    for (var i = 0; i < buttons.length; i++) {
-		//buttons[i].attr("disabled", true);
-	    }
 	    $("#cutoptions").toggle();
 	    inUse = useCutTool(inUse);
 	    cutTool = false;
@@ -124,27 +89,14 @@ var Tools = function() {
 	}
     }
 
-    // Creates the annotation tool to annotate different parts of the photo
-    this.annotateTool = function() {
-	$("#view").css("cursor", "text");
-    }
     
     hideTools();
 
     this.showCornerTools = function(rawImage) {
-	if (!rawImage) {  // We should not show the tools
-	    $("#cornerselectdiv").hide();
-	    cornersFunction = false;
-	} else {
-	    $("#cornerselectdiv").show();
-	    $("#cornerselectform").hide();
-	    cornersFunction = true;
-	}
 	// always show the delete button if there is a photo shown
 	if ($("#view").children().length > 0) {
 	    $("#deletephoto").show();
 	    $("#cut").show();
-	    $("#annotate").show();
 	    $("#cutoptions").hide();
 	}
 	inUse = null;
@@ -318,16 +270,16 @@ function populateCoordinates(e) {
     var cornerId = corner.attr("id");
     // depending on which div it is, we want different values for x and y
     var i = cornerId.substring(cornerId.length - 1);
-    if (i == 4 || i == 3) {  // top right || bottom right
+    if (i == 3 || i == 2) {  // top right || bottom right
 	x = x + corner.width();
     } 
-    if (i == 2 || i == 3) {  // bottom left || bottom right
+    if (i == 1 || i == 2) {  // bottom left || bottom right
 	y = y + corner.height();
     }
 
     // We want the "true" coordinates - immune to any resizing that happens
-    $("#" + cornerId + "x").attr("value", Math.round(x / currentPhotoRatio));
-    $("#" + cornerId + "y").attr("value", Math.round(y / currentPhotoRatio));
+    $("#x" + i).attr("value", Math.round(x / currentPhotoRatio));
+    $("#y" + i).attr("value", Math.round(y / currentPhotoRatio));
 }
 
 function getX(e) {

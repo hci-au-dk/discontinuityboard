@@ -42,7 +42,7 @@
 	  <p>
 	    Human-readable name: {{lform.human_name(size=30)}}<br>
 	    password: {{lform.password(size=30)}}<br>
-	    {% for error in lform.errors.ip_address %}
+	    {% for error in lform.errors.human_name %}
 	    <span style="color: red;">[{{error}}]</span>
 	    {% endfor %}<br>
 	  </p>
@@ -51,6 +51,38 @@
 
         <div class="modal-footer">
           <button type="submit" name="finish" value="ok">Login</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="configure-modal" class="modal">
+      <div class="modal-header">
+        <button type="button" class="modal-close" data-dismiss="modal">close</button>
+        <h3>Configure Your Pi</h3>
+      </div>
+
+      <div id="configure-display">
+      <span id="configure-loading"><p>Loading picture from pi...</p><img id="loading" src="{{ url_for('static', filename='ajax-loader.gif') }}" alt="loading" hidden="true"></span>
+      </div>
+
+      <form action="{{ url_for('configure') }}" method="post" name="configure">
+	{{ cform.hidden_tag() }}
+        <div class="modal-body">
+	  <p>
+	    (upper left corner) x: {{cform.x0(size=5)}} y: {{cform.y0(size=5)}}<br>
+	    (lower left corner) x: {{cform.x1(size=5)}} y: {{cform.y1(size=5)}}<br>
+	    (lower right corner) x: {{cform.x2(size=5)}} y: {{cform.y2(size=5)}}<br>
+	    (upper right corner) x: {{cform.x3(size=5)}} y: {{cform.y3(size=5)}}<br>
+
+	    {% for error in cform.errors.x0 %}
+	    <span style="color: red;">[{{error}}]</span>
+	    {% endfor %}<br>
+	  </p>
+          <hr />
+        </div>
+
+        <div class="modal-footer">
+          <button id="configure-submit" type="submit" name="finish" value="ok">Configure</button>
         </div>
       </form>
     </div>

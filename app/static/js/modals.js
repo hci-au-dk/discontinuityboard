@@ -3,6 +3,7 @@ $(function () {
     $("#overlay").hide();
     $("#register-modal").hide();
     $("#login-modal").hide();
+    $("#configure-modal").hide();
 
     $("#register-button").bind("click", function() {
 	showModal($("#register-modal"), $("#overlay"));
@@ -10,6 +11,17 @@ $(function () {
 
     $("#login-button").bind("click", function() {
 	showModal($("#login-modal"), $("#overlay"));
+    });
+
+    $("#configure-button").bind("click", function() {
+	showModal($("#configure-modal"), $("#overlay"));
+	// we also want to load an unmodified picture from the pi
+	messenger.takePhotoWithPi(false, function(data) { 
+	    messenger.getPhoto(data.id, function(data) {
+		setNewPhotoConfigureView(data);
+		tools.cornerSelectClick($("#toolsdiv"));		
+			      });
+	});
     });
 
     // bind all modal closing buttons to the modal close function
@@ -21,6 +33,7 @@ $(function () {
     });
 
 });
+
 
 function getModalParent($element) {
     var $parent = $($element.parent());
