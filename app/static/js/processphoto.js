@@ -16,6 +16,15 @@ $(window).load(function() {
     // because IE tries to cache all the things
     $.ajaxSetup({cache:false});
 
+    // disable dragging on images
+    $(document).on("dragstart", function(e) {
+	var cl = $(this)
+	if (e.target.nodeName.toUpperCase() == "IMG") {
+            return false;
+	}
+    });
+
+
     messenger = new Messenger();
 
     // Must get the photos before we get the configuration
@@ -31,7 +40,9 @@ $(window).load(function() {
     $(window).bind("resize", fixDimensions);
     $(window).trigger("resize");
 
-    
+    $("#make-selection-button").hide();
+    $("#photo-tools-dropdown").hide();
+    $(".loading-icon").hide();
 });
 
 // to deal with sizing
@@ -46,14 +57,14 @@ function fixDimensions() {
 
 function attachListeners() {
     // Photo taking/uploading
-    $("#takephoto").bind("click", takeRegularPhotoClick);
+    $("#take-photo-button").bind("click", takeRegularPhotoClick);
     $("#deleteconfigs").bind("click", deleteConfigs);
     $("#uploadphotobutton").bind("click", showUpload);
 
     // Tools buttons
     $("#deletephoto").bind("click", tools.deletePhoto);
-    $("#cut").bind("click", tools.cutClick);
-    $("#makecut").bind("click", tools.makeCut);
+    $("#select-button").bind("click", tools.selectClick);
+    $("#make-selection-button").bind("click", tools.makeSelection);
 }
 
 // TODO: fix configuration deletion service
@@ -82,7 +93,11 @@ function takeRegularPhotoClick() {
 }
 
 function takePhotoClick(configs) {
-    messenger.takePhotoWithPi(configs, browser.getPhoto);
+    $(".loading-icon").show();
+    messenger.takePhotoWithPi(configs, function(data) {
+	browser.getPhoto(data)
+	$(".loading-icon").hide();
+    });
     messenger.getAllPhotos(initializeBrowser);
 }
 
@@ -93,6 +108,7 @@ function initializeBrowser(data) {
 }
 
 function removePhoto() {
+    $("#photo-tools-dropdown").hide();
     $("#photocontainer").remove()
 }
 
@@ -101,7 +117,7 @@ function setNewPhotoMainView(data) {
 }
 
 function setNewPhotoConfigureView(data) {
-    $("#configure-loading").hide();
+    $(".loading-icon").remove();
     setNewPhoto($("#configure-display"), data);
 }
 
@@ -164,11 +180,15 @@ function setNewPhoto($parent, data) {
     toolsCan.append(imgSpan);
 
     browser.setSelected(data.id);
-    tools.showCornerTools(raw);
+    $("#photo-tools-dropdown").show();
 }
 
 function appendSelection(data) {
     var img = $(document.createElement("img"));
     img.attr("src", data.path);
+    var width = data.width * currentPhotoRatio;
+    var height = data.height * currentPhotoRatio;
+    img.css("width", width);
+    img.css("height", height);
     $("#notes").append(img);
 }

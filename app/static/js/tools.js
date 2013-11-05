@@ -1,8 +1,8 @@
 // This is where the functionality for the buttons will go
 
-var Tools = function() {    
+var Tools = function() {
 
-    this.cornerSelectClick = function($parent) {
+    this.cornerSelectClick = function($parent, dragFn) {
 	var parentX = $parent.offset().left;
 	var parentY = $parent.offset().top;
 	var parentWidth = $parent.width();
@@ -43,7 +43,7 @@ var Tools = function() {
 	    div.css("height" , "20px");
 	    div.attr("id", "corner" + i);
 	    div.draggable({containment: "#" + $parent.attr("id")});
-	    div.bind("drag", populateCoordinates);  // listen for future updates
+	    div.bind("drag", dragFn);  // listen for future updates
 	    
 	    $parent.append(div);
 
@@ -56,7 +56,6 @@ var Tools = function() {
     // sets it to be viewed.
     this.deletePhoto = function() {
 	messenger.deletePhoto(currentPhotoId, removePhoto);
-	hideTools();
 	messenger.getAllPhotos(initializeBrowser);
 
 	// get the id of the next photo in the browser
@@ -77,35 +76,29 @@ var Tools = function() {
     var inUse = null;
 
     // Creates a cut tool to cut the photo into blocks
-    this.cutClick = function() {
+    this.selectClick = function() {
 	// TODO: make it so that you can't use other tools at the same time
 	cutTool = !cutTool;
 	if (cutTool) {
-	    $("#cutoptions").toggle();
-	    inUse = useCutTool(inUse);
-	    cutTool = false;
+	    inUse = "cut";
+	    $("#toolsdiv").bind("mousedown", selectionDown);
+	    $("#toolsdiv").css("cursor", "crosshair");
+	    $("#make-selection-button").show();
+	    $("#make-selection-button").attr("disabled", "disabled");
+	    //cutTool = false;
 	} else {
-	    $("#view").css("cursor", "default");
+	    $("#toolsdiv").css("cursor", "default");
+	    $("#toolsdiv").unbind("mousedown");
+	    $("#make-selection-button").hide();
+	    $("#selector").remove();
+	    inUse = null;
 	}
     }
-
     
-    hideTools();
-
-    this.showCornerTools = function(rawImage) {
-	// always show the delete button if there is a photo shown
-	if ($("#view").children().length > 0) {
-	    $("#deletephoto").show();
-	    $("#cut").show();
-	    $("#cutoptions").hide();
-	}
-	inUse = null;
-    }
-    
-    this.makeCut = function() {
+    this.makeSelection = function() {
 	if (inUse == "cut") {  // making a cut is a valid thing to do
 	    // get the coordinates of the cutBox
-	    var box = $("#cutBox");
+	    var box = $("#selector");
 	    var td = $("#toolsdiv");
 	    var x = box.offset().left;
 	    var y = box.offset().top;
@@ -138,148 +131,54 @@ var Tools = function() {
 	    botY = Math.round(botY / currentPhotoRatio);
 
 	    // send them to a service
-	    console.log(currentPhotoRatio);
-	    console.log(x + ", " + y + " : " + botX + ", " + botY);
 	    messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
-	    $("#cutBox").remove();
-	    $("#cutoptions").toggle();
+	    $("#selector").remove();
+	    $("#make-selection-button").attr("disabled", "disabled");
 	}
-	inUse = null;  // TODO: uncomment this
     }
 }
 
-function hideTools() {
-    $("#cornerselectform").hide();
-    $("#deletephoto").hide();
-    $("#cut").hide();
-    $("#annotate").hide();
-    $("#cornerselectdiv").hide();
-    $("#cutoptions").hide();
-}
+function selectionDown(e) {
+    $("#make-selection-button").removeAttr("disabled");
+    // get rid of any old selectors
+    $("#selector").remove();
 
-
-function useCutTool(inUse) {
-    if (inUse != null) {
-	return inUse;
-    }
-    var div = $(document.createElement('div'));
-
-    var x = $("#toolsdiv").position().left;
-    var y = $("#toolsdiv").position().top;
-    var parentWidth = $("#toolsdiv").width();
-    var parentHeight = $("#toolsdiv").height();
-
-    div.css("left", x + "px");
-    div.css("top", y + "px");
-    div.css("width", parentWidth);
-    div.css("height", parentHeight);
-    div.attr("id", "cutBox");
-
-    // add corners to the div (grabbers)
-    for (var i = 1; i <= 4; i++) {
-	var grab = $(document.createElement("div"));
-	grab.attr("id" , "grabber" + i);
-	grab.addClass("grabber");
-	if (i == 4 || i == 3) {  // top right || bottom right
-	    grab.css("right", "0");
-	} 
-	if (i == 2 || i == 3) {  // bottom left || bottom right
-	    grab.css("bottom", "0")
-	}
-	if (i == 1 || i == 4) {  // top left || top right
-	    grab.css("top", "0");
-	}
-	if (i == 1 || i == 2) {  // top left || bottom left
-	    grab.css("left", "0");
-	}
-	grab.bind("mousedown", grabClick);
-	div.append(grab);
-    }
+    // make a div that appears where the user clicked
+    var x = getX(e) - $(this).offset().left;
+    var y = getY(e) - $(this).offset().top;
     
-    $("#photocontainer").append(div);
-    // indicate that we are now using the cut tool
-    return "cut";
+    var div = $(document.createElement("div"));
+    div.attr("id", "selector");
+    div.css("top", y + "px");
+    div.css("left", x + "px");
+
+    $(this).append(div);
+    $(window).bind("mousemove", resizeSelector);
+    $(window).bind("mouseup", finishSelecting);
 }
 
-function grabClick(e) {
-    var grab = $(this);
-    var args = {};
-    if (grab.css("left") == "0px") {  // top right || bottom right
-	args.side1 = "left";
-    } else {
-	args.side1 = "right";
-    }
-    if (grab.css("top") == "0px") {
-	args.side2 = "top";
-    } else {
-	args.side2 = "bottom";
-    }
-    $("#cutBox").bind("mousemove", args, resizeDiv);
-    $("body").bind("mouseup", function() {
-	$("#cutBox").unbind("mousemove");
-	$("body").unbind("mouseup");
-    });
-}
-
-function resizeDiv(e) {
-    // e.data.side1 is the first side we need to move
-    // e.data.side2 is the second side we need to move
+function resizeSelector(e) {
+    // only allow dragging right and down to grow the selector for now
     var x = getX(e);
     var y = getY(e);
 
-    var top = $("#cutBox").position().top;
-    var left = $("#cutBox").position().left;
-    var w = $("#cutBox").width();
-    var h = $("#cutBox").height();
+    var sX = $("#selector").offset().left;
+    var sY = $("#selector").offset().top;
 
-    // we want some constraints, like that the box can't get too small    
-    var width = x - left;
-    if (e.data.side1 == "left") {
-	width = (left - x) + w;
-	if (isOK(width)) {
-	    $("#cutBox").css("left", x);
-	}
-    }
-    if (isOK(width)) {
-	$("#cutBox").css("width", width); 
-    }
+    var w = x - sX;
+    var h = y - sY;
 
-    var height = y - top;
-    if (e.data.side2 == "top") {
-	height = (top - y) + h;
-	if (isOK(height)) {
-	    $("#cutBox").css("top", y);
-	}
+    // new width and height
+    if (w > 1) {
+	$("#selector").css("width", w + "px");
     }
-    if (isOK(height)) {
-	$("#cutBox").css("height", height);
+    if (h > 1) {
+	$("#selector").css("height", h + "px");
     }
 }
 
-function isOK(num) {
-    return num >= MIN_SELECT_SIZE;
-}
-
-
-function populateCoordinates(e) {
-    // Get the div that moved
-    var corner = $(this);
-    var x = corner.position().left;
-    var y = corner.position().top;
-    
-    var cornerId = corner.attr("id");
-    // depending on which div it is, we want different values for x and y
-    var i = cornerId.substring(cornerId.length - 1);
-    if (i == 3 || i == 2) {  // top right || bottom right
-	x = x + corner.width();
-    } 
-    if (i == 1 || i == 2) {  // bottom left || bottom right
-	y = y + corner.height();
-    }
-
-    // We want the "true" coordinates - immune to any resizing that happens
-    $("#x" + i).attr("value", Math.round(x / currentPhotoRatio));
-    $("#y" + i).attr("value", Math.round(y / currentPhotoRatio));
+function finishSelecting() {
+    $(window).unbind("mousemove");
 }
 
 function getX(e) {

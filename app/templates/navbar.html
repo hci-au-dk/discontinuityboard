@@ -1,32 +1,36 @@
 
 
 <div id="header">
-  <span class="left">
-       DiscontinuityBoard
-  </span>
-  {% if user %}
-  <span class="right">
-    <button id="configure-button" data-toggle="modal" type="button">Configure</button>
-  </span>
-  {% endif %}
-  <span class="right">
-    <button id="register-button" data-toggle="modal" type="button">Register</button>
-  </span>
-  <span class="right">
-    <button id="login-button" data-toggle="modal" type="button">Login</button>
-  </span>
-  <span class="right">
-    <a href="{{ url_for('logout') }}">Logout</a>
-  </span>
+  <div class="top">
+    <span class="left">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
+    </span>
 
-  <span class="right">
-    {% if user %}
-    <p>{{user}}</p>
-    {% else %}
-    <p> No user </p>
-    {% endif %}
-  </span>
-  
 
+    <div class="loading-icon left"></div>
+
+    <ul class="right">
+      {% if user %}
+      <li id="logout">
+      <a href="{{ url_for('logout') }}">Logout</a>
+      </li>
+      {% endif %}
+      <li id="login-button" data-toggle="modal">Login</li>
+      <li id="register-button" data-toggle="modal">Register</li>
+      {% if user %}
+      <li id="configure-button" data-toggle="modal">Configure</li>
+      {% endif %}
+
+    </ul>
+
+    <span class="right">
+      {% if user %}
+      <p>You are connected to {{user.human_name}}, located at {{user.ip}}</p>
+      {% else %}
+      <p> No user </p>
+      {% endif %}
+    </span>
+
+  </div>
 </div>
 

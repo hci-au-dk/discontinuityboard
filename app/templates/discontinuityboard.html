@@ -6,36 +6,40 @@
 
 {% include "navbar.html" %}
 
-<div id="content">
 
-  <div id="navigate" class="column">
-
-    <div id="picontrols">
-      <div class="left" id="buttons">
-	<div>
-	  <button id="takephoto">Take Photo With Pi</button>
-	  <button id="deleteconfigs">Delete Pi Configuration</button>
-	</div>
-      </div>
-
-    </div>
-
-    {% include "upload.html" %}
+  {% if user %}  
+<div>
+  <div id="navigate">
+    <ul>
+      <li id="take-photo-button">Take Photo</li>
+      <li id="photo-tools-dropdown">Photo Tools
+	<ul>
+	  <li id="select-button">Select Tool</li>
+	</ul>
+      </li>
+      <li id="deletephoto"> Delete Photo </li>
+      <li id="upload-modal-button">Upload photo</li>
+    </ul>
 
     {% include "browse.html" %}
 
-  </div>
-
-
-  <div id="toolcontainer" class="column">
-
-    {% include "tools.html" %}
+    <div id="select-options" class="center">
+      <button id="make-selection-button">Make Selection</button>
+    </div>
 
   </div>
 
-  <div id="view" class="column">
+</div> 
+  {% endif %}
+
+<div id="content">
+
+
+
+  <div id="view" class="column left">
+
   </div>
-  <div id="notes" contentEditable="true" class="column">
+  <div id="notes" contentEditable="true" class="column right">
 
   </div>
 

@@ -28,6 +28,7 @@ class Pi(db.Model):
     ip = db.Column(db.String(45))
     human_name = db.Column(db.String(30), unique = True)  # a memorable name for the user's sake
     password = db.Column(db.String(30))
+    wbratio = db.Column(db.String(10))  # width / height
     photos = db.relationship('Photo', backref='pi')
 
     def is_authenticated(self):
@@ -43,4 +44,4 @@ class Pi(db.Model):
         return unicode(self.id)
 
     def __repr__(self):
-        return 'Pi: %i, ipaddress: %r, name: %r, pass:%r' % (self.id, self.ip, self.human_name, self.password)
+        return 'Pi: %i, ipaddress: %r, name: %r, pass:%r, ratio:%r' % (self.id, self.ip, self.human_name, self.password, self.wbratio)

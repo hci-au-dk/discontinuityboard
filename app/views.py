@@ -7,7 +7,7 @@ from util.perspective_transformation import transform_perspective
 from PIL import Image
 from StringIO import StringIO
 from forms import RegisterPiForm, LoginForm, ConfigurePiForm
-from flask.ext.login import login_user, current_user, logout_user
+from flask.ext.login import login_user, current_user, logout_user, login_required
 from wtforms.validators import ValidationError
 
 def allowed_file(filename):
@@ -39,12 +39,15 @@ def register():
     form = RegisterPiForm(request.form)
     if request.method == 'POST' and form.validate():
         # Everything is great
-        ip_address = form.ip_address.data
-        human_name = form.human_name.data
+        ip = form.ip_address.data
+        name = form.human_name.data
         password = form.password.data
+        wbw = form.wbwidth.data
+        wbh = form.wbheight.data
+        wbratio = str(float(wbw) / float(wbh))
 
         # save the pi in the database
-        pi = models.Pi(ip=ip_address, human_name=human_name, password=password)
+        pi = models.Pi(ip=ip, human_name=name, password=password, wbratio=wbratio)
         if models.Pi.query.filter(models.Pi.human_name==form.human_name.data).count() == 0:
             db.session.add(pi)
             try:
@@ -80,6 +83,7 @@ def logout():
 
 
 @app.route('/upload/', methods=['POST'])
+@login_required
 def upload_file():
     filename = None
     returnobj = {}
@@ -152,15 +156,17 @@ def get_photo_filename(id):
     return filename
 
 @app.route('/get-all-photos/', methods = ['GET'])
+@login_required
 def get_all_photos():
     if request.method == 'POST':
         return make_response(400)
 
-    photos = models.Photo.query.all()
+    photos = models.Photo.query.filter(models.Photo.pi_id==current_user.id)
     data = []
     for photo in photos:
-        name = app.config['FILENAME_BASE'] + os.path.basename(photo.path)
-        data.append({'path': name, 'id': photo.id})
+        if not photo.raw:
+            name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
+            data.append({'path': name, 'id': photo.id})
 
     returnobj = {}
     returnobj["photos"] = data
@@ -171,6 +177,7 @@ def get_all_photos():
     return response
 
 @app.route('/get-photo/', methods = ['GET'])
+@login_required
 def get_photo():
     if request.method == 'POST':
         return make_response(400)
@@ -182,7 +189,7 @@ def get_photo():
     if photo is None:
         return make_response(404)
 
-    name = app.config['FILENAME_BASE'] + os.path.basename(photo.path)
+    name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
     
     img = Image.open(photo.path)
 
@@ -198,14 +205,18 @@ def get_photo():
     return response
 
 @app.route('/delete-photo/', methods = ['GET'])
+@login_required
 def delete_photo():
     if request.method == 'POST':
         return make_response(400)
 
     id = request.args.get('id')
     photo = models.Photo.query.filter(models.Photo.id==id).first()
+    path = photo.path
     db.session.delete(photo)
     db.session.commit()
+
+    os.remove(path)
 
     returnobj = {}
     response = make_response(json.dumps(returnobj), 200)
@@ -215,20 +226,34 @@ def delete_photo():
 
 
 @app.route('/take-photo/', methods = ['GET'])
+@login_required
 def take_photo():
     if request.method == 'POST':
         return make_response(400)
 
     # We need to make a request to the raspberry pi
     raw = True
-    pilocation = app.config['PI_BASE'] + 'rawimage'
+    pilocation = get_pi_base() + 'rawimage'
     if request.args.get('configured') == 'true':
-        pilocation = app.config['PI_BASE'] + 'snapshot'
+        pilocation = get_pi_base() + 'snapshot'
         raw = False
 
     r = requests.get(pilocation)
 
     img = Image.open(StringIO(r.content))
+    if request.args.get('configured') == 'true':
+        # flip and correct for aspect ratio of the whiteboard
+        img = img.rotate(180)
+        ow = img.size[0]
+        h = img.size[1]
+        w = ow
+        if ( (ow / h) != current_user.wbratio):
+            # get a new width and height that does
+            # always keep the height the same
+            w = int(float(current_user.wbratio) * h)
+
+        img = img.resize((w, h))
+
 
     # Generate a filename based on timestamp
     now = datetime.datetime.now()
@@ -250,11 +275,12 @@ def take_photo():
     return response
 
 @app.route('/get-configured/', methods = ['GET'])
+@login_required
 def get_configured():
     if request.method == 'POST':
         return make_response(400)
 
-    pilocation = app.config['PI_BASE'] + 'configuration'
+    pilocation = get_pi_base() + 'configuration'
     r = requests.get(pilocation)
 
     returnobj = {}
@@ -265,31 +291,38 @@ def get_configured():
     return response
 
 @app.route('/configure/', methods=['POST'])
+@login_required
 def configure():
     form = ConfigurePiForm()
     if form.validate_on_submit():
+        # The coordinates given in the configuration do not map
+        # 1 to 1 because the image is natively flipped differently!
         piobj = {}
-        piobj['x0'] = form.x0.data
-        piobj['x1'] = form.x1.data
-        piobj['x2'] = form.x2.data
-        piobj['x3'] = form.x3.data
-        piobj['y0'] = form.y0.data
-        piobj['y1'] = form.y1.data
-        piobj['y2'] = form.y2.data
-        piobj['y3'] = form.y3.data
+        w = float(form.cwidth.data)
+        h = float(form.cheight.data)
         
-        pilocation = app.config['PI_BASE'] + 'configuration'
+        piobj['x0'] = (form.x0.data)
+        piobj['y0'] = (form.y0.data)
+
+        piobj['x1'] = (form.x1.data)
+        piobj['y1'] = (form.y1.data)
+
+        piobj['x2'] = (form.x2.data)
+        piobj['y2'] = (form.y2.data)
+
+        piobj['x3'] = (form.x3.data)
+        piobj['y3'] = (form.y3.data)
+
+        pilocation = get_pi_base() + 'configuration'
         headers = {'Content-type': 'application/json'}
 
         r = requests.post(pilocation, data=json.dumps(piobj), headers=headers)
 
-        # TODO: indicate to the user that their coordinates were saved/set 
         returnobj = {}
         if r.text == 'Configuration saved':
             returnobj['saved'] = True
         else:
             returnobj['saved'] = False
-        print returnobj
 
         #then delete all unconfigured photos from this pi
         pi = models.Pi.query.filter(models.Pi.id==current_user.id).first()
@@ -301,8 +334,9 @@ def configure():
     return redirect(url_for('index'))
 
 @app.route('/delete-configs/', methods = ['GET'])
+@login_required
 def delete_configs():
-    pilocation = app.config['PI_BASE'] + 'configuration'   
+    pilocation = get_pi_base() + 'configuration'   
     
     r = requests.delete(pilocation)
     print "DELETE"
@@ -316,6 +350,7 @@ def delete_configs():
     return response
 
 @app.route('/make-cut/', methods = ['GET'])
+@login_required
 def make_cut():
     # Load the image into a PIL Image first
     photoid = request.args.get('id')
@@ -337,7 +372,7 @@ def make_cut():
 
     selection = models.Selection.query.filter(models.Selection.id==success).first()
 
-    name = app.config['FILENAME_BASE'] + os.path.basename(selection.path)
+    name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(selection.path)
 
     returnobj = {}
     returnobj['path'] = name
@@ -348,6 +383,11 @@ def make_cut():
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
     return response
+
+def get_pi_base():
+    if current_user:
+        return 'http://' + current_user.ip + '/'
+    return None
 
 
 ### Authentication services ###

@@ -10,17 +10,17 @@ div {
 }
 
 body {
+    font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: #E8E8E8;
-    font-family: sans-serif;
     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
     box-sizing: border-box;
     margin: 0;
 }
 
-button {
-    margin: 2px;
-    width: 95%;
+.center {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .corner {
@@ -37,25 +37,18 @@ button {
     clear: left;
 }
 
-.grabber {
-    width: 8px;
-    height: 8px;
-    background-color: black;
-    position: absolute;
-}
-
 .left {
     float: left;
-    clear: left;
 }
 
-.thumbnail {
-    height: 50px;
+.loading-icon {
+    background: url('../ajax-loader.gif');
+    background-size: 100%;
     width: 50px;
-    cursor: pointer;
-    float: left;
-    margin: 3px;
-    border: 2px solid black;
+    height: 50px;
+    margin-top: 25px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .right {
@@ -64,6 +57,16 @@ button {
 
 .selected {
     border: 2px solid red;
+    padding: 0px;
+}
+
+.thumbnail {
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    float: left;
+    margin: 3px;
+    padding: 2px;
 }
 
 .unselectable {
@@ -75,22 +78,12 @@ button {
     user-select: none;
 }
 
-#navigate > div {
-    border: 2px solid green;
-    float: left;
-    clear: left;
-}
-
 #photocontainer > div, #photocontainer > canvas {
     position: absolute;
 }
 
-#cutBox {
-    border: 1px dotted black;
-}
-
 #header {
-    background-color: green;
+    background-color: #66CCFF;
     height: 100px;
     margin-bottom: 5px;
 }
@@ -100,23 +93,25 @@ button {
     text-align: center;
 }
 
-#loadingspan {
+#selector {
+    border: 2px dashed red;
     position: absolute;
-    top: 50%;
-    margin-top: -8px;
+    width: 10px;
+    height: 10px;
 }
 
-#buttons {
-    width: 75%;
+#select-options {
+    height: 30px;
 }
 
-#navigate, #toolcontainer {
-    width: 15%;
-    float: left;
+#select-options {
+    width: 50%;
+    text-align: center;
 }
 
-#tools {
-    border: 2px solid red;
+#take-photo-button {
+    width: 50%;
+    height: 100%;
 }
 
 #content {
@@ -133,15 +128,14 @@ button {
 }
 
 #view {
-    float: left;
-    width: 40%;
+    width: 49%;
     border: 2px solid blue;
 }
 
 #notes {
     border: 2px solid black;
-    width: 25%;
-    float: left;
+    width: 49%;
+    position: relative;
 }
 
 .upperright {
@@ -188,7 +182,75 @@ button {
 }
 
 #configure-display {
-    width: 500px;
-    height: 200px;
+    width: 400px;
+    height: 300px;
     border: 2px solid black;
+}
+
+/* Drop down menus */
+ul {
+  text-align: left;
+  display: inline;
+  margin: 0;
+  padding: 15px 4px 17px 0;
+  list-style: none;
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+}
+
+ul li {
+  font: bold 12px/18px sans-serif;
+  display: inline-block;
+  margin-right: -4px;
+  position: relative;
+  padding: 15px 20px;
+  background: #fff;
+  cursor: pointer;
+  -webkit-transition: all 0.2s;
+  -moz-transition: all 0.2s;
+  -ms-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+ul li:hover {
+  background: #555;
+  color: #fff;
+}
+
+ul li ul {
+  padding: 0;
+  position: absolute;
+  top: 48px;
+  left: 0;
+  width: 150px;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  -webkit-transiton: opacity 0.2s;
+  -moz-transition: opacity 0.2s;
+  -ms-transition: opacity 0.2s;
+  -o-transition: opacity 0.2s;
+  -transition: opacity 0.2s;
+}
+
+ul li ul li { 
+  background: #555; 
+  display: block; 
+  color: #fff;
+  text-shadow: 0 -1px 0 #000;
+}
+
+ul li ul li:hover { 
+    background: #666;
+}
+
+ul li:hover ul {
+  display: block;
+  opacity: 1;
+  visibility: visible;
 }

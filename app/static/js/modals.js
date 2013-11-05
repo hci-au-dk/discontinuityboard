@@ -1,9 +1,7 @@
 $(function () {
 
     $("#overlay").hide();
-    $("#register-modal").hide();
-    $("#login-modal").hide();
-    $("#configure-modal").hide();
+    $(".modal").hide();
 
     $("#register-button").bind("click", function() {
 	showModal($("#register-modal"), $("#overlay"));
@@ -13,15 +11,30 @@ $(function () {
 	showModal($("#login-modal"), $("#overlay"));
     });
 
+    $("#upload-modal-button").bind("click", function() { 
+	showModal($("#upload-modal"), $("#overlay"));
+    });
+
     $("#configure-button").bind("click", function() {
 	showModal($("#configure-modal"), $("#overlay"));
-	// we also want to load an unmodified picture from the pi
-	messenger.takePhotoWithPi(false, function(data) { 
-	    messenger.getPhoto(data.id, function(data) {
-		setNewPhotoConfigureView(data);
-		tools.cornerSelectClick($("#toolsdiv"));		
-			      });
-	});
+	var loader = $(document.createElement("div"));
+	loader.addClass("loading-icon");
+	$("#configure-display").append(loader);
+
+	if ($(".modal #photocontainer").length == 0) {
+	    $("#configure-submit").attr("disabled", "true");
+	    // we also want to load an unmodified picture from the pi
+	    messenger.takePhotoWithPi(false, function(data) { 
+		messenger.getPhoto(data.id, function(data) {
+		    // set the hidden fields
+		    $("#cwidth").val(data.width);
+		    $("#cheight").val(data.width);
+		    setNewPhotoConfigureView(data);
+		    tools.cornerSelectClick($("#toolsdiv"), populateCoordinates);
+		    $("#configure-submit").removeAttr("disabled");
+		});
+	    });
+	}
     });
 
     // bind all modal closing buttons to the modal close function
@@ -68,4 +81,25 @@ function center($modal) {
         top:top + $(window).scrollTop(), 
         left:left + $(window).scrollLeft()
     });
+}
+
+function populateCoordinates(e) {
+    // Get the div that moved
+    var corner = $(this);
+    var x = corner.position().left;
+    var y = corner.position().top;
+    
+    var cornerId = corner.attr("id");
+    // depending on which div it is, we want different values for x and y
+    var i = cornerId.substring(cornerId.length - 1);
+    if (i == 3 || i == 2) {  // top right || bottom right
+	x = x + corner.width();
+    } 
+    if (i == 1 || i == 2) {  // bottom left || bottom right
+	y = y + corner.height();
+    }
+
+    // We want the "true" coordinates - immune to any resizing that happens
+    $("#x" + i).attr("value", Math.round(x / currentPhotoRatio));
+    $("#y" + i).attr("value", Math.round(y / currentPhotoRatio));
 }

@@ -15,11 +15,7 @@ SECRET_KEY = 'kjiouW#(*$QN-1klaj)%&N93jaset%32u3k-o324[qlp4by'
 
 UPLOAD_FOLDER = 'tmp/'
 ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
-FILENAME_BASE = 'http://127.0.0.1:5000/uploads/'
 HOST_BASE = 'http://127.0.0.1:5000/'
-
-### RASPBERRY PI SETTINGS
-PI_BASE = 'http://10.11.109.34/'
 
 ### DATABASE SETTINGS
 
