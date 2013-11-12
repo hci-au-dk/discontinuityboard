@@ -8,6 +8,19 @@ class Photo(db.Model):
     children = db.relationship('Selection', backref='photo')
     pi_id = db.Column(db.Integer, db.ForeignKey('pi.id'))
     parent = db.relationship('Pi', primaryjoin='Pi.id==Photo.pi_id')
+    code = db.Column(db.String(20), unique = True) # string that provides the access point
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
 
     # Tells python how to print the photo object
     def __repr__(self):

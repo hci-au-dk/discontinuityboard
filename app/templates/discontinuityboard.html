@@ -1,44 +1,62 @@
 {% extends "base.html" %}
 
 
-
 {% block content %}
 
-{% include "navbar.html" %}
+<div id="header">
+  <div class="top">
+    <span class="left">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
+    </span>
 
 
-  {% if user %}  
+    <div class="loading-icon left"></div>
+
+    <ul class="right">
+      <li id="photo-view-button" data-toggle="modal">Photo View</li>
+    </ul>
+
+    <span class="right">
+      {% if user %}
+      <p>You are connected to {{user.id}}, accessed with code: {{user.code}}</p>
+      {% endif %}
+    </span>
+
+  </div>
+</div>
+
 <div>
   <div id="navigate">
     <ul>
-      <li id="take-photo-button">Take Photo</li>
       <li id="photo-tools-dropdown">Photo Tools
 	<ul>
 	  <li id="select-button">Select Tool</li>
 	</ul>
       </li>
       <li id="deletephoto"> Delete Photo </li>
-      <li id="upload-modal-button">Upload photo</li>
     </ul>
-
-    {% include "browse.html" %}
 
     <div id="select-options" class="center">
       <button id="make-selection-button">Make Selection</button>
     </div>
 
+    <div id="notes-options">
+      <button id="export-notes" class="right">Export Notes</button>
+      <button id="share-notes" class="right">Share Notes</button>
+    </div>
+
   </div>
 
 </div> 
-  {% endif %}
+
+<input id="photo-id" value="{{user.id}}" hidden="true"/>
 
 <div id="content">
-
-
 
   <div id="view" class="column left">
 
   </div>
+
   <div id="notes" contentEditable="true" class="column right">
 
   </div>

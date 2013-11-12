@@ -21,31 +21,39 @@ var Browser = function (data) {
     });
     
     $("#browse").append(bb);
+}
 
-    if (data.photos.length == 0) {
-	$("#browse").hide();
-    } else {
-	$("#browse").show();
-    }
-
-    this.getPhotoClick = function(e) {
-	var id = $(this).attr("id");
-	messenger.getPhoto(id, setNewPhotoMainView);
-    }
-
-    this.setSelected = function(photoId) {
-	var thumbs = $(".thumbnail");
-	for (var i = 0; i < thumbs.length; i++) {
-	    var id = $(thumbs[i]).attr("id");
-	    if (id == photoId) {
-		$(thumbs[i]).addClass("selected");
-	    } else {
-		$(thumbs[i]).removeClass("selected");
-	    }
+Browser.prototype.setSelected = function(e) {
+    var photoId = $(this).attr("id");
+    var thumbs = $(".thumbnail");
+    for (var i = 0; i < thumbs.length; i++) {
+	var id = $(thumbs[i]).attr("id");
+	if (id == photoId) {
+	    $(thumbs[i]).addClass("selected");
+	} else {
+	    $(thumbs[i]).removeClass("selected");
 	}
     }
+}
 
-    this.getPhoto = function(data) {
-	messenger.getPhoto(data.id, setNewPhotoMainView)
+
+// Deletes the current photo, and, if there is a next photo,
+// sets it to be viewed.
+Browser.prototype.deletePhoto = function(e) {
+    var photoId = $(".selected")[0].attr("id");
+    messenger.deletePhoto(photoId, removePhoto);
+    messenger.getAllPhotos(initializeBrowser);
+
+    // get the id of the next photo in the browser
+    // if there is one, set it as the photo that is currently
+    // being viewed
+    var thumbs = $(".thumbnail");
+    var reset = false;
+    for (var i = 0; i < thumbs.length && !reset; i++) {
+	var id = $(thumbs[i]).attr("id");
+	if (id > currentPhotoId) {
+	    $(thumbs[i]).trigger("click");
+	    reset = true;
+	}
     }
 }

@@ -10,6 +10,8 @@ assets = Environment(app)
 
 assets.register('css_all', app.config['CSS_ALL'])
 assets.register('js_all', app.config['JS_ALL'])
+assets.register('js_pi_all', app.config['JS_PI_ALL'])
+assets.register('js_view_all', app.config['JS_VIEW_ALL'])
 
 db = SQLAlchemy(app)
 

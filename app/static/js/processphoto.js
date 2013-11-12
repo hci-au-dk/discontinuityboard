@@ -3,6 +3,7 @@
 var tools = null;
 var messenger = null;
 var browser = null;
+var viewer = null;
 
 var currentPhotoId = null;
 var currentPhotoRatio = 1;
@@ -28,11 +29,12 @@ $(window).load(function() {
     messenger = new Messenger();
 
     // Must get the photos before we get the configuration
-    messenger.getAllPhotos(initializeBrowser);
+    //messenger.getAllPhotos(initializeBrowser);
 
-    messenger.getConfigured(setConfigured);
+    //messenger.getConfigured(setConfigured);
 
     tools = new Tools();
+    viewer = new PhotoView();
 
     attachListeners();
 
@@ -41,8 +43,15 @@ $(window).load(function() {
     $(window).trigger("resize");
 
     $("#make-selection-button").hide();
+    $("#notes-options").hide();
     $("#photo-tools-dropdown").hide();
     $(".loading-icon").hide();
+
+    // load the proper photo
+    var photoId = $("#photo-id").val()
+    if (photoId) {
+	messenger.getPhoto(photoId, setNewPhotoMainView);
+    }
 });
 
 // to deal with sizing
@@ -109,6 +118,7 @@ function initializeBrowser(data) {
 
 function removePhoto() {
     $("#photo-tools-dropdown").hide();
+    $("#notes-options").hide();
     $("#photocontainer").remove()
 }
 
@@ -118,69 +128,17 @@ function setNewPhotoMainView(data) {
 
 function setNewPhotoConfigureView(data) {
     $(".loading-icon").remove();
-    setNewPhoto($("#configure-display"), data);
+    viewer.setNewPhoto($("#configure-display"), data);
 }
 
 function setNewPhoto($parent, data) {
-    // change the current photo id to the one that is being displayed
-    currentPhotoId = data.id;
+    var stats = viewer.setNewPhoto($parent, data);
+    currentPhotoId = stats.id;
+    currentPhotoRatio = stats.ratio;
 
-    $("#photocontainer").remove();
-
-    var photoCont = $(document.createElement("div"));
-    photoCont.attr("id", "photocontainer");
-
-    var imgSpan = $(document.createElement("span"));
-
-    var img = $(document.createElement("img"));
-    img.attr("src", data.path);
-
-    var owidth = data.width;
-    var oheight = data.height;
-    var raw = data.raw;
-
-    img.attr("id", "imagefile");
-    img.addClass("unselectable");
-
-    imgSpan.append(img)
-    photoCont.append(imgSpan);
-    $parent.append(photoCont);
-    
-    var width = owidth;
-    var height = oheight;
-    currentPhotoRatio = 1;
-    // max width is width of the view portal, plus some to allow for margins
-    var maxWidth = $parent.width();
-    var maxHeight = $parent.height();
-
-    // reset the ratio so that we can send accurate coordinates to the pi
-    if (owidth > maxWidth || oheight > maxHeight) {
-	// get ratio for scaling image
-        var ratio = Math.min((maxWidth / owidth), (maxHeight / oheight));
-        currentPhotoRatio = ratio;
-
-        width = owidth * ratio;
-        height = oheight * ratio;
-    }
-    img.css("width", width); // Set new width
-    img.css("height", height); // Scale height based on ratio
-
-    // now set the proper margins
-    var toolsCan = $(document.createElement("div"));
-    toolsCan.attr("id", "toolsdiv");
-
-    photoCont.css("width", width);
-    photoCont.css("height", height);
-
-    toolsCan.css("width", width);
-    toolsCan.css("height", height);
-
-    photoCont.append(toolsCan);
-
-    toolsCan.append(imgSpan);
-
-    browser.setSelected(data.id);
+//    browser.setSelected(data.id);
     $("#photo-tools-dropdown").show();
+    $("#notes-options").show();
 }
 
 function appendSelection(data) {

@@ -52,25 +52,6 @@ var Tools = function() {
 
     }
 
-    // Deletes the current photo, and, if there is a next photo,
-    // sets it to be viewed.
-    this.deletePhoto = function() {
-	messenger.deletePhoto(currentPhotoId, removePhoto);
-	messenger.getAllPhotos(initializeBrowser);
-
-	// get the id of the next photo in the browser
-	// if there is one, set it as the photo that is currently
-	// being viewed
-	var thumbs = $(".thumbnail");
-	var reset = false;
-	for (var i = 0; i < thumbs.length && !reset; i++) {
-	    var id = $(thumbs[i]).attr("id");
-	    if (id > currentPhotoId) {
-		messenger.getPhoto(id, setNewPhotoMainView);
-		reset = true;
-	    }
-	}
-    }
     
     var cutTool = false;  // TODO: see if this variable is necessary
     var inUse = null;
