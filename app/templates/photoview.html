@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+{% include "navbar.html" %}
+
+
+{% if user %}
+<p> {{ user }} </p>
+{% endif %}
+
+<div id="entry-overlay" class="overlay">
+</div>
+
+<div id="photo-view-modal" class="modal">
+  <div class="modal-header">
+    <h3>Enter your photo code</h3>
+  </div>
+
+  <form action="{{ url_for('register') }}" method="post" name="registerpi">
+    {{ pvform.hidden_tag() }}
+    <div class="modal-body">
+      <p>
+	code: {{pvform.code(size=20)}}<br>
+
+      </p>
+      <hr />
+    </div>
+
+    <div class="modal-footer">
+      <button type="submit" name="finish" value="ok">Go to snapshot!</button>
+    </div>
+  </form>
+</div>
+
+
+{% endblock %}

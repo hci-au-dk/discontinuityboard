@@ -1,0 +1,56 @@
+{% extends "pi_base.html" %}
+
+{% block content %}
+
+
+<div id="header">
+  <div class="top">
+    <span class="left">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
+    </span>
+
+
+    <div class="loading-icon left"></div>
+
+    {% if user %}
+    <p> {{user}}</p>
+    {% endif %}
+
+  </div>
+</div>
+
+<div>
+    <ul class="center">
+      <li id="set-up-pi-button" data-toggle="modal">Set Up Pi</li>
+      {% if user %}
+      <li id="configure-button" data-toggle="modal">Configure</li>
+      {% endif %}
+
+    </ul>
+
+</div>
+
+{% if user %}
+<div>
+  <div id="navigate">
+    <ul>
+      <li id="take-photo-button">Take Photo</li>
+      <li id="photo-tools-dropdown">Photo Tools
+	<ul>
+	  <li id="select-button">Select Tool</li>
+	</ul>
+      </li>
+      <li id="deletephoto"> Delete Photo </li>
+      <li id="upload-modal-button">Upload photo</li>
+    </ul>
+
+    {% include "browse.html" %}
+
+  </div>
+
+</div> 
+{% endif %}
+
+{% include "pi_modals.html" %}
+
+{% endblock %}

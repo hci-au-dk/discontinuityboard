@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div id="header">
+  <div class="top">
+    <span class="left">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
+    </span>
+
+    <div class="loading-icon left"></div>
+
+  </div>
+</div>
+
+
+<div id="modal-overlay" class="overlay">
+</div>
+
+<div id="photo-view-modal" class="modal">
+  <div class="modal-header">
+    <h3>Enter your photo code</h3>
+  </div>
+
+  <form action="{{ url_for('view_login') }}" method="post" name="photoview">
+    {{ pvform.hidden_tag() }}
+    <div class="modal-body">
+      <p>
+	code: {{pvform.code(size=20)}}<br>
+
+      </p>
+      <hr />
+    </div>
+
+    <div class="modal-footer">
+      <button type="submit" name="finish" value="ok">Go to snapshot!</button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
