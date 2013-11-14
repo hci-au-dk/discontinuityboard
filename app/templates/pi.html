@@ -16,9 +16,11 @@
     <ul class="right">
       <li id="login-button" data-toggle="modal">Login</li>
       <li id="configure-button" data-toggle="modal">Configure</li>
-      <li> {{user}}</li>
       <a id="logout" href="{{ url_for('pi_logout') }}"><li>Logout</li></a>
     </ul>
+    <span class="right">
+      <p>Connected to pi located at: {{user.ip}}</p>
+    </span>
     {% endif %}
   </div>
 </div>

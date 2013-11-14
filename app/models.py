@@ -2,13 +2,14 @@ from app import db
 
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key = True)  # Unique identifier
-    path = db.Column(db.String(200), unique = True)  # where the photo is stored
+    path = db.Column(db.String(200))  # where the photo is stored
     raw = db.Column(db.Boolean) # whether or not the photo comes from pi/rawimage
     time_submitted = db.Column(db.DateTime)  # time the photo was submitted
     children = db.relationship('Selection', backref='photo')
     pi_id = db.Column(db.Integer, db.ForeignKey('pi.id'))
     parent = db.relationship('Pi', primaryjoin='Pi.id==Photo.pi_id')
     code = db.Column(db.String(20), unique = True) # string that provides the access point
+    notes = db.Column(db.Text())  # variably sized text field for saving the notes
 
     def is_authenticated(self):
         return True

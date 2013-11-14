@@ -47,30 +47,12 @@ p {
     float: left;
 }
 
-.loading-icon {
-    background: url('../ajax-loader.gif');
-    background-size: 100%;
-    width: 50px;
-    height: 50px;
-    margin-top: 25px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .right {
     float: right;
 }
 
-.thumbnail {
-    cursor: pointer;
-    float: left;
-    margin: 3px;
-    padding: 2px;
-}
-
-.selected {
-    border: 2px solid blue;
-    padding: 0px;
+.inuse {
+    background-color: green;
 }
 
 .unselectable {
@@ -104,20 +86,20 @@ p {
     height: 10px;
 }
 
-#select-options {
-    height: 30px;
+#selection-tools {
+    float: left;
 }
 
 #select-options {
+    float: left;
     width: 50%;
     text-align: center;
 }
 
 #content {
-    border: 2px solid blue;
     background-color: white;
     width: 98%;
-    height: 100%;
+    height: 500px;
     position: absolute;
     left: 50%;  /* for centering, which is also set dynamically */
 }
@@ -128,7 +110,6 @@ p {
 
 #view {
     width: 49%;
-    border: 2px solid blue;
 }
 
 #notes {
@@ -279,6 +260,28 @@ ul li:hover ul {
 /* pi phototools */
 #logout {
     color: inherit;
+}
+
+.loading-icon {
+    background: url('../ajax-loader.gif');
+    background-size: 100%;
+    width: 50px;
+    height: 50px;
+    margin-top: 25px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.thumbnail {
+    cursor: pointer;
+    float: left;
+    margin: 3px;
+    padding: 2px;
+}
+
+.selected {
+    border: 2px solid blue;
+    padding: 0px;
 }
 
 .thumbContainer {

@@ -25,31 +25,28 @@
   </div>
 </div>
 
+<input id="photo-id" value="{{user.id}}" hidden="true"/>
+
 <div>
   <div id="navigate">
-    <ul>
-      <li id="photo-tools-dropdown">Photo Tools
-	<ul>
-	  <li id="select-button">Select Tool</li>
-	</ul>
-      </li>
-      <li id="deletephoto"> Delete Photo </li>
+    <ul id="selection-tools">
+      <li id="select-button">Select Tool</li>
     </ul>
 
     <div id="select-options" class="center">
       <button id="make-selection-button">Make Selection</button>
     </div>
 
-    <div id="notes-options">
-      <button id="export-notes" class="right">Export Notes</button>
-      <button id="share-notes" class="right">Share Notes</button>
-    </div>
+    <ul id="notes-options" class="right">
+      <li id="save-notes-button">Save Notes</li>
+      <li id="share-notes-button">Share Notes</li>
+      <li id="export-notes-button">Export Notes</li>
+    </ul>
 
   </div>
 
 </div> 
 
-<input id="photo-id" value="{{user.id}}" hidden="true"/>
 
 <div id="content">
 

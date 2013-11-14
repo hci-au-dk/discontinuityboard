@@ -25,14 +25,9 @@ $(window).load(function() {
 	}
     });
 
-
     messenger = new Messenger();
 
     // Must get the photos before we get the configuration
-    //messenger.getAllPhotos(initializeBrowser);
-
-    //messenger.getConfigured(setConfigured);
-
     tools = new Tools();
     viewer = new PhotoView();
 
@@ -42,9 +37,6 @@ $(window).load(function() {
     $(window).bind("resize", fixDimensions);
     $(window).trigger("resize");
 
-    $("#make-selection-button").hide();
-    $("#notes-options").hide();
-    $("#photo-tools-dropdown").hide();
     $(".loading-icon").hide();
 
     // load the proper photo

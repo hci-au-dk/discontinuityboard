@@ -5,7 +5,7 @@ from flask.ext.assets import Bundle
 
 CSS_ALL = Bundle('css/discontinuityboard.css')
 JS_ALL = Bundle('js/jquery-2.0.2.min.js', 'js/jquery-ui-1.10.3.js','js/messenger.js', 'js/modals.js', 'js/photoview.js')
-JS_VIEW_ALL = Bundle('js/view/modals.js', 'js/view/tools.js', 'js/processphoto.js')
+JS_VIEW_ALL = Bundle('js/view/modals.js', 'js/view/tools.js', 'js/view/processphoto.js')
 JS_PI_ALL = Bundle('js/browser.js', 'js/pi/configtools.js', 'js/pi/modals.js', 'js/pi/initialize.js')
 
 ### FORM SETTINGS

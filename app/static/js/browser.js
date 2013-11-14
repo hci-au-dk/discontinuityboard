@@ -1,5 +1,5 @@
 
-var MAX_SIZE = 100;
+var MAX_SIZE = 200;
 
 var Browser = function(data) {
     $("#browsebucket").remove();
@@ -24,13 +24,12 @@ var Browser = function(data) {
 	
 	img.css("width", w * scale); // Set new width
 	img.css("height", h * scale); // Scale height based on ratio
-
-
 	div.append(img)
 
 	var p = $(document.createElement("p"));
-	p.text(data.photos[index]["code"]);
+	p.text("Access: " + data.photos[index]["code"]);
 	div.append(p);
+
 
 	bb.append(div);
     });

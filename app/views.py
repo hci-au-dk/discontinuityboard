@@ -171,7 +171,6 @@ def get_all_photos():
     return response
 
 @app.route('/get-photo/', methods = ['GET'])
-@login_required
 def get_photo():
     if request.method == 'POST':
         return make_response(400)
@@ -217,8 +216,6 @@ def delete_photo():
     response.headers['Content-type'] = 'application/json'
     return response
 
-
-
 @app.route('/take-photo/', methods = ['GET'])
 @login_required
 def take_photo():
@@ -232,6 +229,8 @@ def take_photo():
         pilocation = get_pi_base() + 'snapshot'
         raw = False
 
+    print "LOCATION"
+    print pilocation
     r = requests.get(pilocation)
 
     img = Image.open(StringIO(r.content))
@@ -344,7 +343,6 @@ def delete_configs():
     return response
 
 @app.route('/make-cut/', methods = ['GET'])
-@login_required
 def make_cut():
     # Load the image into a PIL Image first
     photoid = request.args.get('id')
