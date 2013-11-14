@@ -24,22 +24,13 @@ PhotoView.prototype.setNewPhoto = function($parent, data) {
     photoCont.append(imgSpan);
     $parent.append(photoCont);
     
-    var width = owidth;
-    var height = oheight;
-    var currentPhotoRatio = 1;
     // max width is width of the view portal, plus some to allow for margins
-    var maxWidth = $parent.width();
-    var maxHeight = $parent.height();
+    var currentPhotoRatio = PhotoView.prototype.getScale(owidth, oheight, 
+							 $parent.width(),
+							 $parent.height());
+    var width = owidth * currentPhotoRatio;
+    var height = oheight * currentPhotoRatio;
 
-    // reset the ratio so that we can send accurate coordinates to the pi
-    if (owidth > maxWidth || oheight > maxHeight) {
-	// get ratio for scaling image
-        var ratio = Math.min((maxWidth / owidth), (maxHeight / oheight));
-        currentPhotoRatio = ratio;
-
-        width = owidth * ratio;
-        height = oheight * ratio;
-    }
     img.css("width", width); // Set new width
     img.css("height", height); // Scale height based on ratio
 
@@ -60,4 +51,16 @@ PhotoView.prototype.setNewPhoto = function($parent, data) {
     var obj = {"id": data.id,
 	      "ratio": currentPhotoRatio};
     return obj
+}
+
+PhotoView.prototype.getScale = function(w, h, maxW, maxH) {
+    var currentPhotoRatio = 1;
+    // reset the ratio so that we can send accurate coordinates to the pi
+    if (w > maxW || h > maxH) {
+	// get ratio for scaling image
+        var ratio = Math.min((maxW / w), (maxH / h));
+        currentPhotoRatio = ratio;
+
+    }
+    return currentPhotoRatio;
 }

@@ -11,7 +11,7 @@
       <div class="modal-footer">
 	<ul class="center">
 	  <li id="register-button" data-toggle="modal">Register</li>
-	  <li id="login-button" data-toggle="modal">Login</li>
+	  <li id="login-configure-button" data-toggle="modal">Login</li>
 	</ul>
       </div>
     </div>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="modal-footer">
-          <button class="step1-submit" type="submit" name="finish" value="ok">Register & Go to Next Step -></button>
+          <button class="step1-submit" type="submit" name="finish" value="ok">Register & Go to Configure -></button>
         </div>
       </form>
     </div>
@@ -66,10 +66,11 @@
         </div>
 	 
         <div class="modal-footer">
-          <button class="step1-submit" type="submit" name="finish" value="ok">Login & Go to Next Step -></button>
+          <button type="submit" name="finish" value="ok">Login</button>
         </div>
       </form>
     </div>
+
 
     <div id="configure-modal" class="modal">
       <div class="modal-header">
@@ -78,7 +79,7 @@
       </div>
 
       <div id="configure-display">
-
+	<div class="loading-icon"></div>
       </div>
 
       <form action="{{ url_for('configure') }}" method="post" name="configure">
@@ -102,7 +103,6 @@
 
         <div class="modal-footer">
           <button id="configure-submit" type="submit" name="finish" value="ok">Configure</button>
-	  <button id="deleteconfigs">Delete Pi Configuration</button>
         </div>
       </form>
     </div>

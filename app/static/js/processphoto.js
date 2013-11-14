@@ -126,17 +126,11 @@ function setNewPhotoMainView(data) {
     setNewPhoto($("#view"), data);
 }
 
-function setNewPhotoConfigureView(data) {
-    $(".loading-icon").remove();
-    viewer.setNewPhoto($("#configure-display"), data);
-}
-
 function setNewPhoto($parent, data) {
     var stats = viewer.setNewPhoto($parent, data);
     currentPhotoId = stats.id;
     currentPhotoRatio = stats.ratio;
 
-//    browser.setSelected(data.id);
     $("#photo-tools-dropdown").show();
     $("#notes-options").show();
 }

@@ -19,7 +19,6 @@ from wtforms.validators import ValidationError
 @app.route('/')
 def entry():
     pvform = PhotoViewForm()
-
     return render_template('entrypoint.html',
                            title = 'Discontinuity Board',
                            pvform = pvform)
@@ -66,6 +65,10 @@ def pi():
                            lform = lform,
                            user = user)
 
+@app.route('/pi/configure-modal')
+def pi_configure():
+    return pi()
+
 ##############################################################
 # Routers - Misc.                                            #
 ##############################################################
@@ -90,29 +93,6 @@ def pi_login():
             login_user(user)
         return redirect(request.args.get("next") or url_for('pi'))
     return redirect(url_for('pi'))
-
-@app.route('/pi/logout/')
-@login_required
-def pi_logout():
-    logout_user()
-    return redirect(url_for('pi'))
-
-@app.route('/upload/', methods=['POST'])
-@login_required
-def upload_file():
-    filename = None
-    returnobj = {}
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            photoid = save_photo(file, filename, False)
-            returnobj['id'] = photoid
-
-    response = make_response(json.dumps(returnobj), 200)
-    response.headers['Content-type'] = 'application/json'
-    return response
-
 
 @app.route('/register-pi/', methods=['POST'])
 def register_pi():
@@ -140,10 +120,31 @@ def register_pi():
         else:
             # TODO: Make a sensible reaction to trying to register a name twice
             print "DUPLICATE USERNAME"
-        return redirect(request.args.get("next") or url_for('pi'))
+        return redirect(request.args.get("next") or url_for('pi_configure'))
 
+    return redirect(url_for('pi_configure'))
+
+@app.route('/pi/logout/')
+@login_required
+def pi_logout():
+    logout_user()
     return redirect(url_for('pi'))
 
+@app.route('/upload/', methods=['POST'])
+@login_required
+def upload_file():
+    filename = None
+    returnobj = {}
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            photoid = save_photo(file, filename, False)
+            returnobj['id'] = photoid
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
 
 @app.route('/get-all-photos/', methods = ['GET'])
 @login_required
@@ -156,7 +157,10 @@ def get_all_photos():
     for photo in photos:
         if not photo.raw:
             name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
-            data.append({'path': name, 'id': photo.id})
+            img = Image.open(photo.path)
+            data.append({'path': name, 'id': photo.id, 'code': photo.code,
+                         'width': img.size[0], 'height': img.size[1]})
+
 
     returnobj = {}
     returnobj["photos"] = data
@@ -321,7 +325,7 @@ def configure():
                 db.session.delete(photo)
         db.session.commit()
 
-    return redirect(url_for('index'))
+    return redirect(url_for('pi'))
 
 @app.route('/delete-configs/', methods = ['GET'])
 @login_required

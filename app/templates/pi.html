@@ -13,37 +13,36 @@
     <div class="loading-icon left"></div>
 
     {% if user %}
-    <p> {{user}}</p>
-    <ul>
-      <li><a href="{{ url_for('pi_logout') }}">Logout</a></li>
+    <ul class="right">
+      <li id="login-button" data-toggle="modal">Login</li>
+      <li id="configure-button" data-toggle="modal">Configure</li>
+      <li> {{user}}</li>
+      <a id="logout" href="{{ url_for('pi_logout') }}"><li>Logout</li></a>
     </ul>
     {% endif %}
-
   </div>
 </div>
 
-<div>
-    <ul class="center">
-      <li id="set-up-pi-button" data-toggle="modal">Set Up Pi</li>
-      <li id="login-button" data-toggle="modal">Login</li>
-      {% if user %}
-      <li id="configure-button" data-toggle="modal">Configure</li>
-      {% endif %}
-
-    </ul>
-
+{% if not user %}
+<div id="register-login">
+  <div class="center">
+    <div id="register-button" class="option" data-toggle="modal">Register</div>
+    <div id="login-button" class="option" data-toggle="modal">Login</div>
+  </div>
 </div>
-
-{% if user %}
+{% else %}
 <div>
-  <div id="navigate">
-    <ul>
-      <li id="take-photo-button">Take Photo</li>
-      <li id="deletephoto"> Delete Photo </li>
-      <li id="upload-button">Upload photo</li>
-    </ul>
+  <div>
+    <div id="phototools">
+      <ul>
+	<li id="take-photo-button">Take Photo</li>
+	<li id="deletephoto"> Delete Photo </li>
+	<li id="upload-button">Upload photo</li>
+      </ul>
+    </div>
 
-    {% include "browse.html" %}
+    <div id="browse">
+    </div>
 
   </div>
 

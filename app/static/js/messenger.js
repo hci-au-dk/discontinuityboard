@@ -1,5 +1,3 @@
-
-
 var Messenger = function() {
 
     var host = window.location.host;
@@ -14,8 +12,6 @@ var Messenger = function() {
                 successFn(data);
             },
             error: function(data) {
-                if (DEBUG)
-                    alert("get all photos error");
             }
         });
     }
@@ -36,14 +32,13 @@ var Messenger = function() {
 	});
     }
 
-    this.deletePhoto = function(photoId, successFn) {
+    this.deletePhoto = function(photoId) {
 	$.ajax({
 	    url: "/delete-photo/",
 	    type: "GET",
 	    dataType: "json",
 	    data: {"id": photoId},
 	    success: function() {
-		successFn();
 	    },
 	    error: function() {
 		if (DEBUG)
@@ -86,7 +81,7 @@ var Messenger = function() {
 	});
     }
 
-    this.uploadPhoto = function(file, successFn) {
+    this.uploadPhoto = function(file) {
 	var fd = new FormData();    
 	fd.append( 'file', file );
 
@@ -97,7 +92,7 @@ var Messenger = function() {
 	    contentType: false,
 	    type: 'POST',
 	    success: function(data){
-		successFn(data);
+
 	    },
 	    error: function(data) {
 		if (DEBUG)

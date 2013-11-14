@@ -2,8 +2,10 @@ var messenger = null;
 var browser = null;
 var viewer = null;
 
+var currentPhotoId = null;
+var currentPhotoRatio = 1;
 
-$(window).load(function() {
+$(window).ready(function() {
     // because IE tries to cache all the things
     $.ajaxSetup({cache:false});
 
@@ -16,29 +18,25 @@ $(window).load(function() {
     attachListeners();
 
     $(".loading-icon").hide();
+
+    // trigger a configure event if the user got here through set up
+    if (window.location.pathname == "/pi/configure-modal") {
+	$("#configure-button").trigger("click");
+    }
+
 });
 
 
 function attachListeners() {
     // Photo taking/uploading
     $("#take-photo-button").bind("click", takeRegularPhotoClick);
-    $("#deleteconfigs").bind("click", deleteConfigs);
     $("#uploadphotobutton").bind("click", showUpload);
-
-    // Tools buttons
-    //$("#deletephoto").bind("click", tools.deletePhoto);
-}
-
-// TODO: fix configuration deletion service
-function deleteConfigs() {
-    messenger.deleteConfigs();
-    messenger.getConfigured(setConfigured);
 }
 
 function showUpload() {
     // first, get the file
     var file = $("#filename")[0].files[0]
-    messenger.uploadPhoto(file, browser.getPhoto);
+    messenger.uploadPhoto(file);
     messenger.getAllPhotos(initializeBrowser);
     // clear the filename from the form
     $("#filename").val("");
@@ -56,13 +54,15 @@ function takePhotoClick(configs) {
     messenger.getAllPhotos(initializeBrowser);
 }
 
-
 function initializeBrowser(data) {
     browser = new Browser(data);
     $(".thumbnail").bind("click", browser.setSelected);
+    $("#deletephoto").unbind("click");
+    $("#deletephoto").bind("click", browser.deletePhoto);
 }
 
 function setNewPhotoConfigureView(data) {
-    $(".loading-icon").remove();
-    viewer.setNewPhoto($("#configure-display"), data);
+    var stats = viewer.setNewPhoto($("#configure-display"), data);
+    currentPhotoId = stats.id;
+    currentPhotoRatio = stats.ratio;
 }
