@@ -14,6 +14,9 @@
 
     {% if user %}
     <p> {{user}}</p>
+    <ul>
+      <li><a href="{{ url_for('pi_logout') }}">Logout</a></li>
+    </ul>
     {% endif %}
 
   </div>
@@ -22,6 +25,7 @@
 <div>
     <ul class="center">
       <li id="set-up-pi-button" data-toggle="modal">Set Up Pi</li>
+      <li id="login-button" data-toggle="modal">Login</li>
       {% if user %}
       <li id="configure-button" data-toggle="modal">Configure</li>
       {% endif %}
@@ -35,13 +39,8 @@
   <div id="navigate">
     <ul>
       <li id="take-photo-button">Take Photo</li>
-      <li id="photo-tools-dropdown">Photo Tools
-	<ul>
-	  <li id="select-button">Select Tool</li>
-	</ul>
-      </li>
       <li id="deletephoto"> Delete Photo </li>
-      <li id="upload-modal-button">Upload photo</li>
+      <li id="upload-button">Upload photo</li>
     </ul>
 
     {% include "browse.html" %}

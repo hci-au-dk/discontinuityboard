@@ -15,6 +15,9 @@ $(function () {
 	modals.showModal($("#login-modal"));
     });
     
+    $("#upload-button").bind("click", function() {
+	modals.showModal($("#upload-modal"));
+    });
 
     $(".step1-submit").bind("click", function() {
 	modals.showModal($("configure-modal"));

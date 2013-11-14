@@ -24,7 +24,8 @@ class Photo(db.Model):
 
     # Tells python how to print the photo object
     def __repr__(self):
-        return 'Photo: %i, path: %r, raw:%r, time_submitted:%r, pi:%i' % (self.id, self.path, self.raw, self.time_submitted, self.pi_id)
+        return 'Photo: %i, path: %r, raw:%r, time_submitted:%r, pi:%i, code:%r' % \
+            (self.id, self.path, self.raw, self.time_submitted, self.pi_id, self.code)
 
 class Selection(db.Model):
     id = db.Column(db.Integer, primary_key = True)  # Unique identifier

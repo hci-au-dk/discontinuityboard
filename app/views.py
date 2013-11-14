@@ -1,6 +1,7 @@
 import datetime, os, string, random, requests
 from app import app, db, models, login_manager
-from flask import render_template, flash, redirect, request, url_for, send_from_directory, make_response, json
+from flask import render_template, flash, redirect, request, url_for, \
+send_from_directory, make_response, json
 from sqlalchemy.exc import IntegrityError
 from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
@@ -11,42 +12,38 @@ from flask.ext.login import login_user, current_user, logout_user, login_require
 from wtforms.validators import ValidationError
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-
-
 ##############################################################
-# Routers - Main App                                         #
+# Routers/AJAX Services - View                               #
 ##############################################################
 
 @app.route('/')
 def entry():
     pvform = PhotoViewForm()
 
-    if current_user.is_authenticated():
-        return redirect(url_for('view'))
-
     return render_template('entrypoint.html',
                            title = 'Discontinuity Board',
                            pvform = pvform)
 
 
-@app.route('/view')
+@app.route('/view/', methods=['GET', 'POST'])
 def view():
+    photo = None
+    if request.method == 'POST':
+        form = PhotoViewForm(request.form)
+        if form.validate_on_submit():
+            user = form.get_user()
+            if form.validate_login():
+                photo = user
+
     # prepare the forms
     pvform = PhotoViewForm()
-
-    user = None
-    if current_user.is_authenticated():
-        user = current_user
-    else:
+    if photo is None:
         return redirect(url_for('entry'))
     
     return render_template('discontinuityboard.html',
                            title = 'Discontinuity Board',
                            pvform = pvform,
-                           user = user)
+                           user = photo)
 
 ##############################################################
 # Routers - Configuration                                    #
@@ -78,97 +75,11 @@ def send_file(filename):
     basepath = app.root_path + '/' + app.config['UPLOAD_FOLDER']
     return send_from_directory(basepath, filename)
 
-
-def save_photo(file, filename, raw):
-    savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
-    file.save(savename)
-
-    # generate an access code
-    code = get_new_access_code()
-    
-    # Now, we want to insert it into our database
-    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now(), pi_id=current_user.id, code=code)
-    db.session.add(photo)
-    try:
-        db.session.commit()
-
-    except:
-        IntegrityError
-        db.session.rollback()
-    
-    photo = models.Photo.query.filter(models.Photo.path==savename).first()
-    db.session.close()
-    return photo.id
-
-def save_selection(image, filename, parent, comments=None):
-    savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
-    image.save(savename)
-    
-    # Now, we want to insert it into our database
-    selection = models.Selection(path=savename, parent=parent)
-    if comments:
-        selection.comments = comments
-
-    db.session.add(selection)
-    try:
-        db.session.commit()
-
-    except:
-        IntegrityError
-        db.session.rollback()
-    
-    selection = models.Selection.query.filter(models.Selection.path==savename).first()
-    db.session.close()
-    return selection.id
-
-def get_photo_path(id):
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
-    db.session.close()
-    return photo.path
-
-def get_photo_filename(id):
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
-    db.session.close()
-    filename = os.path.basename(photo.path)
-    return filename
-
-def get_pi_base():
-    if current_user:
-        return 'http://' + current_user.ip + '/'
-    return None
-
-# Returns a unique access code
-def get_new_access_code(size=6, chars=string.ascii_uppercase):
-    code = generate_code(size, chars)
-    while models.Photo.query.filter(models.Photo.code==code).first() is not None:
-        code = generate_code(size, chars)
-    return code
-
-def generate_code(size, chars):
-    return ''.join(random.choice(chars) for x in range(size))
-
-##############################################################
-# AJAX Services - View                                       #
-##############################################################
-
-@app.route('/view-login/', methods=['POST'])
-def view_login():
-    # logout any existing user
-    logout_user()
-    form = PhotoViewForm(request.form)
-    if form.validate_on_submit():
-        user = form.get_user()
-        if form.validate_login():
-            login_user(user)
-        return redirect(request.args.get("next") or url_for('view'))
-    return redirect(url_for('view'))
-
-
 ##############################################################
 # AJAX Services - Configuration                              #
 ##############################################################
 
-@app.route('/pi-login/', methods=['POST'])
+@app.route('/pi/login/', methods=['POST'])
 def pi_login():
     # logout any existing user
     logout_user()
@@ -178,6 +89,12 @@ def pi_login():
         if form.validate_login():
             login_user(user)
         return redirect(request.args.get("next") or url_for('pi'))
+    return redirect(url_for('pi'))
+
+@app.route('/pi/logout/')
+@login_required
+def pi_logout():
+    logout_user()
     return redirect(url_for('pi'))
 
 @app.route('/upload/', methods=['POST'])
@@ -198,7 +115,7 @@ def upload_file():
 
 
 @app.route('/register-pi/', methods=['POST'])
-def register():
+def register_pi():
     form = RegisterPiForm(request.form)
     if request.method == 'POST' and form.validate():
         # Everything is great
@@ -223,9 +140,9 @@ def register():
         else:
             # TODO: Make a sensible reaction to trying to register a name twice
             print "DUPLICATE USERNAME"
-        return redirect(request.args.get("next") or url_for('index'))
+        return redirect(request.args.get("next") or url_for('pi'))
 
-    return redirect(url_for('index'))
+    return redirect(url_for('pi'))
 
 
 @app.route('/get-all-photos/', methods = ['GET'])
@@ -465,5 +382,81 @@ def make_cut():
 @login_manager.user_loader
 def load_user(userid):
     # Should return None if the user doesn't exist
-    return models.Photo.query.get(int(userid))
+    return models.Pi.query.get(int(userid))
+
+##############################################################
+# Helper Functions                                           #
+##############################################################
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
     
+def save_photo(file, filename, raw):
+    savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
+    file.save(savename)
+
+    # generate an access code
+    code = get_new_access_code()
+    
+    # Now, we want to insert it into our database
+    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now(), pi_id=current_user.id, code=code)
+    db.session.add(photo)
+    try:
+        db.session.commit()
+
+    except:
+        IntegrityError
+        db.session.rollback()
+    
+    photo = models.Photo.query.filter(models.Photo.path==savename).first()
+    db.session.close()
+    return photo.id
+
+def save_selection(image, filename, parent, comments=None):
+    savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
+    image.save(savename)
+    
+    # Now, we want to insert it into our database
+    selection = models.Selection(path=savename, parent=parent)
+    if comments:
+        selection.comments = comments
+
+    db.session.add(selection)
+    try:
+        db.session.commit()
+
+    except:
+        IntegrityError
+        db.session.rollback()
+    
+    selection = models.Selection.query.filter(models.Selection.path==savename).first()
+    db.session.close()
+    return selection.id
+
+def get_photo_path(id):
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    db.session.close()
+    return photo.path
+
+def get_photo_filename(id):
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    db.session.close()
+    filename = os.path.basename(photo.path)
+    return filename
+
+def get_pi_base():
+    if current_user:
+        return 'http://' + current_user.ip + '/'
+    return None
+
+# Returns a unique access code
+def get_new_access_code(size=6, chars=string.ascii_uppercase):
+    code = generate_code(size, chars)
+    while models.Photo.query.filter(models.Photo.code==code).first() is not None:
+        code = generate_code(size, chars)
+    return code
+
+def generate_code(size, chars):
+    return ''.join(random.choice(chars) for x in range(size))

@@ -1,5 +1,3 @@
-
-###from flask.ext.uploads import UploadSet, IMAGES
 from app import db, models
 from flask.ext.wtf import Form
 from werkzeug import secure_filename
