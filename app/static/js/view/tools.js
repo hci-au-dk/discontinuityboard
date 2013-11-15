@@ -1,33 +1,30 @@
 // This is where the functionality for the buttons will go
 
 var Tools = function() {
-
     var cutTool = false;  // TODO: see if this variable is necessary
-    var inUse = null;
+    $("#select-options").hide();
 
     // Creates a cut tool to cut the photo into blocks
     this.selectClick = function() {
 	// TODO: make it so that you can't use other tools at the same time
 	cutTool = !cutTool;
 	if (cutTool) {
-	    inUse = "cut";
 	    $("#toolsdiv").bind("mousedown", selectionDown);
 	    $("#toolsdiv").css("cursor", "crosshair");
-	    $("#make-selection-button").show();
+	    $("#select-options").show();
 	    $("#make-selection-button").attr("disabled", "disabled");
 	    $("#select-button").addClass("inuse");
 	} else {
 	    $("#toolsdiv").css("cursor", "default");
 	    $("#toolsdiv").unbind("mousedown");
-	    $("#make-selection-button").hide();
+	    $("#select-options").hide();
 	    $("#selector").remove();
 	    $("#select-button").removeClass("inuse");
-	    inUse = null;
 	}
     }
     
     this.makeSelection = function() {
-	if (inUse == "cut") {  // making a cut is a valid thing to do
+	if ($("#selector").length == 1) {  // making a cut is a valid thing to do
 	    // get the coordinates of the cutBox
 	    var box = $("#selector");
 	    var td = $("#toolsdiv");

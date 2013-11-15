@@ -101,23 +101,22 @@ var Messenger = function() {
 	}); 
     }
 
-    this.deleteConfigs = function() {
+
+    // AJAX view functions
+
+    this.saveNotes = function(photoId, notesContent) {
+	var data = {id: photoId, content: notesContent};
 	$.ajax({
-	    url: "/delete-configs/",
-	    type: "GET",
-	    success: function(data) {
-		if (data.saved) {
-		    configsSet = false;
-		} else {
-		    configsSet = true;
-		}
-		console.log(configsSet);
+	    url: '/save-notes/',
+	    data: data,
+	    type: 'POST',
+	    success: function(data){
 	    },
 	    error: function(data) {
 		if (DEBUG)
-		    alert("delete configs error");
+		    alert("upload photo error");
 	    }
-	});	
+	}); 
     }
 
     this.makeCut = function(photoId, x1, y1, x2, y2, successFn) {

@@ -13,7 +13,7 @@ from wtforms.validators import ValidationError
 
 
 ##############################################################
-# Routers/AJAX Services - View                               #
+# Routers - View                                             #
 ##############################################################
 
 @app.route('/')
@@ -45,7 +45,7 @@ def view():
                            user = photo)
 
 ##############################################################
-# Routers - Configuration                                    #
+# Routers - Pi                                               #
 ##############################################################
 
 @app.route('/pi')
@@ -79,7 +79,7 @@ def send_file(filename):
     return send_from_directory(basepath, filename)
 
 ##############################################################
-# AJAX Services - Configuration                              #
+# AJAX Services - Pi                                         #
 ##############################################################
 
 @app.route('/pi/login/', methods=['POST'])
@@ -170,33 +170,6 @@ def get_all_photos():
 
     return response
 
-@app.route('/get-photo/', methods = ['GET'])
-def get_photo():
-    if request.method == 'POST':
-        return make_response(400)
-
-    id = request.args.get('id')
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
-
-    # See if the photo does not exist
-    if photo is None:
-        return make_response(404)
-
-    name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
-    
-    img = Image.open(photo.path)
-
-    returnobj = {}
-    returnobj['path'] = name
-    returnobj['id'] = photo.id
-    returnobj['width'] = img.size[0]
-    returnobj['height'] = img.size[1]
-    returnobj['raw'] = photo.raw
-
-    response = make_response(json.dumps(returnobj), 200)
-    response.headers['Content-type'] = 'application/json'
-    return response
-
 @app.route('/delete-photo/', methods = ['GET'])
 @login_required
 def delete_photo():
@@ -267,22 +240,6 @@ def take_photo():
     response.headers['Content-type'] = 'application/json'
     return response
 
-@app.route('/get-configured/', methods = ['GET'])
-@login_required
-def get_configured():
-    if request.method == 'POST':
-        return make_response(400)
-
-    pilocation = get_pi_base() + 'configuration'
-    r = requests.get(pilocation)
-
-    returnobj = {}
-    returnobj['configs'] = r.json()
-    
-    response = make_response(json.dumps(returnobj), 200)
-    response.headers['Content-type'] = 'application/json'
-    return response
-
 @app.route('/configure/', methods=['POST'])
 @login_required
 def configure():
@@ -326,17 +283,33 @@ def configure():
 
     return redirect(url_for('pi'))
 
-@app.route('/delete-configs/', methods = ['GET'])
-@login_required
-def delete_configs():
-    pilocation = get_pi_base() + 'configuration'   
+##############################################################
+# AJAX Services - View                                       #
+##############################################################
+
+@app.route('/get-photo/', methods = ['GET'])
+def get_photo():
+    if request.method == 'POST':
+        return make_response(400)
+
+    id = request.args.get('id')
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+
+    # See if the photo does not exist
+    if photo is None:
+        return make_response(404)
+
+    name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
     
-    r = requests.delete(pilocation)
-    print "DELETE"
-    print r.text
+    img = Image.open(photo.path)
 
     returnobj = {}
-    returnobj['saved'] = True
+    returnobj['path'] = name
+    returnobj['id'] = photo.id
+    returnobj['width'] = img.size[0]
+    returnobj['height'] = img.size[1]
+    returnobj['raw'] = photo.raw
+    returnobj['notes'] = photo.notes
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -371,6 +344,23 @@ def make_cut():
     returnobj['id'] = selection.id
     returnobj['width'] = cropped.size[0]
     returnobj['height'] = cropped.size[1]
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
+@app.route('/save-notes/', methods = ['POST'])
+def save_notes():
+    returnobj = {}
+    if request.method == 'GET':
+        print "BAD REQUEST"
+
+    id = request.form['id']
+    content = request.form['content']
+
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    photo.notes = content
+    db.session.commit()
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'

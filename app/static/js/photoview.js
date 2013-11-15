@@ -53,6 +53,11 @@ PhotoView.prototype.setNewPhoto = function($parent, data) {
     return obj
 }
 
+PhotoView.prototype.initializeNotes = function(data) {
+    var content = data.notes;
+    tinyMCE.activeEditor.setContent(content);
+}
+
 PhotoView.prototype.getScale = function(w, h, maxW, maxH) {
     var currentPhotoRatio = 1;
     // reset the ratio so that we can send accurate coordinates to the pi

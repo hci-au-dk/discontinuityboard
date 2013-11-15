@@ -32,31 +32,35 @@ $(window).load(function() {
 
     attachListeners();
 
-
     $(".loading-icon").hide();
 
     // load the proper photo
     var photoId = $("#photo-id").val()
     if (photoId) {
-	messenger.getPhoto(photoId, setNewPhotoMainView);
+	messenger.getPhoto(photoId, function(data){
+	    setNewPhotoMainView(data);
+	    viewer.initializeNotes(data);
+	});
     }
+
+    var height = $("#content").height();
+    $(".column").height(height);
 
     tinymce.init({
 	selector: '#notes',
+	menubar: 'edit insert format tools',
+	toolbar: "undo redo | alignleft aligncenter alignright alignjustify | bold italic | link image",
 	plugins: 'link image code',
-	relative_urls: false
+	relative_urls: false,
+	height: height - 110  // height of the content minus height of the tinymce toolbars
     });
 
-    // make all the columns have equal height
-    $(window).bind("resize", fixDimensions);
+    // and the centering of the content
+    $(window).bind("resize", fixWidth);
     $(window).trigger("resize");
 });
 
-// to deal with sizing
-function fixDimensions() {
-    var height = $("#content").height();
-    $(".column").height(height);
-    // and the centering of the content
+function fixWidth() {
     var width = $("#content").width();
     $("#content").css("margin-left", (-1 * (width / 2)) + "px");
 }
@@ -84,9 +88,6 @@ function setNewPhoto($parent, data) {
     var stats = viewer.setNewPhoto($parent, data);
     currentPhotoId = stats.id;
     currentPhotoRatio = stats.ratio;
-
-    $("#photo-tools-dropdown").show();
-    $("#notes-options").show();
 }
 
 function appendSelection(data) {
@@ -99,5 +100,5 @@ function appendSelection(data) {
     newNode.src = data.path;                           // add src attribute
     newNode.width = width;
     newNode.height = height;
-    range.insertNode(newNode);       // insert it into the editor! Bam!
+    ed.execCommand('mceInsertContent', false, newNode.outerHTML)
 }

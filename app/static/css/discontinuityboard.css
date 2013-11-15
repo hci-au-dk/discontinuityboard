@@ -52,7 +52,8 @@ p {
 }
 
 .inuse {
-    background-color: green;
+    background: #555;
+    color: #fff;
 }
 
 .unselectable {
@@ -92,7 +93,6 @@ p {
 
 #select-options {
     float: left;
-    width: 50%;
     text-align: center;
 }
 
