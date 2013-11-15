@@ -5,10 +5,9 @@ var messenger = null;
 var browser = null;
 var viewer = null;
 
+// Info about the photo that is currently being displayed
 var currentPhotoId = null;
 var currentPhotoRatio = 1;
-
-var configsSet = false;
 
 // size constants
 var MIN_SELECT_SIZE = 10;
@@ -33,9 +32,6 @@ $(window).load(function() {
 
     attachListeners();
 
-    // make all the columns have equal height
-    $(window).bind("resize", fixDimensions);
-    $(window).trigger("resize");
 
     $(".loading-icon").hide();
 
@@ -44,6 +40,16 @@ $(window).load(function() {
     if (photoId) {
 	messenger.getPhoto(photoId, setNewPhotoMainView);
     }
+
+    tinymce.init({
+	selector: '#notes',
+	plugins: 'link image code',
+	relative_urls: false
+    });
+
+    // make all the columns have equal height
+    $(window).bind("resize", fixDimensions);
+    $(window).trigger("resize");
 });
 
 // to deal with sizing
@@ -55,29 +61,10 @@ function fixDimensions() {
     $("#content").css("margin-left", (-1 * (width / 2)) + "px");
 }
 
-
 function attachListeners() {
-    // Photo taking/uploading
-    $("#take-photo-button").bind("click", takeRegularPhotoClick);
-    $("#deleteconfigs").bind("click", deleteConfigs);
-    $("#uploadphotobutton").bind("click", showUpload);
-
     // Tools buttons
-    $("#deletephoto").bind("click", tools.deletePhoto);
     $("#select-button").bind("click", tools.selectClick);
     $("#make-selection-button").bind("click", tools.makeSelection);
-}
-
-// TODO: fix configuration deletion service
-function deleteConfigs() {
-    messenger.deleteConfigs();
-    messenger.getConfigured(setConfigured);
-}
-
-function setConfigured(data) {
-    if (data.configs.x0.length > 0) {
-	configsSet = true;
-    }
 }
 
 function showUpload() {
@@ -87,31 +74,6 @@ function showUpload() {
     messenger.getAllPhotos(initializeBrowser);
     // clear the filename from the form
     $("#filename").val("");
-}
-
-function takeRegularPhotoClick() {
-    takePhotoClick(true);
-}
-
-function takePhotoClick(configs) {
-    $(".loading-icon").show();
-    messenger.takePhotoWithPi(configs, function(data) {
-	browser.getPhoto(data)
-	$(".loading-icon").hide();
-    });
-    messenger.getAllPhotos(initializeBrowser);
-}
-
-
-function initializeBrowser(data) {
-    browser = new Browser(data);
-    $(".thumbnail").bind("click", browser.getPhotoClick);
-}
-
-function removePhoto() {
-    $("#photo-tools-dropdown").hide();
-    $("#notes-options").hide();
-    $("#photocontainer").remove()
 }
 
 function setNewPhotoMainView(data) {
@@ -128,11 +90,14 @@ function setNewPhoto($parent, data) {
 }
 
 function appendSelection(data) {
-    var img = $(document.createElement("img"));
-    img.attr("src", data.path);
     var width = data.width * currentPhotoRatio;
     var height = data.height * currentPhotoRatio;
-    img.css("width", width);
-    img.css("height", height);
-    $("#notes").append(img);
+
+    var ed = tinyMCE.activeEditor;
+    var range = ed.selection.getRng();                  // get range
+    var newNode = ed.getDoc().createElement( "img" );  // create img node
+    newNode.src = data.path;                           // add src attribute
+    newNode.width = width;
+    newNode.height = height;
+    range.insertNode(newNode);       // insert it into the editor! Bam!
 }

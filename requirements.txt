@@ -1,5 +1,6 @@
 Flask==0.10
 Flask-Assets==0.8
+Flask-Login==0.2.7
 Flask-SQLAlchemy==1.0
 Flask-Testing==0.4
 Flask-WTF==0.9.3
