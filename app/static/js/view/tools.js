@@ -97,10 +97,10 @@ function resizeSelector(e) {
     var h = y - sY;
 
     // new width and height
-    if (w > 1) {
+    if (w > 0) {
 	$("#selector").css("width", w + "px");
     }
-    if (h > 1) {
+    if (h > 0) {
 	$("#selector").css("height", h + "px");
     }
 }

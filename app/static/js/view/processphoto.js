@@ -34,14 +34,6 @@ $(window).load(function() {
 
     $(".loading-icon").hide();
 
-    // load the proper photo
-    var photoId = $("#photo-id").val()
-    if (photoId) {
-	messenger.getPhoto(photoId, function(data){
-	    setNewPhotoMainView(data);
-	    viewer.initializeNotes(data);
-	});
-    }
 
     var height = $("#content").height();
     $(".column").height(height);
@@ -54,6 +46,15 @@ $(window).load(function() {
 	relative_urls: false,
 	height: height - 110  // height of the content minus height of the tinymce toolbars
     });
+
+    // load the proper photo
+    var photoId = $("#photo-id").val()
+    if (photoId) {
+	messenger.getPhoto(photoId, function(data){
+	    setNewPhotoMainView(data);
+	    viewer.initializeNotes(data);
+	});
+    }
 
     // and the centering of the content
     $(window).bind("resize", fixWidth);
