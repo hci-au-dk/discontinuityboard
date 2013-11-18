@@ -40,7 +40,7 @@ def view():
         return redirect(url_for('entry'))
     
     return render_template('discontinuityboard.html',
-                           title = 'Discontinuity Board',
+                           title = 'View | Discontinuity Board',
                            pvform = pvform,
                            user = photo)
 
@@ -59,7 +59,7 @@ def pi():
         user = current_user
 
     return render_template('pi.html',
-                           title = 'Discontinuity Board',
+                           title = 'Pi | Discontinuity Board',
                            rform = rform,
                            cform = cform,
                            lform = lform,

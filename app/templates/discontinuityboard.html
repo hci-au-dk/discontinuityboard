@@ -27,28 +27,34 @@
 
 <input id="photo-id" value="{{user.id}}" hidden="true"/>
 
-<div>
-  <div id="navigate">
-    <ul id="selection-tools">
-      <li id="select-button">Select Tool</li>
-    </ul>
+<div id="navigate">
+  <ul id="selection-tools">
+    <li id="select-button">Select Tool</li>
+  </ul>
 
-    <ul id="select-options" class="center">
-      <li id="make-selection-button">Make Selection</li>
-    </ul>
+  <ul id="select-options" class="center">
+    <li id="make-selection-button">Make Selection</li>
+  </ul>
 
-    <ul id="notes-options" class="right">
-      <li id="save-notes-button">Save Notes</li>
-      <li id="share-notes-button">Share Notes</li>
-      <li id="export-notes-button">Export Notes</li>
-    </ul>
+  <ul id="notes-options" class="menu right">
+    <li id="save-notes-button">Save Notes</li>
+    <li id="share-notes-button">Share Notes</li>
+    <li id="export-notes-options">Export Notes
+      <ul class="sub-menu">
+	<li id="export-pdf" class="export-notes-button">PDF</li>
+	<li id="export-rtf" class="export-notes-button">RTF</li>
+	<li id="export-odt" class="export-notes-button">ODT</li>
+	<li id="export-docx" class="export-notes-button">DOCX</li>
+      </ul>
+    </li>
+  </ul>
+</div>
 
-  </div>
 
-</div> 
-
+<hr />
 
 <div id="content">
+
 
   <div id="view" class="column left">
 
