@@ -21,7 +21,6 @@ from markupsafe import Markup
 
 @app.route('/')
 def entry():
-    clear_old_photos()
     pvform = PhotoViewForm()
     return render_template('entrypoint.html',
                            title = 'Discontinuity Board',
@@ -54,7 +53,6 @@ def view():
 
 @app.route('/pi')
 def pi():
-    clear_old_photos()
     rform = RegisterPiForm()
     cform = ConfigurePiForm()
     lform = LoginPiForm()
@@ -157,6 +155,7 @@ def get_all_photos():
     if request.method == 'POST':
         return make_response(400)
 
+    clear_old_photos()
     photos = models.Photo.query.filter(models.Photo.pi_id==current_user.id)
     data = []
     for photo in photos:
@@ -292,25 +291,25 @@ def get_photo():
     if request.method == 'POST':
         return make_response(400)
 
+    clear_old_photos()
     id = request.args.get('id')
     photo = models.Photo.query.filter(models.Photo.id==id).first()
 
     # See if the photo does not exist
-    if photo is None:
-        return make_response(404)
-
-    name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
-    
-    img = Image.open(photo.path)
-
     returnobj = {}
-    returnobj['path'] = name
-    returnobj['id'] = photo.id
-    returnobj['width'] = img.size[0]
-    returnobj['height'] = img.size[1]
-    returnobj['raw'] = photo.raw
-    returnobj['notes'] = photo.notes
-    returnobj['time'] = get_time_left(photo.time_submitted)
+    if photo is None:
+        return redirect(url_for('entry'))
+    else:
+        name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
+        img = Image.open(photo.path)
+    
+        returnobj['path'] = name
+        returnobj['id'] = photo.id
+        returnobj['width'] = img.size[0]
+        returnobj['height'] = img.size[1]
+        returnobj['raw'] = photo.raw
+        returnobj['notes'] = photo.notes
+        returnobj['time'] = get_time_left(photo.time_submitted)
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'

@@ -25,6 +25,12 @@
   </div>
 </div>
 
+<span class="center-text">
+  <p id="time-left"></p>
+</span>
+
+<hr />
+
 <input id="photo-id" value="{{user.id}}" hidden="true"/>
 
 <div id="navigate">
@@ -37,7 +43,7 @@
   </ul>
 
   <ul id="notes-options" class="menu right">
-    <li id="save-notes-button">Saved</li>
+    <li id="save-notes-button">Save Notes</li>
     <a href="{{ url_for('export_notes', id=user.id) }}">
       <li id="export-pdf-button"> 
 	Export to PDF
@@ -48,10 +54,6 @@
 
 
 <hr />
-
-<span class="center-text">
-  <p id="time-left"></p>
-</span>
 
 <div id="content">
 

@@ -74,14 +74,19 @@ $(window).load(function() {
     $(window).trigger("resize");
 });
 
-window.setInterval(updateTime, 100000);
+window.setInterval(updateTime, 10000);
 
 function updateTime() {
     messenger.getPhoto(currentPhotoId, function(data){
-	if (data.notes == null) {
-	    $("#time-left").html("Days left to process: " + data.time);
+	if (data.path){
+	    if (data.notes == null) {
+		$("#time-left").html("Days left to process: " + data.time);
+	    } else {
+		$("#time-left").html("Congratulations, your photo will not be deleted!");
+	    }
 	} else {
-	    $("#time-left").html("Congratulations, your photo will not be deleted!");
+	    // so that the browser doesn't ask the user about it
+	    window.location = window.location.pathname;
 	}
     });
 }
