@@ -13,6 +13,11 @@ from wtforms.validators import ValidationError
 
 from flask_weasyprint import HTML, render_pdf
 from markupsafe import Markup
+import socket
+
+if os.name != "nt":
+    import fcntl
+    import struct
 
 
 ##############################################################
@@ -108,18 +113,26 @@ def register_pi():
         wbw = form.wbwidth.data
         wbh = form.wbheight.data
         wbratio = str(float(wbw) / float(wbh))
+        if (models.Pi.query.filter(models.Pi.human_name==form.human_name.data).count() == 0 and
+            models.Pi.query.filter(models.Pi.ip==form.ip_address.data).count() == 0):
+            # register this server and name with the pi
+            me = app.config['SERVER_IP']
+            pilocation = 'http://' + ip + '/' + 'register-server'
+            headers = {'Content-Type': 'application/json'}
+            piobj = {'server': me}
+            r = requests.post(pilocation, data=json.dumps(piobj), headers=headers)
 
-        # save the pi in the database
-        pi = models.Pi(ip=ip, human_name=name, password=password, wbratio=wbratio)
-        if models.Pi.query.filter(models.Pi.human_name==form.human_name.data).count() == 0:
-            db.session.add(pi)
-            try:
-                db.session.commit()
-                user = form.get_user()
-                login_user(user, remember = True)
-            except:
-                IntegrityError
-                db.session.rollback()
+            if r.status_code == 200:
+                # save the pi in the database
+                pi = models.Pi(ip=ip, human_name=name, password=password, wbratio=wbratio)
+                db.session.add(pi)
+                try:
+                    db.session.commit()
+                    user = form.get_user()
+                    login_user(user, remember = True)
+                except:
+                    IntegrityError
+                    db.session.rollback()
         else:
             # TODO: Make a sensible reaction to trying to register a name twice
             print "DUPLICATE USERNAME"
@@ -131,6 +144,21 @@ def register_pi():
 @login_required
 def pi_logout():
     logout_user()
+    return redirect(url_for('pi'))
+
+@app.route('/pi/delete-pi/')
+@login_required
+def pi_delete():
+    pi = models.Pi.query.filter(models.Pi.id==current_user.id).first()
+    for photo in pi.photos:
+        delete_photo_and_selections(photo)
+
+    # delete config file on the pi
+    pilocation = get_pi_base() + 'register-server'
+    r = requests.delete(pilocation)
+
+    db.session.delete(pi)
+    db.session.commit()
     return redirect(url_for('pi'))
 
 @app.route('/upload/', methods=['POST'])
@@ -268,7 +296,7 @@ def configure():
         r = requests.post(pilocation, data=json.dumps(piobj), headers=headers)
 
         returnobj = {}
-        if r.text == 'Configuration saved':
+        if r.status_code == 200:
             returnobj['saved'] = True
         else:
             returnobj['saved'] = False
@@ -281,6 +309,24 @@ def configure():
         db.session.commit()
 
     return redirect(url_for('pi'))
+
+
+@app.route('/pi-upload/', methods=['POST'])
+def pi_upload():
+    print "I'm alive!"
+    filename = None
+    returnobj = {}
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            photoid = save_photo(file, filename, False)
+            returnobj['id'] = photoid
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
 
 ##############################################################
 # AJAX Services - View                                       #
@@ -298,7 +344,7 @@ def get_photo():
     # See if the photo does not exist
     returnobj = {}
     if photo is None:
-        return redirect(url_for('entry'))
+        returnobj['path'] = None
     else:
         name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
         img = Image.open(photo.path)
@@ -397,9 +443,8 @@ def clear_old_photos(timespan_days=2):
     now = datetime.datetime.now()
     for photo in models.Photo.query.all():
         delta = now - photo.time_submitted
-        if delta.days >= timespan_days and photo.notes is None:
+        if (delta.days >= timespan_days and photo.notes is None):
             delete_photo_and_selections(photo)
-
 
 def delete_photo_and_selections(photo):
     path = photo.path
@@ -493,3 +538,33 @@ def get_new_access_code(size=6, chars=string.ascii_uppercase):
 
 def generate_code(size, chars):
     return ''.join(random.choice(chars) for x in range(size))
+
+
+
+
+def get_interface_ip(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, struct.pack('256s',
+                                                                        ifname[:15]))[20:24])
+
+def get_lan_ip():
+    ip = socket.gethostbyname(socket.gethostname())
+    if ip.startswith("127.") and os.name != "nt":
+        interfaces = [
+            "eth0",
+            "eth1",
+            "eth2",
+            "wlan0",
+            "wlan1",
+            "wifi0",
+            "ath0",
+            "ath1",
+            "ppp0",
+            ]
+        for ifname in interfaces:
+            try:
+                ip = get_interface_ip(ifname)
+                break
+            except IOError:
+                pass
+    return ip

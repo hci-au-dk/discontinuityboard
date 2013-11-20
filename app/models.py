@@ -40,7 +40,7 @@ class Selection(db.Model):
     
 class Pi(db.Model):
     id = db.Column(db.Integer, primary_key = True)  # Unique Identifier
-    ip = db.Column(db.String(45))
+    ip = db.Column(db.String(45), unique = True)
     human_name = db.Column(db.String(30), unique = True)  # a memorable name for the user's sake
     password = db.Column(db.String(30))
     wbratio = db.Column(db.String(10))  # width / height

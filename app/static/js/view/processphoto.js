@@ -46,12 +46,8 @@ $(window).load(function() {
 	relative_urls: false,
 	height: height - 110,  // height of the content minus height of the tinymce toolbars
 	setup: function(ed) {
-            ed.on("change", function(ed) {
-		var message = $("#save-notes-button").html();
-		if (message != "Save Notes") {
-		    $("#save-notes-button").html("Save Notes");
-		}
-            });
+            ed.on("change", editorChange);
+            ed.on("keyDown", editorChange);
 	}
     });
 
@@ -74,7 +70,14 @@ $(window).load(function() {
     $(window).trigger("resize");
 });
 
-window.setInterval(updateTime, 10000);
+function editorChange(ed) {
+    var message = $("#save-notes-button").html();
+    if (message != "Save Notes") {
+	$("#save-notes-button").html("Save Notes");
+    }
+}
+
+window.setInterval(updateTime, 100000);
 
 function updateTime() {
     messenger.getPhoto(currentPhotoId, function(data){

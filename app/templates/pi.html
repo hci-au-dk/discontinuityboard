@@ -14,9 +14,11 @@
 
     {% if user %}
     <ul class="right">
-      <li id="login-button" data-toggle="modal">Login</li>
       <li id="configure-button" data-toggle="modal">Configure</li>
+      <li id="login-button" data-toggle="modal">Login</li>
+      <li id="register-button" data-toggle="modal">Register</li>
       <a id="logout" href="{{ url_for('pi_logout') }}"><li>Logout</li></a>
+      <li id="delete-pi-button" data-toggle="modal">Delete Pi</li>
     </ul>
     <span class="right">
       <p>Connected to pi located at: {{user.ip}}</p>

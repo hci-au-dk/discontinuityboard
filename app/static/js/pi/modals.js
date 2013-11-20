@@ -18,6 +18,10 @@ $(function () {
 	showConfigure(modals, tools);
     });
 
+    $("#delete-pi-button").bind("click", function() {
+	modals.showModal($("#delete-pi-modal"));
+    });
+
 });
 
 function showConfigure(modals, tools) {
