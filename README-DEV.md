@@ -36,6 +36,17 @@ that is complaining about missing decoders, you need to install `jpeg`. If you a
 (venv)$ pip install pillow
 ```
 
+### flask-weasyprint (for pdf-output)
+
+If you are getting errors about libraries not being available, you need to go install all of the right ones:
+
+```
+$ brew install python cairo pango gdk-pixbuf libxml2 libxslt libffi
+```
+
+If that isn't working, you may need to do a `brew update`
+
+
 ## Database
 
 There are a few database helper scripts now. Their names should be self-explanatory. If you haven't created your database before, you should do the following:

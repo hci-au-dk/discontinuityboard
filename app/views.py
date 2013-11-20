@@ -11,6 +11,9 @@ from forms import RegisterPiForm, ConfigurePiForm, LoginPiForm, PhotoViewForm
 from flask.ext.login import login_user, current_user, logout_user, login_required
 from wtforms.validators import ValidationError
 
+from flask_weasyprint import HTML, render_pdf
+from markupsafe import Markup
+
 
 ##############################################################
 # Routers - View                                             #
@@ -18,6 +21,7 @@ from wtforms.validators import ValidationError
 
 @app.route('/')
 def entry():
+    clear_old_photos()
     pvform = PhotoViewForm()
     return render_template('entrypoint.html',
                            title = 'Discontinuity Board',
@@ -34,11 +38,11 @@ def view():
             if form.validate_login():
                 photo = user
 
-    # prepare the forms
-    pvform = PhotoViewForm()
     if photo is None:
         return redirect(url_for('entry'))
-    
+
+    # prepare the forms
+    pvform = PhotoViewForm()    
     return render_template('discontinuityboard.html',
                            title = 'View | Discontinuity Board',
                            pvform = pvform,
@@ -50,6 +54,7 @@ def view():
 
 @app.route('/pi')
 def pi():
+    clear_old_photos()
     rform = RegisterPiForm()
     cform = ConfigurePiForm()
     lform = LoginPiForm()
@@ -159,8 +164,8 @@ def get_all_photos():
             name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
             img = Image.open(photo.path)
             data.append({'path': name, 'id': photo.id, 'code': photo.code,
-                         'width': img.size[0], 'height': img.size[1]})
-
+                         'width': img.size[0], 'height': img.size[1],
+                         'time': get_time_left(photo.time_submitted)})
 
     returnobj = {}
     returnobj["photos"] = data
@@ -178,11 +183,8 @@ def delete_photo():
 
     id = request.args.get('id')
     photo = models.Photo.query.filter(models.Photo.id==id).first()
-    path = photo.path
-    db.session.delete(photo)
-    db.session.commit()
 
-    os.remove(path)
+    delete_photo_and_selections(photo)
 
     returnobj = {}
     response = make_response(json.dumps(returnobj), 200)
@@ -202,8 +204,6 @@ def take_photo():
         pilocation = get_pi_base() + 'snapshot'
         raw = False
 
-    print "LOCATION"
-    print pilocation
     r = requests.get(pilocation)
 
     img = Image.open(StringIO(r.content))
@@ -310,6 +310,7 @@ def get_photo():
     returnobj['height'] = img.size[1]
     returnobj['raw'] = photo.raw
     returnobj['notes'] = photo.notes
+    returnobj['time'] = get_time_left(photo.time_submitted)
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -366,6 +367,19 @@ def save_notes():
     response.headers['Content-type'] = 'application/json'
     return response
 
+@app.route('/export-notes/', methods = ['GET'])
+def export_notes():
+    if request.method == 'POST':
+        print "BAD REQUEST"
+
+    id = request.args.get('id')
+
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    tmp = render_template('notes.html', notes=Markup(photo.notes))
+
+    response = render_pdf(HTML(string=tmp), download_filename='notes.pdf')
+    return response
+
 
 ##############################################################
 # Authentication Services                                    #
@@ -379,6 +393,34 @@ def load_user(userid):
 ##############################################################
 # Helper Functions                                           #
 ##############################################################
+
+def clear_old_photos(timespan_days=2):
+    now = datetime.datetime.now()
+    for photo in models.Photo.query.all():
+        delta = now - photo.time_submitted
+        if delta.days >= timespan_days and photo.notes is None:
+            delete_photo_and_selections(photo)
+
+
+def delete_photo_and_selections(photo):
+    path = photo.path
+    for child in photo.children:
+        os.remove(child.path)
+        db.session.delete(child)
+
+    db.session.delete(photo)
+    db.session.commit()
+    os.remove(path)
+
+def get_time_left(time_submitted, timespan_days=2):
+    now = datetime.datetime.now()
+    delta = now - time_submitted
+    # convert timespan_days to seconds
+    seconds_allowed = timespan_days * 24 * 60 * 60
+    seconds_left = seconds_allowed - delta.total_seconds()
+    # return the number of days left
+    days_left = seconds_left / 60 / 60 / 24
+    return round(days_left, 6)
 
 def allowed_file(filename):
     return '.' in filename and \

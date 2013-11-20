@@ -26,6 +26,12 @@ $(window).ready(function() {
 
 });
 
+window.setInterval(loadPhotos, 100000);
+
+function loadPhotos() {
+    messenger.getAllPhotos(initializeBrowser);
+}
+
 
 function attachListeners() {
     // Photo taking/uploading

@@ -104,13 +104,14 @@ var Messenger = function() {
 
     // AJAX view functions
 
-    this.saveNotes = function(photoId, notesContent) {
+    this.saveNotes = function(photoId, notesContent, successFn) {
 	var data = {id: photoId, content: notesContent};
 	$.ajax({
 	    url: '/save-notes/',
 	    data: data,
 	    type: 'POST',
 	    success: function(data){
+		successFn(data);
 	    },
 	    error: function(data) {
 		if (DEBUG)

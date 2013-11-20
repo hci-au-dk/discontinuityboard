@@ -30,6 +30,9 @@ var Browser = function(data) {
 	p.text("Access: " + data.photos[index]["code"]);
 	div.append(p);
 
+	var p = $(document.createElement("p"));
+	p.text("Days until expiry: " + data.photos[index]["time"]);
+	div.append(p);
 
 	bb.append(div);
     });

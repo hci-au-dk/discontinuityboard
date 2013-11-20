@@ -13,12 +13,12 @@
     <div class="loading-icon left"></div>
 
     <ul class="right">
-      <li id="photo-view-button" data-toggle="modal">Photo View</li>
+      <li id="photo-view-button" data-toggle="modal">View New Photo</li>
     </ul>
 
     <span class="right">
       {% if user %}
-      <p>You are connected to {{user.id}}, accessed with code: {{user.code}}</p>
+      <p>You are connected to photo: {{user.code}}</p>
       {% endif %}
     </span>
 
@@ -37,21 +37,21 @@
   </ul>
 
   <ul id="notes-options" class="menu right">
-    <li id="save-notes-button">Save Notes</li>
-    <li id="share-notes-button">Share Notes</li>
-    <li id="export-notes-options">Export Notes
-      <ul class="sub-menu">
-	<li id="export-pdf" class="export-notes-button">PDF</li>
-	<li id="export-rtf" class="export-notes-button">RTF</li>
-	<li id="export-odt" class="export-notes-button">ODT</li>
-	<li id="export-docx" class="export-notes-button">DOCX</li>
-      </ul>
-    </li>
+    <li id="save-notes-button">Saved</li>
+    <a href="{{ url_for('export_notes', id=user.id) }}">
+      <li id="export-pdf-button"> 
+	Export to PDF
+      </li>
+    </a>
   </ul>
 </div>
 
 
 <hr />
+
+<span class="center-text">
+  <p id="time-left"></p>
+</span>
 
 <div id="content">
 

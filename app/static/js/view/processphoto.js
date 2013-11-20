@@ -44,14 +44,27 @@ $(window).load(function() {
 	toolbar: "undo redo | alignleft aligncenter alignright alignjustify | bold italic | link image",
 	plugins: 'link image code',
 	relative_urls: false,
-	height: height - 110  // height of the content minus height of the tinymce toolbars
+	height: height - 110,  // height of the content minus height of the tinymce toolbars
+	setup: function(ed) {
+            ed.on("change", function(ed) {
+		var message = $("#save-notes-button").html();
+		if (message != "Save Notes") {
+		    $("#save-notes-button").html("Save Notes");
+		}
+            });
+	}
     });
 
     // load the proper photo
     var photoId = $("#photo-id").val()
     if (photoId) {
 	messenger.getPhoto(photoId, function(data){
-	    setNewPhotoMainView(data);
+	    if (data.notes == null) {
+		$("#time-left").html("Days left to process: " + data.time);
+	    } else {
+		$("#time-left").html("Congratulations, your photo will not be deleted!");
+	    }
+	    setNewPhoto($("#view"), data);
 	    viewer.initializeNotes(data);
 	});
     }
@@ -60,6 +73,19 @@ $(window).load(function() {
     $(window).bind("resize", fixWidth);
     $(window).trigger("resize");
 });
+
+window.setInterval(updateTime, 100000);
+
+function updateTime() {
+    messenger.getPhoto(currentPhotoId, function(data){
+	if (data.notes == null) {
+	    $("#time-left").html("Days left to process: " + data.time);
+	} else {
+	    $("#time-left").html("Congratulations, your photo will not be deleted!");
+	}
+    });
+}
+
 
 function fixWidth() {
     var width = $("#content").width();
@@ -81,10 +107,6 @@ function showUpload() {
     $("#filename").val("");
 }
 
-function setNewPhotoMainView(data) {
-    setNewPhoto($("#view"), data);
-}
-
 function setNewPhoto($parent, data) {
     var stats = viewer.setNewPhoto($parent, data);
     currentPhotoId = stats.id;
@@ -99,7 +121,7 @@ function appendSelection(data) {
     var range = ed.selection.getRng();                  // get range
     var newNode = ed.getDoc().createElement( "img" );  // create img node
     newNode.src = data.path;                           // add src attribute
-    newNode.width = width;
-    newNode.height = height;
+    newNode.style.width = width + "px";
+    newNode.style.height = height + "px";
     ed.execCommand('mceInsertContent', false, newNode.outerHTML)
 }

@@ -50,12 +50,15 @@ PhotoView.prototype.setNewPhoto = function($parent, data) {
 
     var obj = {"id": data.id,
 	      "ratio": currentPhotoRatio};
+
     return obj
 }
 
 PhotoView.prototype.initializeNotes = function(data) {
     var content = data.notes;
-    tinyMCE.activeEditor.setContent(content);
+    if (content) {
+	tinyMCE.activeEditor.setContent(content);
+    }
 }
 
 PhotoView.prototype.getScale = function(w, h, maxW, maxH) {

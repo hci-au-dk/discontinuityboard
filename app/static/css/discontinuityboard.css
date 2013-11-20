@@ -10,6 +10,10 @@ div {
     overflow: hidden;
 }
 
+hr {
+    clear: both;
+}
+
 body {
     font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: #E8E8E8;
@@ -27,6 +31,10 @@ p {
 .center {
     margin-left: auto;
     margin-right: auto;
+}
+
+.center-text {
+    text-align: center;
 }
 
 .corner {
@@ -83,8 +91,8 @@ p {
 #selector {
     border: 2px dashed red;
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: 100px;
+    height: 100px;
 }
 
 #selection-tools {
@@ -219,11 +227,6 @@ ul li ul li:hover {
     background: #666;
 }
 
-hr {
-    width: 100%;
-    clear: both;
-}
-
 ul li:hover ul {
   display: block;
   opacity: 1;
@@ -299,4 +302,29 @@ ul li:hover ul {
     overflow: hidden;
     float: left;
 }
+
+/* For resizable */
+
+.ui-resizable { 
+    position: relative;
+}
+
+.ui-resizable-handle { 
+    position: absolute; 
+    font-size: 0.1px;
+    display: block;
+    background-color: black;
+}
+
+.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle {
+    display: none;
+ }
+.ui-resizable-n { cursor: n-resize; height: 8px; width: 100%; top: -5px; left: 0; }
+.ui-resizable-s { cursor: s-resize; height: 8px; width: 100%; bottom: -5px; left: 0; }
+.ui-resizable-e { cursor: e-resize; width: 8px; right: -5px; top: 0; height: 100%; }
+.ui-resizable-w { cursor: w-resize; width: 8px; left: -5px; top: 0; height: 100%; }
+.ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: -5px; bottom: -5px; }
+.ui-resizable-sw { cursor: sw-resize; width: 12px; height: 12px; left: -5px; bottom: -5px; }
+.ui-resizable-nw { cursor: nw-resize; width: 12px; height: 12px; left: -5px; top: -5px; }
+.ui-resizable-ne { cursor: ne-resize; width: 12px; height: 12px; right: -5px; top: -5px;}
 

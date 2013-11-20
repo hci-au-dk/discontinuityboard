@@ -62,6 +62,7 @@ var Tools = function() {
 	    messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
 	    $("#selector").remove();
 	    $("#make-selection-button").attr("disabled", "disabled");
+	    $("#toolsdiv").bind("click", selectionDown);
 	}
     }
 }
@@ -79,34 +80,14 @@ function selectionDown(e) {
     div.attr("id", "selector");
     div.css("top", y + "px");
     div.css("left", x + "px");
+    div.css("cursor", "pointer");
+    div.addClass("ui-widget-content")
+
+    div.draggable({containment: "#toolsdiv"}).resizable({containment: "#toolsdiv", handles: "n,e,s,w,se,sw,ne,nw"});
 
     $(this).append(div);
-    $(window).bind("mousemove", resizeSelector);
-    $(window).bind("mouseup", finishSelecting);
-}
 
-function resizeSelector(e) {
-    // only allow dragging right and down to grow the selector for now
-    var x = getX(e);
-    var y = getY(e);
-
-    var sX = $("#selector").offset().left;
-    var sY = $("#selector").offset().top;
-
-    var w = x - sX;
-    var h = y - sY;
-
-    // new width and height
-    if (w > 0) {
-	$("#selector").css("width", w + "px");
-    }
-    if (h > 0) {
-	$("#selector").css("height", h + "px");
-    }
-}
-
-function finishSelecting() {
-    $(window).unbind("mousemove");
+    $("#toolsdiv").unbind("mousedown");
 }
 
 function getX(e) {
