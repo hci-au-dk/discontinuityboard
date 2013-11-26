@@ -103,7 +103,6 @@ var Messenger = function() {
 
 
     // AJAX view functions
-
     this.saveNotes = function(photoId, notesContent, successFn) {
 	var data = {id: photoId, content: notesContent};
 	$.ajax({
