@@ -9,6 +9,7 @@ Flask-WTF==0.9.3
 Flask-WeasyPrint==0.4
 Jinja2==2.7.1
 MarkupSafe==0.18
+PIL==1.1.7
 Pillow==2.1.0
 Pyphen==0.8
 SQLAlchemy==0.7.10

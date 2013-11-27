@@ -115,24 +115,24 @@ def register_pi():
         wbratio = str(float(wbw) / float(wbh))
         if (models.Pi.query.filter(models.Pi.human_name==form.human_name.data).count() == 0 and
             models.Pi.query.filter(models.Pi.ip==form.ip_address.data).count() == 0):
-            # register this server and name with the pi
-            me = app.config['SERVER_IP']
-            pilocation = 'http://' + ip + '/' + 'register-server'
-            headers = {'Content-Type': 'application/json'}
-            piobj = {'server': me}
-            r = requests.post(pilocation, data=json.dumps(piobj), headers=headers)
 
-            if r.status_code == 200:
-                # save the pi in the database
-                pi = models.Pi(ip=ip, human_name=name, password=password, wbratio=wbratio)
-                db.session.add(pi)
-                try:
-                    db.session.commit()
-                    user = form.get_user()
-                    login_user(user, remember = True)
-                except:
-                    IntegrityError
-                    db.session.rollback()
+            # save the pi in the database
+            pi = models.Pi(ip=ip, human_name=name, password=password, wbratio=wbratio)
+            db.session.add(pi)
+            try:
+                db.session.commit()
+                user = form.get_user()
+                login_user(user, remember = True)
+
+                # register this server and name with the pi
+                pilocation = 'http://' + ip + '/' + 'register-server'
+                payload = {'id': current_user.id}
+                r = requests.get(pilocation, params=payload)
+            
+            except:
+                IntegrityError
+                db.session.rollback()
+
         else:
             # TODO: Make a sensible reaction to trying to register a name twice
             print "DUPLICATE USERNAME"
@@ -188,7 +188,7 @@ def get_all_photos():
     data = []
     for photo in photos:
         if not photo.raw:
-            name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
+            name = '/uploads/' + os.path.basename(photo.path)
             img = Image.open(photo.path)
             data.append({'path': name, 'id': photo.id, 'code': photo.code,
                          'width': img.size[0], 'height': img.size[1],
@@ -318,10 +318,15 @@ def pi_upload():
     returnobj = {}
     if request.method == 'POST':
         file = request.files['file']
+        pi_id = request.form['id']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            photoid = save_photo(file, filename, False)
-            returnobj['id'] = photoid
+            photoid = save_photo(file, filename, False, pi_id)
+            photo = models.Photo.query.filter(models.Photo.id==photoid).first()
+
+            returnobj['timesubmitted'] = photo.time_submitted 
+            returnobj['time'] = get_time_left(photo.time_submitted)
+            returnobj['code'] = photo.code 
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -346,7 +351,7 @@ def get_photo():
     if photo is None:
         returnobj['path'] = None
     else:
-        name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(photo.path)
+        name = '/uploads/' + os.path.basename(photo.path)
         img = Image.open(photo.path)
     
         returnobj['path'] = name
@@ -383,7 +388,7 @@ def make_cut():
 
     selection = models.Selection.query.filter(models.Selection.id==success).first()
 
-    name = app.config['HOST_BASE'] + 'uploads/' + os.path.basename(selection.path)
+    name = '/uploads/' + os.path.basename(selection.path)
 
     returnobj = {}
     returnobj['path'] = name
@@ -472,7 +477,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
     
-def save_photo(file, filename, raw):
+def save_photo(file, filename, raw, pi_id=None):
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
     file.save(savename)
 
@@ -480,7 +485,9 @@ def save_photo(file, filename, raw):
     code = get_new_access_code()
     
     # Now, we want to insert it into our database
-    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now(), pi_id=current_user.id, code=code)
+    if pi_id is None:
+        pi_id = current_user.id
+    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now(), pi_id=pi_id, code=code)
     db.session.add(photo)
     try:
         db.session.commit()

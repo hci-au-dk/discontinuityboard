@@ -1,11 +1,6 @@
 import os, tempfile
 from flask.ext.assets import Bundle
 
-### SERVER SETTINGS
-PORT = 80
-# TODO: make the server ip address something that is programatically discovered
-SERVER_IP = '10.185.10.191'
-
 ### STATIC FILES TO LOAD WITH ASSETS
 
 CSS_ALL = Bundle('css/discontinuityboard.css')
@@ -22,7 +17,6 @@ SECRET_KEY = 'kjiouW#(*$QN-1klaj)%&N93jaset%32u3k-o324[qlp4by'
 
 UPLOAD_FOLDER = 'tmp/'
 ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg', 'gif'])
-HOST_BASE = 'http://' + SERVER_IP + ':' + str(PORT) + '/'
 
 ### DATABASE SETTINGS
 
