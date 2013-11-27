@@ -423,6 +423,7 @@ def export_notes():
     tmp = render_template('notes.html', notes=Markup(photo.notes))
 
     response = render_pdf(HTML(string=tmp), download_filename='notes.pdf')
+
     return response
 
 
