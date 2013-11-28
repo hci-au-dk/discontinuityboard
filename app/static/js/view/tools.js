@@ -81,6 +81,7 @@ function selectionDown(e) {
     div.css("top", y + "px");
     div.css("left", x + "px");
     div.css("cursor", "pointer");
+    div.css("position", "absolute");  /* needs to be programmatically set to override style*/
     div.addClass("ui-widget-content")
 
     div.draggable({containment: "#toolsdiv"}).resizable({containment: "#toolsdiv", handles: "n,e,s,w,se,sw,ne,nw"});

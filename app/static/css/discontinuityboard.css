@@ -90,9 +90,9 @@ p {
 
 #selector {
     border: 2px dashed red;
-    position: absolute;
     width: 100px;
     height: 100px;
+    position: absolute;
 }
 
 #selection-tools {
