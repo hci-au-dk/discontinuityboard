@@ -313,20 +313,49 @@ def configure():
 
 @app.route('/pi-upload/', methods=['POST'])
 def pi_upload():
-    print "I'm alive!"
     filename = None
     returnobj = {}
     if request.method == 'POST':
         file = request.files['file']
         pi_id = request.form['id']
         if file and allowed_file(file.filename):
+           
+            img = Image.open(file)
+            # flip and correct for aspect ratio of the whiteboard
+            img = img.rotate(180)
+            ow = img.size[0]
+            h = img.size[1]
+            w = ow
+            wbratio = models.Pi.query.filter(models.Pi.id==pi_id).first().wbratio
+            if ( (ow / h) != wbratio):
+                # get a new width and height that does
+                # always keep the height the same
+                w = int(float(wbratio) * h)
+
+            img = img.resize((w, h))
+
             filename = secure_filename(file.filename)
-            photoid = save_photo(file, filename, False, pi_id)
+            photoid = save_photo(img, filename, False, pi_id, request.form['code'])
             photo = models.Photo.query.filter(models.Photo.id==photoid).first()
 
             returnobj['timesubmitted'] = photo.time_submitted 
             returnobj['time'] = get_time_left(photo.time_submitted)
             returnobj['code'] = photo.code 
+        else:
+            return 'Ill-formated request', 400
+    else:
+        return 'Bad request', 400
+
+    response = make_response(json.dumps(returnobj), 200)
+    response.headers['Content-type'] = 'application/json'
+    return response
+
+@app.route('/generate-access-code/', methods=['GET'])
+def generate_access_code():
+    returnobj = {}
+    if request.method == 'GET':
+        code = get_new_access_code()
+        returnobj['code'] = code 
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -404,7 +433,7 @@ def make_cut():
 def save_notes():
     returnobj = {}
     if request.method == 'GET':
-        print "BAD REQUEST"
+        return 'Bad request', 400
 
     id = request.form['id']
     content = request.form['content']
@@ -420,7 +449,7 @@ def save_notes():
 @app.route('/export-notes/', methods = ['GET'])
 def export_notes():
     if request.method == 'POST':
-        print "BAD REQUEST"
+        return 'Bad request', 400
 
     id = request.args.get('id')
 
@@ -477,12 +506,13 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
     
-def save_photo(file, filename, raw, pi_id=None):
+def save_photo(file, filename, raw, pi_id=None, code=None):
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
     file.save(savename)
 
     # generate an access code
-    code = get_new_access_code()
+    if code is None:
+        code = get_new_access_code()
     
     # Now, we want to insert it into our database
     if pi_id is None:
