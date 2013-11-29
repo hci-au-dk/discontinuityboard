@@ -6,6 +6,10 @@ $(function () {
 	modals.showModal($("#register-modal"));
     });
 
+    $("#edit-pi-button").bind("click", function() {
+	modals.showModal($("#edit-pi-modal"));
+    });
+
     $("#login-button").bind("click", function() {
 	modals.showModal($("#login-modal"))
     });

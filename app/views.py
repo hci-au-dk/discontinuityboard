@@ -7,7 +7,7 @@ from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
 from PIL import Image
 from StringIO import StringIO
-from forms import RegisterPiForm, ConfigurePiForm, LoginPiForm, PhotoViewForm
+from forms import RegisterPiForm, EditPiForm, ConfigurePiForm, LoginPiForm, PhotoViewForm
 from flask.ext.login import login_user, current_user, logout_user, login_required
 from wtforms.validators import ValidationError
 
@@ -32,15 +32,22 @@ def entry():
                            pvform = pvform)
 
 
+@app.route('/<code>', methods=['GET'])
 @app.route('/view/', methods=['GET', 'POST'])
-def view():
+def view(code=None):
+    print "VIEW"
+    print code
     photo = None
-    if request.method == 'POST':
-        form = PhotoViewForm(request.form)
-        if form.validate_on_submit():
-            user = form.get_user()
-            if form.validate_login():
-                photo = user
+    if (request.method == 'GET' and code is not None) or request.method == 'POST':
+        form = PhotoViewForm()
+        if request.method == 'GET':
+            form.code.data = code
+        else:
+            form = PhotoViewForm(request.form)
+
+        user = form.get_user()
+        if form.validate_login():
+            photo = user
 
     if photo is None:
         return redirect(url_for('entry'))
@@ -51,6 +58,8 @@ def view():
                            title = 'View | Discontinuity Board',
                            pvform = pvform,
                            user = photo)
+    
+
 
 ##############################################################
 # Routers - Pi                                               #
@@ -61,6 +70,7 @@ def pi():
     rform = RegisterPiForm()
     cform = ConfigurePiForm()
     lform = LoginPiForm()
+    eform = EditPiForm()
 
     user = None
     if current_user.is_authenticated():
@@ -71,6 +81,7 @@ def pi():
                            rform = rform,
                            cform = cform,
                            lform = lform,
+                           eform = eform,
                            user = user)
 
 @app.route('/pi/configure-modal')
@@ -139,6 +150,39 @@ def register_pi():
         return redirect(request.args.get("next") or url_for('pi_configure'))
 
     return redirect(url_for('pi_configure'))
+
+@app.route('/send-location-to-pi/', methods=['GET'])
+def send_location():
+    # register this server and name with the pi
+    pilocation = 'http://' + current_user.ip + '/' + 'register-server'
+    payload = {'id': current_user.id}
+    r = requests.get(pilocation, params=payload)
+    return redirect(url_for('pi'))
+
+
+@app.route('/edit-pi/', methods=['POST'])
+def edit_pi():
+    form = EditPiForm(request.form)
+    if request.method == 'POST' and form.validate():
+        new_ip = form.ip_address.data
+        new_name = form.human_name.data
+        new_password = form.password.data
+        new_width = form.wbwidth.data
+        new_height = form.wbheight.data
+        pi = form.get_user()
+        if pi is not None:
+            if len(new_ip) > 0:
+                pi.ip = new_ip
+            if len(new_name) > 0:
+                pi.name = new_name
+            if len(new_password) > 0:
+                pi.password = new_password
+            if len(new_width) and len(new_height) is not None:
+                wbratio = str(float(new_width) / float(new_height))
+                pi.wbratio = wbratio
+        db.session.commit()
+    # get the pi
+    return redirect(url_for('pi'))
 
 @app.route('/pi/logout/')
 @login_required

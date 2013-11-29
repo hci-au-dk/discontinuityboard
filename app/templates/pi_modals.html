@@ -2,20 +2,6 @@
 <div id="modal-overlay" class="overlay">
 </div>
 
-    <div id="set-up-modal" class="modal">
-      <div class="modal-header">
-        <button type="button" class="modal-close" data-dismiss="modal">close</button>
-        <h3>Set Up Your Pi</h3>
-      </div>
-
-      <div class="modal-footer">
-	<ul class="center">
-	  <li id="register-button" data-toggle="modal">Register</li>
-	  <li id="login-configure-button" data-toggle="modal">Login</li>
-	</ul>
-      </div>
-    </div>
-
     <div id="register-modal" class="modal">
       <div class="modal-header">
         <button type="button" class="modal-close" data-dismiss="modal">close</button>
@@ -26,17 +12,17 @@
 	{{ rform.hidden_tag() }}
         <div class="modal-body">
 	  <p>
-	    Pi ip address: {{rform.ip_address(size=45)}}<br>
-	    Name: {{rform.human_name(size=30)}}<br>
-	    password: {{rform.password(size=30)}}<br>
+	    <label>Pi ip address:</label> <span>{{rform.ip_address(size=45)}}</span>
+	    <label>Name:</label> <span>{{rform.human_name(size=30)}}</span>
+	    <label>Password:</label> <span>{{rform.password(size=30)}}</span>
 	    {% for error in rform.errors.ip_address %}
 	    <span style="color: red;">[{{error}}]</span>
 	    {% endfor %}<br>
 
 	    <hr />
 	    Whiteboard information:<br>
-	    width: {{rform.wbwidth(size=3)}}<br>
-	    height: {{rform.wbheight(size=3)}}<br>
+	    <label>width:</label> <span>{{rform.wbwidth(size=3)}}</span>
+	    <label>height:</label> <span>{{rform.wbheight(size=3)}}</span>
 
 	  </p>
           <hr />
@@ -59,8 +45,8 @@
         <div class="modal-body">
 
          <p>
-           Name: {{lform.human_name(size=30)}}<br>
-           password: {{lform.password(size=30)}}<br>
+           <label>Name:</label> <span>{{lform.human_name(size=30)}}</span>
+           <label>Password:</label> <span>{{lform.password(size=30)}}</span>
          </p>
          <hr />
         </div>
@@ -86,10 +72,18 @@
 	{{ cform.hidden_tag() }}
         <div class="modal-body">
 	  <p>
-	    (upper left corner) x: {{cform.x0(size=5)}} y: {{cform.y0(size=5)}}<br>
-	    (lower left corner) x: {{cform.x1(size=5)}} y: {{cform.y1(size=5)}}<br>
-	    (lower right corner) x: {{cform.x2(size=5)}} y: {{cform.y2(size=5)}}<br>
-	    (upper right corner) x: {{cform.x3(size=5)}} y: {{cform.y3(size=5)}}<br>
+	    <div class="coord-column">
+	      <label>(upper left) x:</label> <span>{{cform.x0(size=5)}}</span>
+	      <label>(lower left) x:</label> <span>{{cform.x1(size=5)}}</span>
+	      <label>(lower right) x:</label> <span>{{cform.x2(size=5)}}</span>
+	      <label>(upper right) x:</label> <span>{{cform.x3(size=5)}}</span>
+	    </div>
+	    <div class="coord-column">
+	      <label>y:</label> <span>{{cform.y0(size=5)}}</span>
+	      <label>y:</label> <span>{{cform.y1(size=5)}}</span>
+	      <label>y:</label> <span>{{cform.y2(size=5)}}</span>
+	      <label>y:</label> <span>{{cform.y3(size=5)}}</span>
+	    </div>
 
 	    {{cform.cwidth}}
 	    {{cform.cheight}}
@@ -138,4 +132,36 @@
 	    <a id="delete-pi-confirm" href="{{ url_for('pi_delete') }}"><li>Yes</li></a>
 	    <li class="modal-close">No</li>
         </div>
+    </div>
+
+    <div id="edit-pi-modal" class="modal">
+      <div class="modal-header">
+        <button type="button" class="modal-close" data-dismiss="modal">close</button>
+        <h3>Edit Your Pi Settings</h3>
+      </div>
+
+      <form action="{{ url_for('edit_pi') }}" method="post" name="editpi">
+	{{ rform.hidden_tag() }}
+	<div class="modal-body">
+	  <p>
+	    <label>Pi ip address:</label> <span>{{eform.ip_address(size=45, value=user.ip)}}</span>
+	    <label>Name:</label> <span>{{eform.human_name(size=30, value=user.human_name)}}</span>
+	    <label>Password:</label> <span>{{eform.password(size=30)}}</span>
+	    {% for error in rform.errors.ip_address %}
+	    <span style="color: red;">[{{error}}]</span>
+	    {% endfor %}<br>
+
+	    <hr />
+	    Whiteboard information:<br>
+	    <label>width:</label> <span>{{eform.wbwidth(size=3)}}</span>
+	    <label>height:</label> <span>{{eform.wbheight(size=3)}}</span>
+
+	    {{eform.old_ip(value=user.ip)}}
+	  </p>
+	</div>
+
+	<div class="modal-footer">
+	  <button type="submit" name="finish" value="ok">Change Settings</button>
+	</div>
+      </form>
     </div>

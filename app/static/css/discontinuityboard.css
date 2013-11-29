@@ -163,6 +163,26 @@ p {
     padding:20px;
 }
 
+.modal-body label {
+	    float: left;
+}
+
+.modal-body span {
+	    display: block;	 	
+	    overflow: hidden;
+	    padding: 0 4px 2px 6px
+}
+
+.modal-body input {
+	    width: 90%;
+	    margin: 2px;
+}
+
+.coord-column{
+	float:left;
+	width: 50%;
+}
+
 #modalContent {
     border-radius:8px;
     background:#fff;

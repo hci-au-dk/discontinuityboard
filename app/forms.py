@@ -17,7 +17,19 @@ class RegisterPiForm(Form):
 
     def get_user(self):
         return models.Pi.query.filter(models.Pi.human_name==self.human_name.data).first()
-    
+
+class EditPiForm(Form):
+    old_ip = HiddenField('old_ip', validators = [Required()])
+    ip_address = TextField('ip_address')
+    human_name = TextField('human_name')
+    password = PasswordField('password')
+
+    # white board aspect information
+    wbwidth = TextField('wbwidth')
+    wbheight = TextField('wbheight')
+
+    def get_user(self):
+        return models.Pi.query.filter(models.Pi.ip==self.old_ip.data).first()    
 
 class ConfigurePiForm(Form):
     x0 = TextField('x0', validators = [Required()])
