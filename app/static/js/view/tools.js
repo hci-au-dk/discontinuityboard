@@ -1,6 +1,7 @@
 // This is where the functionality for the buttons will go
 
 var Tools = function() {
+    /*
     var cutTool = false;  // TODO: see if this variable is necessary
     $("#select-options").hide();
 
@@ -21,12 +22,12 @@ var Tools = function() {
 	    $("#selector").remove();
 	    $("#select-button").removeClass("inuse");
 	}
-    }
+	}*/
     
     this.makeSelection = function() {
-	if ($("#selector").length == 1) {  // making a cut is a valid thing to do
+	if ($(".imgareaselect-selection").length == 1) {  // making a cut is a valid thing to do
 	    // get the coordinates of the cutBox
-	    var box = $("#selector");
+	    var box = $($(".imgareaselect-selection")[0]);
 	    var td = $("#toolsdiv");
 	    var x = box.offset().left;
 	    var y = box.offset().top;
@@ -60,9 +61,6 @@ var Tools = function() {
 
 	    // send them to a service
 	    messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
-	    $("#selector").remove();
-	    $("#make-selection-button").attr("disabled", "disabled");
-	    $("#toolsdiv").bind("click", selectionDown);
 	}
     }
 }

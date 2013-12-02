@@ -9,7 +9,6 @@
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
     </span>
 
-
     <div class="loading-icon left"></div>
 
     {% if user %}
@@ -29,6 +28,16 @@
       <p>Connected to pi located at: {{user.ip}}</p>
     </span>
     {% endif %}
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
   </div>
 </div>
 

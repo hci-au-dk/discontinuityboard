@@ -163,6 +163,8 @@ def send_location():
 @app.route('/edit-pi/', methods=['POST'])
 def edit_pi():
     form = EditPiForm(request.form)
+    s = ''
+    error = ''
     if request.method == 'POST' and form.validate():
         new_ip = form.ip_address.data
         new_name = form.human_name.data
@@ -174,14 +176,19 @@ def edit_pi():
             if len(new_ip) > 0:
                 pi.ip = new_ip
             if len(new_name) > 0:
-                pi.name = new_name
+                pi.human_name = new_name
             if len(new_password) > 0:
                 pi.password = new_password
             if len(new_width) and len(new_height) is not None:
                 wbratio = str(float(new_width) / float(new_height))
                 pi.wbratio = wbratio
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            IntegrityError
+            db.session.rollback()
     # get the pi
+        flash('Named changed!')
     return redirect(url_for('pi'))
 
 @app.route('/pi/logout/')

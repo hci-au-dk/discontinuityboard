@@ -102,8 +102,8 @@ function fixWidth() {
 
 function attachListeners() {
     // Tools buttons
-    $("#select-button").bind("click", tools.selectClick);
-    $("#make-selection-button").bind("click", tools.makeSelection);
+    //$("#select-button").bind("click", tools.selectClick);
+    //$("#make-selection-button").bind("click", tools.makeSelection);
 }
 
 function showUpload() {
@@ -119,6 +119,11 @@ function setNewPhoto($parent, data) {
     var stats = viewer.setNewPhoto($parent, data);
     currentPhotoId = stats.id;
     currentPhotoRatio = stats.ratio;
+
+    // make it selectable
+    $("#imagefile").imgAreaSelect({
+	    onSelectEnd: tools.makeSelection
+    });
 }
 
 function appendSelection(data) {

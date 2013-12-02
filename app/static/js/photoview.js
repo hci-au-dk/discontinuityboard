@@ -50,7 +50,6 @@ PhotoView.prototype.setNewPhoto = function($parent, data) {
 
     var obj = {"id": data.id,
 	      "ratio": currentPhotoRatio};
-
     return obj
 }
 
