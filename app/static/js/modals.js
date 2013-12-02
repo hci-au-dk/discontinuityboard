@@ -8,7 +8,18 @@ var Modals = function($overlay) {
 	// refers to parts of the event that occurred, not the Modals
 	// object
 	$overlay.hide();
-	Modals.prototype.close(e)
+	Modals.prototype.close(e);
+    });
+
+};
+
+Modals.prototype.registerButtonAndHash = function($button, hash, $modal, modals) {
+    if (window.location.hash == "#" + hash) {
+	modals.showModal($modal);
+    }
+    $button.bind("click", function() {
+	    modals.showModal($modal);
+	window.location.hash = hash;
     });
 
 };
@@ -30,6 +41,7 @@ Modals.prototype.close = function(e) {
     var $modal = Modals.prototype.getModalParent($(e.target));
     $modal.hide();
     $(window).unbind('resize.modal');
+    window.location.hash = '';
 }
 
 Modals.prototype.closeModal = function($modal) {

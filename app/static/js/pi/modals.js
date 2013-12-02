@@ -2,30 +2,25 @@ $(function () {
     var modals = new Modals($("#modal-overlay"));
     var tools = new ConfigTools();
 
-    $("#register-button").bind("click", function() {
-	modals.showModal($("#register-modal"));
-    });
 
-    $("#edit-pi-button").bind("click", function() {
-	modals.showModal($("#edit-pi-modal"));
-    });
+    // these are for password reset. If a url comes in with a hash matching a modal id, display that modal
+    modals.registerButtonAndHash($("#register-button"), "register-modal",
+				 $("#register-modal"), modals);
 
-    $("#login-button").bind("click", function() {
-	modals.showModal($("#login-modal"))
-    });
-    
-    $("#upload-button").bind("click", function() {
-	modals.showModal($("#upload-modal"));
-    });
+    modals.registerButtonAndHash($("#login-button"), "login-modal",
+				 $("#login-modal"), modals);
 
-    $("#configure-button").bind("click", function() {
-	showConfigure(modals, tools);
-    });
+    modals.registerButtonAndHash($("#edit-pi-button"), "edit-pi-modal",
+				 $("#edit-pi-modal"), modals);
 
-    $("#delete-pi-button").bind("click", function() {
-	modals.showModal($("#delete-pi-modal"));
-    });
+    modals.registerButtonAndHash($("#upload-button"), "upload-modal",
+				 $("#upload-modal"), modals);
 
+    modals.registerButtonAndHash($("#configure-button"), "configure-modal",
+				 $("#configure-modal"), modals);
+
+    modals.registerButtonAndHash($("#delete-pi-button"), "delete-pi-modal",
+				 $("#delete-pi-modal"), modals);
 });
 
 function showConfigure(modals, tools) {

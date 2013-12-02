@@ -23,13 +23,18 @@ class EditPiForm(Form):
     ip_address = TextField('ip_address')
     human_name = TextField('human_name')
     password = PasswordField('password')
+    old_password = PasswordField('old_password', validators = [Required()])
 
     # white board aspect information
     wbwidth = TextField('wbwidth')
     wbheight = TextField('wbheight')
 
     def get_user(self):
-        return models.Pi.query.filter(models.Pi.ip==self.old_ip.data).first()    
+        pi = models.Pi.query.filter(models.Pi.ip==self.old_ip.data).first()
+        if pi.password == self.old_password.data:
+            return pi
+        return None
+
 
 class ConfigurePiForm(Form):
     x0 = TextField('x0', validators = [Required()])
@@ -54,7 +59,7 @@ class PhotoViewForm(Form):
         return models.Photo.query.filter(models.Photo.code==self.code.data).first()
 
 class LoginPiForm(Form):
-    human_name = TextField('human_name', validators = [Required(), Length(min=4, message='Too short')])
+    human_name = TextField('human_name', validators = [Required(), Length(min=2, message='Too short')])
     password = PasswordField('password', validators = [Required()])
     
     def validate_login(self):

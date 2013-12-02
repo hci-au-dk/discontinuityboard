@@ -63,7 +63,7 @@ var Messenger = function() {
 	});
     }
 
-    this.takePhotoWithPi = function(configsSet, successFn) {
+    this.takePhotoWithPi = function(configsSet, successFn, failureFn) {
 	$("#loading").show();
 	$.ajax({
 	    url: "/take-photo/",
@@ -75,6 +75,8 @@ var Messenger = function() {
 		$("#loading").hide();
 	    },
 	    error: function(data) {
+		    failureFn(data);
+		$("#loading").hide();
 		if (DEBUG)
 		    alert("take photo error");
 	    }

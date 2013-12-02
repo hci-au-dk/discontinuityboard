@@ -15,15 +15,23 @@
 	    <label>Pi ip address:</label> <span>{{rform.ip_address(size=45)}}</span>
 	    <label>Name:</label> <span>{{rform.human_name(size=30)}}</span>
 	    <label>Password:</label> <span>{{rform.password(size=30)}}</span>
-	    {% for error in rform.errors.ip_address %}
-	    <span style="color: red;">[{{error}}]</span>
-	    {% endfor %}<br>
 
 	    <hr />
 	    Whiteboard information:<br>
 	    <label>width:</label> <span>{{rform.wbwidth(size=3)}}</span>
 	    <label>height:</label> <span>{{rform.wbheight(size=3)}}</span>
 
+	   {% with errors = get_flashed_messages(category_filter=["error"]) %}
+	   {% if errors %}
+	   <div class="alert-message block-message error">
+	     <ul>
+	       {%- for msg in errors %}
+	       <li>{{ msg }}</li>
+	       {% endfor -%}
+	     </ul>
+	   </div>
+	   {% endif %}
+	   {% endwith %}
 	  </p>
           <hr />
         </div>
@@ -41,12 +49,24 @@
       </div>
 
       <form action="{{ url_for('pi_login') }}" method="post" name="loginpi">
-	{{ lform.hidden_tag() }}
+	{{ lform.csrf_token }}
         <div class="modal-body">
 
          <p>
            <label>Name:</label> <span>{{lform.human_name(size=30)}}</span>
            <label>Password:</label> <span>{{lform.password(size=30)}}</span>
+
+	   {% with errors = get_flashed_messages(category_filter=["error"]) %}
+	   {% if errors %}
+	   <div class="alert-message block-message error">
+	     <ul>
+	       {%- for msg in errors %}
+	       <li>{{ msg }}</li>
+	       {% endfor -%}
+	     </ul>
+	   </div>
+	   {% endif %}
+	   {% endwith %}
          </p>
          <hr />
         </div>
@@ -85,11 +105,17 @@
 	      <label>y:</label> <span>{{cform.y3(size=5)}}</span>
 	    </div>
 
-	    {{cform.cwidth}}
-	    {{cform.cheight}}
-	    {% for error in cform.errors.x0 %}
-	    <span style="color: red;">[{{error}}]</span>
-	    {% endfor %}<br>
+	   {% with errors = get_flashed_messages(category_filter=["error"]) %}
+	   {% if errors %}
+	   <div class="alert-message block-message error">
+	     <ul>
+	       {%- for msg in errors %}
+	       <li>{{ msg }}</li>
+	       {% endfor -%}
+	     </ul>
+	   </div>
+	   {% endif %}
+	   {% endwith %}
 
 	  </p>
           <hr />
@@ -144,17 +170,29 @@
 	{{ rform.hidden_tag() }}
 	<div class="modal-body">
 	  <p>
-	    <label>Pi ip address:</label> <span>{{eform.ip_address(size=45, value=user.ip)}}</span>
-	    <label>Name:</label> <span>{{eform.human_name(size=30, value=user.human_name)}}</span>
-	    <label>Password:</label> <span>{{eform.password(size=30)}}</span>
-	    {% for error in rform.errors.ip_address %}
-	    <span style="color: red;">[{{error}}]</span>
-	    {% endfor %}<br>
+	    <label>Pi ip address:</label> <span>{{eform.ip_address(size=45)}}</span>
+	    <label>Name:</label> <span>{{eform.human_name(size=30)}}</span>
+	    <label>New Password:</label> <span>{{eform.password(size=30)}}</span>
 
 	    <hr />
 	    Whiteboard information:<br>
 	    <label>width:</label> <span>{{eform.wbwidth(size=3)}}</span>
 	    <label>height:</label> <span>{{eform.wbheight(size=3)}}</span>
+
+	    <hr />
+	    <label>Password:</label> <span>{{eform.old_password}}</span>
+
+	    {% with errors = get_flashed_messages(category_filter=["error"]) %}
+	    {% if errors %}
+	    <div class="alert-message block-message error">
+	      <ul>
+		{%- for msg in errors %}
+		<li>{{ msg }}</li>
+		{% endfor -%}
+	      </ul>
+	    </div>
+	    {% endif %}
+	    {% endwith %}
 
 	    {{eform.old_ip(value=user.ip)}}
 	  </p>

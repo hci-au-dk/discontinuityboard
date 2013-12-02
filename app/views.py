@@ -13,7 +13,6 @@ from wtforms.validators import ValidationError
 
 from flask_weasyprint import HTML, render_pdf
 from markupsafe import Markup
-import socket
 
 if os.name != "nt":
     import fcntl
@@ -67,16 +66,24 @@ def view(code=None):
 
 @app.route('/pi')
 def pi():
-    rform = RegisterPiForm()
-    cform = ConfigurePiForm()
-    lform = LoginPiForm()
-    eform = EditPiForm()
+    return render_pi_frontpage()
+
+
+def render_pi_frontpage(rform = None, cform = None, lform = None, eform = None):
+    if rform is None:
+        rform = RegisterPiForm()
+    if cform is None:
+        cform = ConfigurePiForm()
+    if lform is None:
+        lform = LoginPiForm()
+    if eform is None:
+        eform = EditPiForm()
 
     user = None
     if current_user.is_authenticated():
         user = current_user
 
-    return render_template('pi.html',
+    return render_template('pi.html', 
                            title = 'Pi | Discontinuity Board',
                            rform = rform,
                            cform = cform,
@@ -101,21 +108,32 @@ def send_file(filename):
 # AJAX Services - Pi                                         #
 ##############################################################
 
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error), category='error')
+
 @app.route('/pi/login/', methods=['POST'])
 def pi_login():
     # logout any existing user
-    logout_user()
     form = LoginPiForm(request.form)
     if form.validate_on_submit():
         user = form.get_user()
         if form.validate_login():
+            logout_user()
             login_user(user)
         return redirect(request.args.get("next") or url_for('pi'))
-    return redirect(url_for('pi'))
+    else:
+        flash_errors(form)
+        location = url_for('pi') + "#login-modal"
+        return redirect(location)
 
 @app.route('/register-pi/', methods=['POST'])
 def register_pi():
     form = RegisterPiForm(request.form)
+    location = url_for('pi') + '#register-modal'
     if request.method == 'POST' and form.validate():
         # Everything is great
         ip = form.ip_address.data
@@ -124,9 +142,10 @@ def register_pi():
         wbw = form.wbwidth.data
         wbh = form.wbheight.data
         wbratio = str(float(wbw) / float(wbh))
-        if (models.Pi.query.filter(models.Pi.human_name==form.human_name.data).count() == 0 and
-            models.Pi.query.filter(models.Pi.ip==form.ip_address.data).count() == 0):
 
+        name_unique = models.Pi.query.filter(models.Pi.human_name==form.human_name.data).count() == 0
+        ip_unique = models.Pi.query.filter(models.Pi.ip==form.ip_address.data).count() == 0
+        if name_unique and ip_unique:
             # save the pi in the database
             pi = models.Pi(ip=ip, human_name=name, password=password, wbratio=wbratio)
             db.session.add(pi)
@@ -139,24 +158,32 @@ def register_pi():
                 pilocation = 'http://' + ip + '/' + 'register-server'
                 payload = {'id': current_user.id}
                 r = requests.get(pilocation, params=payload)
-            
+                return redirect(request.args.get("next") or url_for('pi_configure'))
             except:
                 IntegrityError
+                requests.exceptions.Timeout
                 db.session.rollback()
-
+                flash("Error communicating with IP address: %s" % (ip), category="error")
+                    
         else:
-            # TODO: Make a sensible reaction to trying to register a name twice
-            print "DUPLICATE USERNAME"
-        return redirect(request.args.get("next") or url_for('pi_configure'))
-
-    return redirect(url_for('pi_configure'))
+            s = ''
+            if not name_unique:
+                flash("This name is already in use.", category='error')
+            if not ip_unique:
+                flash("This ip address is already in use.", category='error')
+    return redirect(location)
 
 @app.route('/send-location-to-pi/', methods=['GET'])
 def send_location():
     # register this server and name with the pi
     pilocation = 'http://' + current_user.ip + '/' + 'register-server'
     payload = {'id': current_user.id}
-    r = requests.get(pilocation, params=payload)
+    try:
+        r = requests.get(pilocation, params=payload, timeout=1)
+        flash("Success. Pi IP verified.", category="general")
+    except:
+        requests.exceptions.Timeout
+        flash("Timout occurred. Perhaps the Pi IP is incorrect.", "general")
     return redirect(url_for('pi'))
 
 
@@ -182,13 +209,18 @@ def edit_pi():
             if len(new_width) and len(new_height) is not None:
                 wbratio = str(float(new_width) / float(new_height))
                 pi.wbratio = wbratio
+        else:
+            flash("Password is incorrect.", category="error")
+            return redirect(url_for('pi') + "#edit-pi-modal")
         try:
             db.session.commit()
         except:
             IntegrityError
             db.session.rollback()
+            flash("Error with changes. IP address and name must be unique.", category="error")
+            return redirect(url_for('pi') + "#edit-pi-modal")
     # get the pi
-        flash('Named changed!')
+
     return redirect(url_for('pi'))
 
 @app.route('/pi/logout/')
@@ -282,7 +314,12 @@ def take_photo():
         pilocation = get_pi_base() + 'snapshot'
         raw = False
 
-    r = requests.get(pilocation)
+    try:
+        r = requests.get(pilocation, timeout=1)
+    except:
+        requests.exceptions.Timeout
+        flash('Timeout occurred. Make sure IP address is correct and server is running.', category='general')
+        return 'Failed', 500
 
     img = Image.open(StringIO(r.content))
     if request.args.get('configured') == 'true':

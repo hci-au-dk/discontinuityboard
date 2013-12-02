@@ -7,7 +7,6 @@ html {
 div {
     margin: 0px;
     padding: 0px;
-    overflow: hidden;
 }
 
 hr {
@@ -53,6 +52,12 @@ p {
 
 .left {
     float: left;
+}
+
+.line {
+      width: 1px;
+      height: 70px;
+      background-color: black;
 }
 
 .right {
@@ -118,6 +123,7 @@ p {
 
 #view {
     width: 49%;
+    overflow: hidden;
 }
 
 #notes {
@@ -348,3 +354,7 @@ ul li:hover ul {
 .ui-resizable-nw { cursor: nw-resize; width: 12px; height: 12px; left: -5px; top: -5px; }
 .ui-resizable-ne { cursor: ne-resize; width: 12px; height: 12px; right: -5px; top: -5px;}
 
+/* For tiny MCE*/
+.mce-panel {
+	   overflow: hidden;
+}

@@ -56,7 +56,10 @@ function takePhotoClick(configs) {
     $(".loading-icon").show();
     messenger.takePhotoWithPi(configs, function(data) {
 	$(".loading-icon").hide();
-    });
+	}, function(data) {
+	    $(".loading-icon").hide();
+	    window.location.reload();
+	});
     messenger.getAllPhotos(initializeBrowser);
 }
 
