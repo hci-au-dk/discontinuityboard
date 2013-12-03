@@ -1,28 +1,6 @@
 // This is where the functionality for the buttons will go
 
 var Tools = function() {
-    /*
-    var cutTool = false;  // TODO: see if this variable is necessary
-    $("#select-options").hide();
-
-    // Creates a cut tool to cut the photo into blocks
-    this.selectClick = function() {
-	// TODO: make it so that you can't use other tools at the same time
-	cutTool = !cutTool;
-	if (cutTool) {
-	    $("#toolsdiv").bind("mousedown", selectionDown);
-	    $("#toolsdiv").css("cursor", "crosshair");
-	    $("#select-options").show();
-	    $("#make-selection-button").attr("disabled", "disabled");
-	    $("#select-button").addClass("inuse");
-	} else {
-	    $("#toolsdiv").css("cursor", "default");
-	    $("#toolsdiv").unbind("mousedown");
-	    $("#select-options").hide();
-	    $("#selector").remove();
-	    $("#select-button").removeClass("inuse");
-	}
-	}*/
     
     this.makeSelection = function() {
 	if ($(".imgareaselect-selection").length == 1) {  // making a cut is a valid thing to do
@@ -60,7 +38,9 @@ var Tools = function() {
 	    botY = Math.round(botY / currentPhotoRatio);
 
 	    // send them to a service
-	    messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
+	    if (x < botX && y < botY) {
+		messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
+	    }
 	}
     }
 }

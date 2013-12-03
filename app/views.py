@@ -1,7 +1,7 @@
 import datetime, os, string, random, requests
 from app import app, db, models, login_manager
 from flask import render_template, flash, redirect, request, url_for, \
-send_from_directory, make_response, json
+send_from_directory, make_response, json, get_flashed_messages
 from sqlalchemy.exc import IntegrityError
 from werkzeug import secure_filename
 from util.perspective_transformation import transform_perspective
@@ -13,11 +13,6 @@ from wtforms.validators import ValidationError
 
 from flask_weasyprint import HTML, render_pdf
 from markupsafe import Markup
-
-if os.name != "nt":
-    import fcntl
-    import struct
-
 
 ##############################################################
 # Routers - View                                             #
@@ -34,9 +29,8 @@ def entry():
 @app.route('/<code>', methods=['GET'])
 @app.route('/view/', methods=['GET', 'POST'])
 def view(code=None):
-    print "VIEW"
-    print code
     photo = None
+    form = None
     if (request.method == 'GET' and code is not None) or request.method == 'POST':
         form = PhotoViewForm()
         if request.method == 'GET':
@@ -48,14 +42,15 @@ def view(code=None):
         if form.validate_login():
             photo = user
 
-    if photo is None:
+    if photo is None and form is not None:
+        flash('Incorrect entry code.', category='entry')
         return redirect(url_for('entry'))
 
     # prepare the forms
-    pvform = PhotoViewForm()    
+    form = PhotoViewForm()
     return render_template('discontinuityboard.html',
                            title = 'View | Discontinuity Board',
-                           pvform = pvform,
+                           pvform = form,
                            user = photo)
     
 
@@ -108,12 +103,12 @@ def send_file(filename):
 # AJAX Services - Pi                                         #
 ##############################################################
 
-def flash_errors(form):
+def flash_errors(form, category):
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
                 getattr(form, field).label.text,
-                error), category='error')
+                error), category='error' + category)
 
 @app.route('/pi/login/', methods=['POST'])
 def pi_login():
@@ -126,7 +121,7 @@ def pi_login():
             login_user(user)
         return redirect(request.args.get("next") or url_for('pi'))
     else:
-        flash_errors(form)
+        flash_errors(form, '-login')
         location = url_for('pi') + "#login-modal"
         return redirect(location)
 
@@ -163,14 +158,16 @@ def register_pi():
                 IntegrityError
                 requests.exceptions.Timeout
                 db.session.rollback()
-                flash("Error communicating with IP address: %s" % (ip), category="error")
+                flash("Error communicating with IP address: %s" % (ip), category="error-register")
                     
         else:
             s = ''
             if not name_unique:
-                flash("This name is already in use.", category='error')
+                flash("This name is already in use.", category='error-register')
             if not ip_unique:
-                flash("This ip address is already in use.", category='error')
+                flash("This ip address is already in use.", category='error-register')
+    else:
+        flash_errors(form, '-register')
     return redirect(location)
 
 @app.route('/send-location-to-pi/', methods=['GET'])
@@ -210,15 +207,18 @@ def edit_pi():
                 wbratio = str(float(new_width) / float(new_height))
                 pi.wbratio = wbratio
         else:
-            flash("Password is incorrect.", category="error")
+            flash("Password is incorrect.", category="error-edit")
             return redirect(url_for('pi') + "#edit-pi-modal")
         try:
             db.session.commit()
         except:
             IntegrityError
             db.session.rollback()
-            flash("Error with changes. IP address and name must be unique.", category="error")
+            flash("Error with changes. IP address and name must be unique.", category="error-edit")
             return redirect(url_for('pi') + "#edit-pi-modal")
+    else:
+        flash_errors(form, '-edit')
+        return redirect(url_for('pi') + "#edit-pi-modal")
     # get the pi
 
     return redirect(url_for('pi'))
@@ -315,7 +315,7 @@ def take_photo():
         raw = False
 
     try:
-        r = requests.get(pilocation, timeout=1)
+        r = requests.get(pilocation, timeout=20)
     except:
         requests.exceptions.Timeout
         flash('Timeout occurred. Make sure IP address is correct and server is running.', category='general')
@@ -395,7 +395,11 @@ def configure():
             if photo.raw:
                 db.session.delete(photo)
         db.session.commit()
+    else:
+        flash_errors(form, '-configure')
+        return redirect(url_for('pi') + "#configure-modal")
 
+    flash("Success configuring pi.", category="general")
     return redirect(url_for('pi'))
 
 

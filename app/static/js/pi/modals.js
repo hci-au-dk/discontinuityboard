@@ -1,4 +1,7 @@
 $(function () {
+	if (messenger == null) {
+	    messenger = new Messenger();
+	}
     var modals = new Modals($("#modal-overlay"));
     var tools = new ConfigTools();
 
@@ -16,8 +19,15 @@ $(function () {
     modals.registerButtonAndHash($("#upload-button"), "upload-modal",
 				 $("#upload-modal"), modals);
 
-    modals.registerButtonAndHash($("#configure-button"), "configure-modal",
-				 $("#configure-modal"), modals);
+    if (window.location.hash == "#configure-modal") {
+	showConfigure(modals, tools);
+    }
+    $("#configure-button").bind("click", function() {
+	    showConfigure(modals, tools);
+	    window.location.hash = "#configure-modal";
+    });
+
+
 
     modals.registerButtonAndHash($("#delete-pi-button"), "delete-pi-modal",
 				 $("#delete-pi-modal"), modals);
@@ -31,7 +41,8 @@ function showConfigure(modals, tools) {
 
         $("#configure-submit").attr("disabled", "true");
         // we also want to load an unmodified picture from the pi
-        messenger.takePhotoWithPi(false, function(data) {
+        messenger.takePhotoWithPi(false,
+				  function(data) {
             messenger.getPhoto(data.id, function(data) {
                 // set the hidden fields
                 $("#cwidth").val(data.width);
@@ -41,7 +52,11 @@ function showConfigure(modals, tools) {
                 tools.cornerSelectClick($("#toolsdiv"), populateCoordinates);
                 $("#configure-submit").removeAttr("disabled");
             });
-        });
+				  },
+				  function() {
+				      $(".loading-icon").hide();
+				      window.location.reload();
+				  });
     }
 }
 

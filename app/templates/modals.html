@@ -14,6 +14,18 @@
       <p>
 	<label>code:</label> <span>{{pvform.code(size=20)}}</span><br>
 
+	
+	   {% with errors = get_flashed_messages(category_filter=["entry"]) %}
+	   {% if errors %}
+	   <div class="alert-message block-message error">
+	     <ul>
+	       {%- for msg in errors %}
+	       <li>{{ msg }}</li>
+	       {% endfor -%}
+	     </ul>
+	   </div>
+	   {% endif %}
+	   {% endwith %}
       </p>
       <hr />
     </div>

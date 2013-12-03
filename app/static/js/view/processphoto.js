@@ -30,8 +30,6 @@ $(window).load(function() {
     tools = new Tools();
     viewer = new PhotoView();
 
-    attachListeners();
-
     $(".loading-icon").hide();
 
 
@@ -100,12 +98,6 @@ function fixWidth() {
     $("#content").css("margin-left", (-1 * (width / 2)) + "px");
 }
 
-function attachListeners() {
-    // Tools buttons
-    //$("#select-button").bind("click", tools.selectClick);
-    //$("#make-selection-button").bind("click", tools.makeSelection);
-}
-
 function showUpload() {
     // first, get the file
     var file = $("#filename")[0].files[0]
@@ -121,7 +113,7 @@ function setNewPhoto($parent, data) {
     currentPhotoRatio = stats.ratio;
 
     // make it selectable
-    $("#imagefile").imgAreaSelect({
+    var ias = $("#imagefile").imgAreaSelect({
 	    onSelectEnd: tools.makeSelection
     });
 }
@@ -136,5 +128,6 @@ function appendSelection(data) {
     newNode.src = data.path;                           // add src attribute
     newNode.style.width = width + "px";
     newNode.style.height = height + "px";
-    ed.execCommand('mceInsertContent', false, newNode.outerHTML)
+    ed.execCommand('mceInsertContent', false, newNode.outerHTML);
+    $("imagefile").trigger("click");
 }

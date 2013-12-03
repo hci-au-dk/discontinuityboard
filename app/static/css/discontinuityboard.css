@@ -167,6 +167,7 @@ p {
     border-radius:8px;
     background:#fff;
     padding:20px;
+    z-index: 999;
 }
 
 .modal-body label {
@@ -203,7 +204,7 @@ p {
 
 /* Drop down menus */
 
-ul {
+.menu {
   text-align: left;
   display: inline;
   margin: 0;
@@ -211,7 +212,7 @@ ul {
   list-style: none;
 }
 
-.option, ul li {
+.option,.menu li {
   font: bold 12px/18px sans-serif;
   display: inline-block;
   margin-right: -4px;
@@ -226,12 +227,12 @@ ul {
   transition: all 0.2s;
 }
 
-.option:hover, ul li:hover {
+.option:hover,.menu li:hover {
   background: #555;
   color: #fff;
 }
 
-ul li ul {
+.menu li ul {
   padding: 0;
   position: absolute;
   top: 48px;
@@ -242,18 +243,18 @@ ul li ul {
   visibility: hidden;
 }
 
-ul li ul li {
+.menu li ul li {
   background: #555;
   display: block;
   color: #fff;
   text-shadow: 0 -1px 0 #000;
 }
 
-ul li ul li:hover {
+.menu li ul li:hover {
     background: #666;
 }
 
-ul li:hover ul {
+.menu li:hover ul {
   display: block;
   opacity: 1;
   visibility: visible;
