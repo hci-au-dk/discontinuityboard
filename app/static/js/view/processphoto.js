@@ -62,6 +62,14 @@ $(window).load(function() {
 	    viewer.initializeNotes(data);
 	});
     }
+    $("input#code").focus();
+    $("input#code").bind('keyup paste', function(){
+	    console.log($("input#code").val());
+	    if ($("input#code").val().length == 6) {
+		$('form[name="photoview"]').submit();
+	    }
+	});
+    
 
     // and the centering of the content
     $(window).bind("resize", fixWidth);
@@ -129,5 +137,10 @@ function appendSelection(data) {
     newNode.style.width = width + "px";
     newNode.style.height = height + "px";
     ed.execCommand('mceInsertContent', false, newNode.outerHTML);
-    $("imagefile").trigger("click");
+    $($(".imgareaselect-selection")[0].parentNode).css("display", "none");
+    $($(".imgareaselect-selection")[0].parentNode).css("width", "0");
+    $($(".imgareaselect-selection")[0].parentNode).css("top", "0");
+    $($(".imgareaselect-selection")[0].parentNode).css("left", "0");
+    $($(".imgareaselect-selection")[0].parentNode).css("height", "0");
+    $(".imgareaselect-outer").hide();
 }
