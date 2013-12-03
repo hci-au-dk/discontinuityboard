@@ -24,14 +24,14 @@ var Browser = function(data) {
 	
 	img.css("width", w * scale); // Set new width
 	img.css("height", h * scale); // Scale height based on ratio
-	div.append(img)
+	div.append(img);
 
 	var p = $(document.createElement("p"));
-	p.text("Access: " + data.photos[index]["code"]);
+	p.text("Access code: " + data.photos[index]["code"]);
 	div.append(p);
 
 	var p = $(document.createElement("p"));
-	p.text("Days until expiry: " + data.photos[index]["time"]);
+	p.text("Expires on: " + data.photos[index]["time"]);
 	div.append(p);
 
 	bb.append(div);

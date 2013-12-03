@@ -320,6 +320,10 @@ p {
     padding: 2px;
 }
 
+.thumbContainer p {
+		clear: both;
+}
+
 .selected {
     border: 2px solid blue;
     padding: 0px;

@@ -54,7 +54,7 @@ $(window).load(function() {
     if (photoId) {
 	messenger.getPhoto(photoId, function(data){
 	    if (data.notes == null) {
-		$("#time-left").html("Days left to process: " + data.time);
+		$("#time-left").html("Expires on: " + data.time);
 	    } else {
 		$("#time-left").html("Congratulations, your photo will not be deleted!");
 	    }
@@ -64,7 +64,6 @@ $(window).load(function() {
     }
     $("input#code").focus();
     $("input#code").bind('keyup paste', function(){
-	    console.log($("input#code").val());
 	    if ($("input#code").val().length == 6) {
 		$('form[name="photoview"]').submit();
 	    }
@@ -89,7 +88,7 @@ function updateTime() {
     messenger.getPhoto(currentPhotoId, function(data){
 	if (data.path){
 	    if (data.notes == null) {
-		$("#time-left").html("Days left to process: " + data.time);
+		$("#time-left").html("Expires on: " + data.time);
 	    } else {
 		$("#time-left").html("Congratulations, your photo will not be deleted!");
 	    }

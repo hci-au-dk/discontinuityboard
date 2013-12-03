@@ -1,4 +1,5 @@
 import datetime, os, string, random, requests
+from datetime import timedelta
 from app import app, db, models, login_manager
 from flask import render_template, flash, redirect, request, url_for, \
 send_from_directory, make_response, json, get_flashed_messages
@@ -276,7 +277,7 @@ def get_all_photos():
             img = Image.open(photo.path)
             data.append({'path': name, 'id': photo.id, 'code': photo.code,
                          'width': img.size[0], 'height': img.size[1],
-                         'time': get_time_left(photo.time_submitted)})
+                         'time': get_expiry_date(photo.time_submitted)})
 
     returnobj = {}
     returnobj["photos"] = data
@@ -432,7 +433,7 @@ def pi_upload():
             photo = models.Photo.query.filter(models.Photo.id==photoid).first()
 
             returnobj['timesubmitted'] = photo.time_submitted 
-            returnobj['time'] = get_time_left(photo.time_submitted)
+            returnobj['time'] = get_expiry_date(photo.time_submitted)
             returnobj['code'] = photo.code 
         else:
             return 'Ill-formated request', 400
@@ -482,7 +483,7 @@ def get_photo():
         returnobj['height'] = img.size[1]
         returnobj['raw'] = photo.raw
         returnobj['notes'] = photo.notes
-        returnobj['time'] = get_time_left(photo.time_submitted)
+        returnobj['time'] = get_expiry_date(photo.time_submitted)
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -584,15 +585,9 @@ def delete_photo_and_selections(photo):
     db.session.commit()
     os.remove(path)
 
-def get_time_left(time_submitted, timespan_days=2):
-    now = datetime.datetime.now()
-    delta = now - time_submitted
-    # convert timespan_days to seconds
-    seconds_allowed = timespan_days * 24 * 60 * 60
-    seconds_left = seconds_allowed - delta.total_seconds()
-    # return the number of days left
-    days_left = seconds_left / 60 / 60 / 24
-    return round(days_left, 6)
+def get_expiry_date(time_submitted, timespan_days=2):
+    left = time_submitted + timedelta(days=timespan_days)
+    return left.strftime("%Y-%m-%d %H:%M:%S")
 
 def allowed_file(filename):
     return '.' in filename and \
