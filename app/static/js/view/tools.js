@@ -32,14 +32,14 @@ var Tools = function() {
 	    }
 
 	    // Correct for the ratio that the picture is being displayed at
-	    x = Math.round(x / currentPhotoRatio);
-	    y = Math.round(y / currentPhotoRatio);
-	    botX = Math.round(botX / currentPhotoRatio);
-	    botY = Math.round(botY / currentPhotoRatio);
+	    x = Math.round(x / current.ratio);
+	    y = Math.round(y / current.ratio);
+	    botX = Math.round(botX / current.ratio);
+	    botY = Math.round(botY / current.ratio);
 
 	    // send them to a service
 	    if (x < botX && y < botY) {
-		messenger.makeCut(currentPhotoId, x, y, botX, botY, appendSelection);
+		messenger.makeCut(current.id, x, y, botX, botY, appendSelection);
 	    }
 	}
     }

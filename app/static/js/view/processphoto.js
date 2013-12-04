@@ -6,8 +6,7 @@ var browser = null;
 var viewer = null;
 
 // Info about the photo that is currently being displayed
-var currentPhotoId = null;
-var currentPhotoRatio = 1;
+var current = {};
 
 // size constants
 var MIN_SELECT_SIZE = 10;
@@ -32,6 +31,37 @@ $(window).load(function() {
 
     $(".loading-icon").hide();
 
+    initializeTinyMCE();
+
+
+    $("input#code").focus();
+    $("input#code").bind('keyup paste', function(){
+	    if ($("input#code").val().length == 6) {
+		$('form[name="photoview"]').submit();
+	    }
+	});    
+
+    // and the centering of the content
+    $(window).bind("resize", fixWidth);
+
+
+    // load the proper photo
+    var photoId = $("#photo-id").val()
+    if (photoId) {
+	messenger.getPhoto(photoId, function(data){
+	    if (data.notes == null) {
+		$("#time-left").html("Expires on: " + data.time);
+	    } else {
+		$("#time-left").html("Congratulations, your photo will not be deleted!");
+	    }
+	    setNewPhoto($("#view"), data);
+	    viewer.initializeNotes(data);
+	    $(window).trigger("resize");
+	});
+    }
+});
+
+function initializeTinyMCE() {
     var height = $("#content").height();
 
     tinymce.init({
@@ -50,7 +80,7 @@ $(window).load(function() {
 			onclick : function() {
 			ed.label = 'Save';
 			var content = tinyMCE.activeEditor.getContent();
-			messenger.saveNotes(currentPhotoId, content, function(data) {
+			messenger.saveNotes(current.id, content, function(data) {
 				$("#save-notes-button").html("Saved");
 			    });
 			}
@@ -60,7 +90,7 @@ $(window).load(function() {
 			text: 'Export to PDF',
 			onclick : function() {
 			var content = tinyMCE.activeEditor.getContent();
-			messenger.saveNotes(currentPhotoId, content, function(data) {
+			messenger.saveNotes(current.id, content, function(data) {
 				$("#save-notes-button").html("Saved");
 				window.location = $("#export-link").attr("href");
 			    });
@@ -68,32 +98,7 @@ $(window).load(function() {
 		});
 	    }
     });
-
-    // load the proper photo
-    var photoId = $("#photo-id").val()
-    if (photoId) {
-	messenger.getPhoto(photoId, function(data){
-	    if (data.notes == null) {
-		$("#time-left").html("Expires on: " + data.time);
-	    } else {
-		$("#time-left").html("Congratulations, your photo will not be deleted!");
-	    }
-	    setNewPhoto($("#view"), data);
-	    viewer.initializeNotes(data);
-	});
-    }
-    $("input#code").focus();
-    $("input#code").bind('keyup paste', function(){
-	    if ($("input#code").val().length == 6) {
-		$('form[name="photoview"]').submit();
-	    }
-	});
-    
-
-    // and the centering of the content
-    $(window).bind("resize", fixWidth);
-    $(window).trigger("resize");
-});
+}
 
 function editorChange(ed) {
     var message = $("#save-notes-button").html();
@@ -105,7 +110,7 @@ function editorChange(ed) {
 window.setInterval(updateTime, 100000);
 
 function updateTime() {
-    messenger.getPhoto(currentPhotoId, function(data){
+    messenger.getPhoto(current.id, function(data){
 	if (data.path){
 	    if (data.notes == null) {
 		$("#time-left").html("Expires on: " + data.time);
@@ -122,7 +127,23 @@ function updateTime() {
 
 function fixWidth() {
     var width = $("#content").width();
-    $("#content").css("margin-left", (-1 * (width / 2)) + "px");
+    width = width / 2;
+    $("#content").css("margin-left", (-1 * width) + "px");
+    var height = $("#content").height() - $("#logo").height() - 10;
+
+    current.ratio = viewer.getScale(current.width, current.height, 
+					width, height);
+    var nwidth = current.width * current.ratio;
+    var nheight = current.height * current.ratio;
+	    
+    $("#imagefile").css("width", nwidth); // Set new width
+    $("#imagefile").css("height", nheight); // Scale height based on ratio
+
+    $("#photocontainer").css("width", nwidth);
+    $("#photocontainer").css("height", nheight);
+    
+    $("#toolsdiv").css("width", nwidth);
+    $("#toolsdiv").css("height", nheight);
 }
 
 function showUpload() {
@@ -135,9 +156,7 @@ function showUpload() {
 }
 
 function setNewPhoto($parent, data) {
-    var stats = viewer.setNewPhoto($parent, data);
-    currentPhotoId = stats.id;
-    currentPhotoRatio = stats.ratio;
+    current = viewer.setNewPhoto($parent, data);
 
     // make it selectable
     var ias = $("#imagefile").imgAreaSelect({
@@ -146,8 +165,8 @@ function setNewPhoto($parent, data) {
 }
 
 function appendSelection(data) {
-    var width = data.width * currentPhotoRatio;
-    var height = data.height * currentPhotoRatio;
+    var width = data.width * current.ratio;
+    var height = data.height * current.ratio;
 
     var ed = tinyMCE.activeEditor;
     var range = ed.selection.getRng();                  // get range

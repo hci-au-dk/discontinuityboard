@@ -89,18 +89,17 @@ p {
 
 
 #header-logo {
-	     width: 50%;
+	     width: 30%;
 	     float: left;
 }
 
 #logo {
       background-color:rgba(0,102,255,0.5);
-      position: absolute;		
-      top: 510px;
+      position: fixed;
+      bottom: 0px;
       z-index: 2;
       width: 48%;
-      height: 20%;
-      max-height: 100px;
+      height: 80px;
       overflow: hidden;
 }
 
@@ -140,7 +139,7 @@ p {
     position: absolute;
     left: 50%;  /* for centering, which is also set dynamically */
     margin-top: 10px;
-
+    min-height: 200px;
 }
 
 #header {
@@ -153,7 +152,6 @@ p {
     width: 49%;
     overflow: hidden;
     background-color: #66CCFF;
-    max-height: 650px;
 }
 
 #view #header {

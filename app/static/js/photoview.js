@@ -49,7 +49,9 @@ PhotoView.prototype.setNewPhoto = function($parent, data) {
     toolsCan.append(imgSpan);
 
     var obj = {"id": data.id,
-	      "ratio": currentPhotoRatio};
+	       "ratio": currentPhotoRatio,
+	       "width": data.width,
+	       "height": data.height};
     return obj
 }
 
@@ -68,6 +70,9 @@ PhotoView.prototype.getScale = function(w, h, maxW, maxH) {
         var ratio = Math.min((maxW / w), (maxH / h));
         currentPhotoRatio = ratio;
 
+    } else {
+        var ratio = Math.min((maxW / w), (maxH / h));
+        currentPhotoRatio = ratio;
     }
     return currentPhotoRatio;
 }
