@@ -64,13 +64,17 @@ $(window).load(function() {
 function initializeTinyMCE() {
     var height = $("#content").height();
 
+    if (tinyMCE.activeEditor != null) {
+	tinyMCE.activeEditor.remove();
+    }
+
     tinymce.init({
 	selector: '#notes',
 	menubar: '',
 	toolbar: "undo redo | alignleft aligncenter alignright alignjustify | bold italic | link image | save export",
 	plugins: 'link image code',
 	relative_urls: false,
-       	height: height - 61,  // height of the content minus height of the tinymce toolbars
+       	height: height - 75,  // height of the content minus height of the tinymce toolbars
 	setup: function(ed) {
             ed.on("change", editorChange);
 	    ed.on("keyDown", editorChange);
@@ -127,9 +131,10 @@ function updateTime() {
 
 function fixWidth() {
     var width = $("#content").width();
-    width = (width / 2) - 20;
+    width = (width / 2);
     $("#content").css("margin-left", (-1 * width) + "px");
     var height = $("#content").height() - $("#logo").height() - 10;
+    width = $("#view").width();
 
     current.ratio = viewer.getScale(current.width, current.height, 
 					width, height);
@@ -146,6 +151,8 @@ function fixWidth() {
     $("#toolsdiv").css("height", nheight);
 
     $("#photocontainer").css("margin-top", (-1 * (height / 2)));
+
+    initializeTinyMCE();
 }
 
 function showUpload() {
