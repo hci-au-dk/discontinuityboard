@@ -37,13 +37,35 @@ $(window).load(function() {
     tinymce.init({
 	selector: '#notes',
 	menubar: '',
-	toolbar: "undo redo | alignleft aligncenter alignright alignjustify | bold italic | link image",
+	toolbar: "undo redo | alignleft aligncenter alignright alignjustify | bold italic | link image | save export",
 	plugins: 'link image code',
 	relative_urls: false,
        	height: height - 61,  // height of the content minus height of the tinymce toolbars
 	setup: function(ed) {
             ed.on("change", editorChange);
-            ed.on("keyDown", editorChange);
+	    ed.on("keyDown", editorChange);
+	    // Add a custom button
+	    ed.addButton('save', {
+			title : 'Save button',
+			onclick : function() {
+			ed.label = 'Save';
+			var content = tinyMCE.activeEditor.getContent();
+			messenger.saveNotes(currentPhotoId, content, function(data) {
+				$("#save-notes-button").html("Saved");
+			    });
+			}
+		    });
+	    ed.addButton('export', {
+			title : 'Export button',
+			text: 'Export',
+			onclick : function() {
+			var content = tinyMCE.activeEditor.getContent();
+			messenger.saveNotes(currentPhotoId, content, function(data) {
+				$("#save-notes-button").html("Saved");
+				window.location = $("#export-link").attr("href");
+			    });
+		    }
+		});
 	    }
     });
 

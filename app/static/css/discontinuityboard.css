@@ -291,7 +291,7 @@ p {
   z-index: 100;
 }
 
-#header ul, #navigate ul {
+#header ul {
     margin-right: 25px;
     padding: 0px;
     margin-top: 0px;
@@ -301,17 +301,6 @@ p {
     background-color: #66CCFF;
     border: 1px solid #808080;
     padding: 7px 20px;
-}
-
-#selection-tools {
-    margin-left: 25px;
-}
-
-#navigate {
-    overflow: hidden;
-    position: fixed;
-    right: 0px;
-    z-index: 2;
 }
 
 /* pi beginning options */

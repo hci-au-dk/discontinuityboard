@@ -40,13 +40,7 @@
   </div>
 
   <div>
-    <div id="navigate">
-      <ul id="notes-options" class="menu right">
-	<li id="save-notes-button">Save Notes</li>
-	<li id="export-pdf-button">Export to PDF</li>
-	<a id="export-link" href="{{ url_for('export_notes', id=user.id) }}"></a>
-      </ul>
-    </div>
+    <a id="export-link" href="{{ url_for('export_notes', id=user.id) }}"></a>
 
     <textarea id="notes" class="right">
     </textarea>
