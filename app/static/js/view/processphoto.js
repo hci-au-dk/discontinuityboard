@@ -32,21 +32,19 @@ $(window).load(function() {
 
     $(".loading-icon").hide();
 
-
     var height = $("#content").height();
-    $(".column").height(height);
 
     tinymce.init({
 	selector: '#notes',
-	menubar: 'edit insert format tools',
+	menubar: '',
 	toolbar: "undo redo | alignleft aligncenter alignright alignjustify | bold italic | link image",
 	plugins: 'link image code',
 	relative_urls: false,
-	height: height - 110,  // height of the content minus height of the tinymce toolbars
+       	height: height - 61,  // height of the content minus height of the tinymce toolbars
 	setup: function(ed) {
             ed.on("change", editorChange);
             ed.on("keyDown", editorChange);
-	}
+	    }
     });
 
     // load the proper photo
@@ -103,6 +101,13 @@ function updateTime() {
 function fixWidth() {
     var width = $("#content").width();
     $("#content").css("margin-left", (-1 * (width / 2)) + "px");
+    var photoId = $("#photo-id").val()
+    if (photoId) {
+	messenger.getPhoto(photoId, function(data){
+	    setNewPhoto($("#view"), data);
+	});
+    }
+
 }
 
 function showUpload() {

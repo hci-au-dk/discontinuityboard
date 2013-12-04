@@ -82,10 +82,18 @@ p {
     position: absolute;
 }
 
-#header {
-    background-color: #66CCFF;
-    height: 100px;
-    margin-bottom: 5px;
+
+#header-logo {
+	     width: 50%;
+	     float: left;
+}
+
+#logo {
+      background-color:rgba(0,102,255,0.5);
+      position: absolute;		
+      bottom: 50px;
+      z-index: 2;
+      width: 48%;
 }
 
 #picontrols {
@@ -110,20 +118,23 @@ p {
 }
 
 #content {
-    background-color: white;
+    background-color: #66CCFF;
     width: 98%;
-    height: 500px;
+    height: 100%;
     position: absolute;
     left: 50%;  /* for centering, which is also set dynamically */
 }
 
 #header {
+    background-color: #66CCFF;
     text-align: center;
+    margin-bottom: 5px;
 }
 
 #view {
     width: 49%;
     overflow: hidden;
+    background-color: #66CCFF;
 }
 
 #notes {
@@ -217,7 +228,7 @@ p {
   display: inline-block;
   margin-right: -4px;
   position: relative;
-  padding: 15px 20px;
+  padding: 10px 20px;
   background: #fff;
   cursor: pointer;
   -webkit-transition: all 0.2s;
@@ -235,7 +246,7 @@ p {
 .menu li ul {
   padding: 0;
   position: absolute;
-  top: 48px;
+  top: 38px;
   left: 0;
   width: 150px;
   display: none;
@@ -261,8 +272,14 @@ p {
   z-index: 100;
 }
 
-#notes-options {
+#header ul, #navigate ul {
     margin-right: 25px;
+    padding: 0px;
+    margin-top: 0px;
+}
+
+#notes-options li{
+    background-color: #66CCFF;
 }
 
 #selection-tools {
@@ -270,9 +287,12 @@ p {
 }
 
 #navigate {
-    overflow: visible;
-
+    overflow: hidden;
+    position: fixed;
+    right: 0px;
+    z-index: 2;
 }
+
 /* pi beginning options */
 
 #register-login {

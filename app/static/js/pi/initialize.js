@@ -23,7 +23,6 @@ $(window).ready(function() {
     if (window.location.pathname == "/pi/configure-modal") {
 	$("#configure-button").trigger("click");
     }
-
 });
 
 window.setInterval(loadPhotos, 100000);

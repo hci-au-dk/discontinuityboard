@@ -3,47 +3,10 @@
 
 {% block content %}
 
-<div id="header">
-  <div class="top">
-    <span class="left">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
-    </span>
 
-
-    <div class="loading-icon left"></div>
-
-    <ul class="menu right">
-      <li id="photo-view-button" data-toggle="modal">View New Photo</li>
-    </ul>
-
-    <span class="right">
-      {% if user %}
-      <p>You are connected to photo: {{user.code}}</p>
-      {% endif %}
-    </span>
-
-  </div>
-</div>
-
-<span class="center-text">
-  <p id="time-left"></p>
-</span>
-
-<hr />
 
 <input id="photo-id" value="{{user.id}}" hidden="true"/>
 
-<div id="navigate">
-
-  <ul id="notes-options" class="menu right">
-    <li id="save-notes-button">Save Notes</li>
-    <li id="export-pdf-button">Export to PDF</li>
-    <a id="export-link" href="{{ url_for('export_notes', id=user.id) }}"></a>
-  </ul>
-  <div class="center line"></div>
-</div>
-
-<hr />
 
 
 <div id="content">
@@ -51,13 +14,48 @@
 
   <div id="view" class="column left">
 
+
+    <div id="header">
+
+	<div class="loading-icon left"></div>
+
+	<ul class="menu right">
+	  <li id="photo-view-button" data-toggle="modal">View New Photo</li>
+	</ul>
+	<hr />
+    </div>
+
+    <div id="logo">
+      <img id="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
+
+
+
+	  {% if user %}
+	  <p>You are connected to photo: {{user.code}}</p>
+	  {% endif %}
+
+	  <p id="time-left"></p>
+
+    </div>
   </div>
 
-  <textarea id="notes" class="right">
+  <div>
+    <div id="navigate">
+      <ul id="notes-options" class="menu right">
+	<li id="save-notes-button">Save Notes</li>
+	<li id="export-pdf-button">Export to PDF</li>
+	<a id="export-link" href="{{ url_for('export_notes', id=user.id) }}"></a>
+      </ul>
+    </div>
 
-  </textarea>
+    <textarea id="notes" class="right">
+    </textarea>
 
+  </div>
 </div>
+
+
+
 
 {% include "modals.html" %}
 

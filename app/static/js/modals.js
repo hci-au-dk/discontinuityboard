@@ -32,6 +32,18 @@ Modals.prototype.showModal = function($modal) {
 
     $(window).bind("resize.modal", centerMe);
     $(window).trigger("resize.modal");
+
+    // focus on the first input box
+    var id = $modal.attr("id");
+    ins = $("#" + id + " input");
+    for (var i = 0; i < ins.length; i++) {
+	if (ins[i].type == "text") {
+	    var inid = $(ins[i]).attr("id");
+	    $("#" + id + " input" + "#" + inid).focus();
+	    $("#" + id + " input" + "#" + inid).select();
+	}
+    }
+    
     
     $modal.show();
     this.$overlay.show();

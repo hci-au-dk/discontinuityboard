@@ -587,7 +587,7 @@ def delete_photo_and_selections(photo):
 
 def get_expiry_date(time_submitted, timespan_days=2):
     left = time_submitted + timedelta(days=timespan_days)
-    return left.strftime("%Y-%m-%d %H:%M:%S")
+    return left.strftime("%b %d, %Y %H:%M:%S")
 
 def allowed_file(filename):
     return '.' in filename and \
