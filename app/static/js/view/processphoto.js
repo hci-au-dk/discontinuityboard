@@ -101,13 +101,6 @@ function updateTime() {
 function fixWidth() {
     var width = $("#content").width();
     $("#content").css("margin-left", (-1 * (width / 2)) + "px");
-    var photoId = $("#photo-id").val()
-    if (photoId) {
-	messenger.getPhoto(photoId, function(data){
-	    setNewPhoto($("#view"), data);
-	});
-    }
-
 }
 
 function showUpload() {

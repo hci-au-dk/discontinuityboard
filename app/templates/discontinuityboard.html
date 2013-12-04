@@ -22,20 +22,20 @@
 	<ul class="menu right">
 	  <li id="photo-view-button" data-toggle="modal">View New Photo</li>
 	</ul>
-	<hr />
+
     </div>
 
     <div id="logo">
       <img id="header-logo" src="{{ url_for('static', filename='logo.png') }}" alt="Discontinuity Board">
 
-
+      <div class="right">
 
 	  {% if user %}
 	  <p>You are connected to photo: {{user.code}}</p>
 	  {% endif %}
 
 	  <p id="time-left"></p>
-
+      </div>
     </div>
   </div>
 
