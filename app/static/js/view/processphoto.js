@@ -57,7 +57,7 @@ $(window).load(function() {
 		    });
 	    ed.addButton('export', {
 			title : 'Export button',
-			text: 'Export',
+			text: 'Export to PDF',
 			onclick : function() {
 			var content = tinyMCE.activeEditor.getContent();
 			messenger.saveNotes(currentPhotoId, content, function(data) {

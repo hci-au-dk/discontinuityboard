@@ -83,6 +83,10 @@ p {
     position: absolute;
 }
 
+#imagefile {
+	   cursor: crosshair;
+}
+
 
 #header-logo {
 	     width: 50%;
@@ -352,6 +356,7 @@ p {
 
 .thumbContainer p {
 		clear: both;
+		font-size: 80%;
 }
 
 .selected {
@@ -362,6 +367,7 @@ p {
 .thumbContainer {
     overflow: hidden;
     float: left;
+    margin: 5px;
 }
 
 /* For resizable */
