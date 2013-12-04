@@ -79,6 +79,11 @@ p {
     user-select: none;
 }
 
+#photocontainer {
+		position: absolute;
+		top: 50%;
+}
+
 #photocontainer > div, #photocontainer > canvas {
     position: absolute;
 }
@@ -96,7 +101,7 @@ p {
 #logo {
       background-color:rgba(0,102,255,0.5);
       position: fixed;
-      bottom: 0px;
+      bottom: 5px;
       z-index: 2;
       width: 48%;
       height: 80px;
@@ -139,7 +144,8 @@ p {
     position: absolute;
     left: 50%;  /* for centering, which is also set dynamically */
     margin-top: 10px;
-    min-height: 200px;
+    min-height: 400px;
+    min-width: 400px;
 }
 
 #header {

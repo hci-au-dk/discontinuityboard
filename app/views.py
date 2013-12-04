@@ -39,7 +39,6 @@ def view(code=None):
         else:
             form = PhotoViewForm(request.form)
 
-        print form.code.data
         user = form.get_user()
         if form.validate_login():
             photo = user

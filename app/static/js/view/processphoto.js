@@ -127,7 +127,7 @@ function updateTime() {
 
 function fixWidth() {
     var width = $("#content").width();
-    width = width / 2;
+    width = (width / 2) - 20;
     $("#content").css("margin-left", (-1 * width) + "px");
     var height = $("#content").height() - $("#logo").height() - 10;
 
@@ -144,6 +144,8 @@ function fixWidth() {
     
     $("#toolsdiv").css("width", nwidth);
     $("#toolsdiv").css("height", nheight);
+
+    $("#photocontainer").css("margin-top", (-1 * (height / 2)));
 }
 
 function showUpload() {
