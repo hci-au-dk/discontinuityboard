@@ -1,38 +1,44 @@
+/* Pi specific modals code. Mostly just bnds buttons and hashes
+ * to the correct modals, but also takes care of what to do when
+ * displaying the configuration modal.
+ */
+
 $(function () {
 	if (messenger == null) {
 	    messenger = new Messenger();
 	}
-    var modals = new Modals($("#modal-overlay"));
-    var tools = new ConfigTools();
+	var modals = new Modals($("#modal-overlay"));
+	var tools = new ConfigTools();
 
 
-    // these are for password reset. If a url comes in with a hash matching a modal id, display that modal
-    modals.registerButtonAndHash($("#register-button"), "register-modal",
-				 $("#register-modal"), modals);
+	// these are for password reset. If a url comes in with 
+	//a hash matching a modal id, display that modal
+	modals.registerButtonAndHash($("#register-button"), "register-modal",
+				     $("#register-modal"), modals);
 
-    modals.registerButtonAndHash($("#login-button"), "login-modal",
-				 $("#login-modal"), modals);
+	modals.registerButtonAndHash($("#login-button"), "login-modal",
+				     $("#login-modal"), modals);
 
-    modals.registerButtonAndHash($("#edit-pi-button"), "edit-pi-modal",
-				 $("#edit-pi-modal"), modals);
+	modals.registerButtonAndHash($("#edit-pi-button"), "edit-pi-modal",
+				     $("#edit-pi-modal"), modals);
 
-    modals.registerButtonAndHash($("#upload-button"), "upload-modal",
-				 $("#upload-modal"), modals);
+	modals.registerButtonAndHash($("#upload-button"), "upload-modal",
+				     $("#upload-modal"), modals);
 
-    if (window.location.hash == "#configure-modal") {
-	showConfigure(modals, tools);
-    }
-    $("#configure-button").bind("click", function() {
+	if (window.location.hash == "#configure-modal") {
 	    showConfigure(modals, tools);
-	    window.location.hash = "#configure-modal";
-    });
+	}
+	$("#configure-button").bind("click", function() {
+		showConfigure(modals, tools);
+		window.location.hash = "#configure-modal";
+	    });
 
-
-
-    modals.registerButtonAndHash($("#delete-pi-button"), "delete-pi-modal",
-				 $("#delete-pi-modal"), modals);
+	modals.registerButtonAndHash($("#delete-pi-button"), "delete-pi-modal",
+				     $("#delete-pi-modal"), modals);
 });
 
+// When you show the configure modal, you need to take an
+// unmodified picture and display it in the modal.
 function showConfigure(modals, tools) {
     modals.showModal($("#configure-modal"));
 
@@ -60,6 +66,8 @@ function showConfigure(modals, tools) {
     }
 }
 
+// Whenever the corners are moved, this function gets called.
+// it displays what the x and y are for this corner div in the input boxes.
 function populateCoordinates(e) {
     // Get the div that moved
     var corner = $(this);

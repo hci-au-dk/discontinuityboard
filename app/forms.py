@@ -35,7 +35,6 @@ class EditPiForm(Form):
             return pi
         return None
 
-
 class ConfigurePiForm(Form):
     x0 = TextField('x0', validators = [Required()])
     x1 = TextField('x1', validators = [Required()])
@@ -56,7 +55,9 @@ class PhotoViewForm(Form):
         return user is not None
 
     def get_user(self):
-        return models.Photo.query.filter(models.Photo.code==self.code.data).first()
+        # ignore case
+        code = self.code.data.upper()
+        return models.Photo.query.filter(models.Photo.code==code).first()
 
 class LoginPiForm(Form):
     human_name = TextField('human_name', validators = [Required(), Length(min=2, message='Too short')])

@@ -1,9 +1,23 @@
+/* A general messenger object that provides a convenient interface
+ * to execute AJAX requests from. Goes to debug mode if the host's
+ * location is "localhost" or "127.0.0.1".
+ */
+
 var Messenger = function() {
 
     var host = window.location.host;
     var DEBUG = (host.indexOf("localhost") != -1) ||
                 (host.indexOf("127.0.0.1") != -1);
 
+    // Get all photos associated with this pi
+    // Returns on successan array of photo objects:
+    // {"path": path to photo, 
+    // "id": photo id,
+    // "code": access code,
+    // "width": original photo width,
+    // "height": original photo height,
+    // "time": expiry time,
+    // "saved": whether or not the photo has been saved}
     this.getAllPhotos = function(successFn) {
 	$.ajax({
             url: "/get-all-photos/",
@@ -16,6 +30,15 @@ var Messenger = function() {
         });
     }
 
+    // Get a single photo specified by this id.
+    // Returns on succes:
+    // {"path": path to photo, 
+    // "id": photo id,
+    // "width": original photo width,
+    // "height": original photo height,
+    // "raw": whether this photo was configured,
+    // "time": expiry time,
+    // "notes": notes content for this  photo}
     this.getPhoto = function(photoId, successFn) {
 	$.ajax({
 	    url: "/get-photo/",
@@ -32,6 +55,7 @@ var Messenger = function() {
 	});
     }
 
+    // Deletes the photo and all selections associated with the photo
     this.deletePhoto = function(photoId) {
 	$.ajax({
 	    url: "/delete-photo/",
@@ -45,24 +69,11 @@ var Messenger = function() {
 		    alert("delete photo error");
 	    }
 	});
-
     }
 
-    this.getConfigured = function(successFn) {
-	$.ajax({
-	    url: "/get-configured/",
-	    type: "GET",
-	    success: function(data) {
-		successFn(data);
-	    },
-	    error: function() {
-		if (DEBUG) {
-		    alert("get configured error");
-		}
-	    }
-	});
-    }
-
+    // Take a photo with the pi, if configsSet, get a configured photo
+    // Returns on success:
+    // {"id": photo id}
     this.takePhotoWithPi = function(configsSet, successFn, failureFn) {
 	$("#loading").show();
 	$.ajax({
@@ -83,10 +94,12 @@ var Messenger = function() {
 	});
     }
 
+    // Upload a photo into our server
+    // Returns on success:
+    // {"id": photo id}
     this.uploadPhoto = function(file) {
 	var fd = new FormData();    
 	fd.append( 'file', file );
-
 	$.ajax({
 	    url: '/upload/',
 	    data: fd,
@@ -103,8 +116,11 @@ var Messenger = function() {
 	}); 
     }
 
+    /* AJAX view functions */
 
-    // AJAX view functions
+    // Save these notes associated with this photo
+    // Returns on success:
+    // {}
     this.saveNotes = function(photoId, notesContent, successFn) {
 	var data = {id: photoId, content: notesContent};
 	$.ajax({
@@ -121,6 +137,12 @@ var Messenger = function() {
 	}); 
     }
 
+    // Make a selection from the given rectangle of the given photo
+    // Returns on success:
+    // {"path": path to the selection,
+    // "id": selection id,
+    // "width": original width of selection,
+    // "height": original height of selection}
     this.makeCut = function(photoId, x1, y1, x2, y2, successFn) {
 	$.ajax({
 	    url: "/make-cut/",

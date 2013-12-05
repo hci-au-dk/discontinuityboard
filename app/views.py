@@ -1,19 +1,23 @@
+from app import app, db, models, login_manager
+
 import datetime, os, string, random, requests
 from datetime import timedelta
-from app import app, db, models, login_manager
 from flask import render_template, flash, redirect, request, url_for, \
 send_from_directory, make_response, json, get_flashed_messages
-from sqlalchemy.exc import IntegrityError
-from werkzeug import secure_filename
-from util.perspective_transformation import transform_perspective
-from PIL import Image
-from StringIO import StringIO
-from forms import RegisterPiForm, EditPiForm, ConfigurePiForm, LoginPiForm, PhotoViewForm
 from flask.ext.login import login_user, current_user, logout_user, login_required
+from flask_weasyprint import HTML, render_pdf
+from forms import RegisterPiForm, EditPiForm, ConfigurePiForm, LoginPiForm, PhotoViewForm
+from PIL import Image
+from markupsafe import Markup
+from StringIO import StringIO
+from sqlalchemy.exc import IntegrityError
+from util.perspective_transformation import transform_perspective
+from werkzeug import secure_filename
 from wtforms.validators import ValidationError
 
-from flask_weasyprint import HTML, render_pdf
-from markupsafe import Markup
+
+TIMESPAN_DAYS = 2
+CODE_LENGTH = 6  # should correspond with the javascript access triggers
 
 ##############################################################
 # Routers - View                                             #
@@ -47,13 +51,12 @@ def view(code=None):
         flash('Incorrect entry code.', category='entry')
         return redirect(url_for('entry'))
 
-    # prepare the forms
+    # If you got this far, you are viewing your photo!
     form = PhotoViewForm()
     return render_template('discontinuityboard.html',
                            title = 'View | Discontinuity Board',
                            pvform = form,
                            user = photo)
-    
 
 
 ##############################################################
@@ -62,18 +65,10 @@ def view(code=None):
 
 @app.route('/pi')
 def pi():
-    return render_pi_frontpage()
-
-
-def render_pi_frontpage(rform = None, cform = None, lform = None, eform = None):
-    if rform is None:
-        rform = RegisterPiForm()
-    if cform is None:
-        cform = ConfigurePiForm()
-    if lform is None:
-        lform = LoginPiForm()
-    if eform is None:
-        eform = EditPiForm()
+    rform = RegisterPiForm()
+    cform = ConfigurePiForm()
+    lform = LoginPiForm()
+    eform = EditPiForm()
 
     user = None
     if current_user.is_authenticated():
@@ -86,6 +81,7 @@ def render_pi_frontpage(rform = None, cform = None, lform = None, eform = None):
                            lform = lform,
                            eform = eform,
                            user = user)
+
 
 @app.route('/pi/configure-modal')
 def pi_configure():
@@ -103,13 +99,6 @@ def send_file(filename):
 ##############################################################
 # AJAX Services - Pi                                         #
 ##############################################################
-
-def flash_errors(form, category):
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error), category='error' + category)
 
 @app.route('/pi/login/', methods=['POST'])
 def pi_login():
@@ -220,8 +209,6 @@ def edit_pi():
     else:
         flash_errors(form, '-edit')
         return redirect(url_for('pi') + "#edit-pi-modal")
-    # get the pi
-
     return redirect(url_for('pi'))
 
 @app.route('/pi/logout/')
@@ -233,13 +220,20 @@ def pi_logout():
 @app.route('/pi/delete-pi/')
 @login_required
 def pi_delete():
-    pi = models.Pi.query.filter(models.Pi.id==current_user.id).first()
-    for photo in pi.photos:
-        delete_photo_and_selections(photo)
 
     # delete config file on the pi
     pilocation = get_pi_base() + 'register-server'
-    r = requests.delete(pilocation)
+
+    # even if a timeout occurs we still want to do the delete
+    try:
+        r = requests.delete(pilocation, timeout=1)
+    except:
+        requests.exceptions.Timeout
+        # ignore this
+
+    pi = models.Pi.query.filter(models.Pi.id==current_user.id).first()
+    for photo in pi.photos:
+        delete_photo_and_selections(photo)
 
     db.session.delete(pi)
     db.session.commit()
@@ -276,7 +270,8 @@ def get_all_photos():
             img = Image.open(photo.path)
             data.append({'path': name, 'id': photo.id, 'code': photo.code,
                          'width': img.size[0], 'height': img.size[1],
-                         'time': get_expiry_date(photo.time_submitted)})
+                         'time': get_expiry_date(photo.time_submitted),
+                         'saved': photo.notes is not None})
 
     returnobj = {}
     returnobj["photos"] = data
@@ -531,9 +526,10 @@ def save_notes():
     id = request.form['id']
     content = request.form['content']
 
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
-    photo.notes = content
-    db.session.commit()
+    if len(content) > 0:
+        photo = models.Photo.query.filter(models.Photo.id==id).first()
+        photo.notes = content
+        db.session.commit()
 
     response = make_response(json.dumps(returnobj), 200)
     response.headers['Content-type'] = 'application/json'
@@ -567,13 +563,20 @@ def load_user(userid):
 # Helper Functions                                           #
 ##############################################################
 
-def clear_old_photos(timespan_days=2):
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+# Clears photos that don't have notes and have
+# been around for more than TIMESPAN_DAYS
+def clear_old_photos():
     now = datetime.datetime.now()
     for photo in models.Photo.query.all():
         delta = now - photo.time_submitted
-        if (delta.days >= timespan_days and photo.notes is None):
+        if (delta.days >= TIMESPAN_DAYS and photo.notes is None):
             delete_photo_and_selections(photo)
 
+# Deletes a photo and all selections associated with it
 def delete_photo_and_selections(photo):
     path = photo.path
     for child in photo.children:
@@ -584,15 +587,50 @@ def delete_photo_and_selections(photo):
     db.session.commit()
     os.remove(path)
 
-def get_expiry_date(time_submitted, timespan_days=2):
-    left = time_submitted + timedelta(days=timespan_days)
+# Gets the human-readable date that the photo will expire
+def get_expiry_date(time_submitted):
+    left = time_submitted + timedelta(days=TIMESPAN_DAYS)
     return left.strftime("%b %d, %Y %H:%M:%S")
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+# Returns a unique access code of length CODE_LENGTH
+def get_new_access_code(chars=string.ascii_uppercase):
+    code = generate_code(CODE_LENGTH, chars)
+    while models.Photo.query.filter(models.Photo.code==code).first() is not None:
+        code = generate_code(CODE_LENGTH, chars)
+    return code
 
-    
+def generate_code(size, chars):
+    return ''.join(random.choice(chars) for x in range(size))
+
+# Given an id, returns the base filename of the photo
+def get_photo_filename(id):
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    db.session.close()
+    filename = os.path.basename(photo.path)
+    return filename
+
+# Given an id, returns the path to where the photo is stored
+def get_photo_path(id):
+    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    db.session.close()
+    return photo.path
+
+# Get the base address of the pi that you are connected to
+def get_pi_base():
+    if current_user:
+        return 'http://' + current_user.ip + '/'
+    return None
+
+# Register errors associated with a form to a certain category
+# in the format "error[category]"
+def flash_errors(form, category):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error), category='error' + category)
+
+# Save a photo in the database and in the file system
 def save_photo(file, filename, raw, pi_id=None, code=None):
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
     file.save(savename)
@@ -617,6 +655,7 @@ def save_photo(file, filename, raw, pi_id=None, code=None):
     db.session.close()
     return photo.id
 
+# Save a selection in the database and in the file system
 def save_selection(image, filename, parent, comments=None):
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
     image.save(savename)
@@ -637,59 +676,3 @@ def save_selection(image, filename, parent, comments=None):
     selection = models.Selection.query.filter(models.Selection.path==savename).first()
     db.session.close()
     return selection.id
-
-def get_photo_path(id):
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
-    db.session.close()
-    return photo.path
-
-def get_photo_filename(id):
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
-    db.session.close()
-    filename = os.path.basename(photo.path)
-    return filename
-
-def get_pi_base():
-    if current_user:
-        return 'http://' + current_user.ip + '/'
-    return None
-
-# Returns a unique access code
-def get_new_access_code(size=6, chars=string.ascii_uppercase):
-    code = generate_code(size, chars)
-    while models.Photo.query.filter(models.Photo.code==code).first() is not None:
-        code = generate_code(size, chars)
-    return code
-
-def generate_code(size, chars):
-    return ''.join(random.choice(chars) for x in range(size))
-
-
-
-
-def get_interface_ip(ifname):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, struct.pack('256s',
-                                                                        ifname[:15]))[20:24])
-
-def get_lan_ip():
-    ip = socket.gethostbyname(socket.gethostname())
-    if ip.startswith("127.") and os.name != "nt":
-        interfaces = [
-            "eth0",
-            "eth1",
-            "eth2",
-            "wlan0",
-            "wlan1",
-            "wifi0",
-            "ath0",
-            "ath1",
-            "ppp0",
-            ]
-        for ifname in interfaces:
-            try:
-                ip = get_interface_ip(ifname)
-                break
-            except IOError:
-                pass
-    return ip

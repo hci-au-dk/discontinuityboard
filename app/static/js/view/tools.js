@@ -1,4 +1,6 @@
-// This is where the functionality for the buttons will go
+/* Functionality for any extra photo manipulation tools.
+ * Currently, only contains code for the photo selection tool. 
+*/
 
 var Tools = function() {
     
@@ -43,52 +45,4 @@ var Tools = function() {
 	    }
 	}
     }
-}
-
-function selectionDown(e) {
-    $("#make-selection-button").removeAttr("disabled");
-    // get rid of any old selectors
-    $("#selector").remove();
-
-    // make a div that appears where the user clicked
-    var x = getX(e) - $(this).offset().left;
-    var y = getY(e) - $(this).offset().top;
-    
-    var div = $(document.createElement("div"));
-    div.attr("id", "selector");
-    div.css("top", y + "px");
-    div.css("left", x + "px");
-    div.css("cursor", "pointer");
-    div.css("position", "absolute");  /* needs to be programmatically set to override style*/
-    div.addClass("ui-widget-content")
-
-    div.draggable({containment: "#toolsdiv"}).resizable({containment: "#toolsdiv", handles: "n,e,s,w,se,sw,ne,nw"});
-
-    $(this).append(div);
-
-    $("#toolsdiv").unbind("mousedown");
-}
-
-function getX(e) {
-    var ev = e || window.event; //Moz || IE
-
-    var x = 0;
-    if (ev.pageX) { //Moz
-	x = ev.pageX;
-    } else if (ev.clientX) { //IE
-	x = ev.clientX;
-    }
-    return x;
-}
-
-function getY(e) {
-    var ev = e || window.event; //Moz || IE
-
-    var y = 0;
-    if (ev.pageX) { //Moz
-	y = ev.pageY;
-    } else if (ev.clientX) { //IE
-	y = ev.clientY;
-    }
-    return y;
 }

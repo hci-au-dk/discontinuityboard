@@ -1,3 +1,6 @@
+/* View specific modals functionality.
+ */
+
 $(function () {
     var modals = new Modals($("#modal-overlay"));
 

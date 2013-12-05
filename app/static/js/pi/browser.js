@@ -1,6 +1,10 @@
+/* Javascript for viewing and manipulating the thumbnails of all
+ * photos associated with the pi that you are logged into.
+ */
 
-var MAX_SIZE = 200;
+var MAX_SIZE = 200; // Corresponds with the size set in discontinuityboard.css
 
+// Initialize a browser with the data from messenger.getAllPhotos
 var Browser = function(data) {
     $("#browsebucket").remove();
     
@@ -31,16 +35,20 @@ var Browser = function(data) {
 	div.append(p);
 
 	var p = $(document.createElement("p"));
-	p.text("Expires on: " + data.photos[index]["time"]);
+	if (data.photos[index]["saved"]) {
+	    p.text("This photo has been saved.")
+	} else {
+	    p.text("Expires on: " + data.photos[index]["time"]);
+	}
 	div.append(p);
 
 	bb.append(div);
     });
     
     $("#browse").append(bb);
-
 }
 
+// Shows which thumbnail is currently selected
 Browser.prototype.setSelected = function(e) {
     var photoId = $(this).attr("id");
     var thumbs = $(".thumbnail");
@@ -55,8 +63,8 @@ Browser.prototype.setSelected = function(e) {
 }
 
 
-// Deletes the current photo, and, if there is a next photo,
-// sets it to be viewed.
+// Deletes the current thumbnail, and, if there is a next thumbnail,
+// sets it to be selected.
 Browser.prototype.deletePhoto = function(e) {
     if ($(".selected").length == 0) {
 	return;
@@ -79,8 +87,6 @@ Browser.prototype.deletePhoto = function(e) {
 	    }
 	}
     });
-
-    
 }
 
 

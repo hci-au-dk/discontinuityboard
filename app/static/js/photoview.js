@@ -1,6 +1,12 @@
+/* An object that serves knows how to set new photos into view ports
+ * and initialize notes.
+ */
+
 var PhotoView = function() {
 }
 
+// Set the given photo data (from messenger.getPhoto) into a 
+// photo view port in the given parent object
 PhotoView.prototype.setNewPhoto = function($parent, data) {
 
     $("#photocontainer").remove();
@@ -55,6 +61,8 @@ PhotoView.prototype.setNewPhoto = function($parent, data) {
     return obj
 }
 
+// Initialize the notes so that they have the content associated
+// with the photo data
 PhotoView.prototype.initializeNotes = function(data) {
     var content = data.notes;
     if (content) {
@@ -62,6 +70,8 @@ PhotoView.prototype.initializeNotes = function(data) {
     }
 }
 
+// Get the scale that the photo can be displayed at, given its
+// original width and height and the maximum width and height
 PhotoView.prototype.getScale = function(w, h, maxW, maxH) {
     var currentPhotoRatio = 1;
     // reset the ratio so that we can send accurate coordinates to the pi

@@ -1,3 +1,6 @@
+/* Set up all the functionality needed for the pi front end.
+ */
+
 var messenger = null;
 var browser = null;
 var viewer = null;
@@ -16,7 +19,6 @@ $(window).ready(function() {
     viewer = new PhotoView();
 
     attachListeners();
-
     $(".loading-icon").hide();
 
     // trigger a configure event if the user got here through set up
@@ -25,8 +27,8 @@ $(window).ready(function() {
     }
 });
 
+// Reload the photos every now and then automatically
 window.setInterval(loadPhotos, 100000);
-
 function loadPhotos() {
     messenger.getAllPhotos(initializeBrowser);
 }
@@ -34,10 +36,11 @@ function loadPhotos() {
 
 function attachListeners() {
     // Photo taking/uploading
-    $("#take-photo-button").bind("click", takeRegularPhotoClick);
+    $("#take-photo-button").bind("click", takePhotoClick);
     $("#uploadphotobutton").bind("click", showUpload);
 }
 
+// Upload a photo and refresh the browser so that it shows things accurately.
 function showUpload() {
     // first, get the file
     var file = $("#filename")[0].files[0]
@@ -47,13 +50,10 @@ function showUpload() {
     $("#filename").val("");
 }
 
-function takeRegularPhotoClick() {
-    takePhotoClick(true);
-}
-
-function takePhotoClick(configs) {
+// Take a photo and refresh the browser.
+function takePhotoClick() {
     $(".loading-icon").show();
-    messenger.takePhotoWithPi(configs, function(data) {
+    messenger.takePhotoWithPi(true, function(data) {
 	$(".loading-icon").hide();
 	}, function(data) {
 	    $(".loading-icon").hide();
@@ -62,6 +62,7 @@ function takePhotoClick(configs) {
     messenger.getAllPhotos(initializeBrowser);
 }
 
+// Initialize the browser and make the thumbnails listen to the correct things.
 function initializeBrowser(data) {
     browser = new Browser(data);
     $(".thumbnail").bind("click", browser.setSelected);
@@ -69,6 +70,7 @@ function initializeBrowser(data) {
     $("#deletephoto").bind("click", browser.deletePhoto);
 }
 
+// Set a new photo to be viewed in the configuration window
 function setNewPhotoConfigureView(data) {
     var stats = viewer.setNewPhoto($("#configure-display"), data);
     currentPhotoId = stats.id;

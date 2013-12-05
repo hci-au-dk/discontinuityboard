@@ -3,7 +3,6 @@ html {
     body: 100%;
 }
 
-
 div {
     margin: 0px;
     padding: 0px;
@@ -79,7 +78,7 @@ p {
     user-select: none;
 }
 
-#photocontainer {
+#view #photocontainer {
 		position: absolute;
 		top: 50%;
 }
@@ -88,7 +87,7 @@ p {
     position: absolute;
 }
 
-#imagefile {
+#view #imagefile {
 	   cursor: crosshair;
 }
 

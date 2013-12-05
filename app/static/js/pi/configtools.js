@@ -1,7 +1,9 @@
-// This is where the functionality for the buttons will go
+// Tools associated with configuring the pi.
 
 var ConfigTools = function() {
 
+    // This is what gets called with the configure photo is loaded.
+    // It displays the corner selection arrows and makes them work correctly.
     this.cornerSelectClick = function($parent, dragFn) {
 	var parentX = $parent.offset().left;
 	var parentY = $parent.offset().top;
@@ -50,29 +52,4 @@ var ConfigTools = function() {
 	    div.trigger("drag");
 	}
     }
-
-}
-
-function getX(e) {
-    var ev = e || window.event; //Moz || IE
-
-    var x = 0;
-    if (ev.pageX) { //Moz
-	x = ev.pageX;
-    } else if (ev.clientX) { //IE
-	x = ev.clientX;
-    }
-    return x;
-}
-
-function getY(e) {
-    var ev = e || window.event; //Moz || IE
-
-    var y = 0;
-    if (ev.pageX) { //Moz
-	y = ev.pageY;
-    } else if (ev.clientX) { //IE
-	y = ev.clientY;
-    }
-    return y;
 }

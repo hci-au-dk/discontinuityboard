@@ -1,3 +1,8 @@
+/* This file contains the code for a general modals object.
+ * Once initialized with an overlay jQuery object, the modals
+ * object can be used to do things like display a generic modal.
+ */
+
 var Modals = function($overlay) {
     this.$overlay = $overlay;
     this.$overlay.hide();
@@ -13,6 +18,8 @@ var Modals = function($overlay) {
 
 };
 
+// Register a button and a hash to redirect to displaying the given
+// modal with the given Modals object
 Modals.prototype.registerButtonAndHash = function($button, hash, $modal, modals) {
     if (window.location.hash == "#" + hash) {
 	modals.showModal($modal);
@@ -24,6 +31,7 @@ Modals.prototype.registerButtonAndHash = function($button, hash, $modal, modals)
 
 };
 
+// Show a given modal in the center of the screen
 Modals.prototype.showModal = function($modal) {
     // wrap the center method so it's bound to the displayed modal
     var centerMe = function() {
@@ -44,11 +52,11 @@ Modals.prototype.showModal = function($modal) {
 	}
     }
     
-    
     $modal.show();
     this.$overlay.show();
 };
 
+// Close the modal associated with the close button that has been triggered
 Modals.prototype.close = function(e) {
     var $modal = Modals.prototype.getModalParent($(e.target));
     $modal.hide();
@@ -56,11 +64,7 @@ Modals.prototype.close = function(e) {
     window.location.hash = '';
 }
 
-Modals.prototype.closeModal = function($modal) {
-    $modal.hide();
-    $(window).unbind('resize.modal');
-}
-
+// Center a modal
 Modals.prototype.center = function($modal) {
     var top, left;
     
@@ -73,6 +77,8 @@ Modals.prototype.center = function($modal) {
     });
 };
 
+// Get the closest parent of the given element that
+// has class "modal" 
 Modals.prototype.getModalParent = function($element) {
     var $parent = $($element.parent());
     while (!$parent.hasClass("modal")) {

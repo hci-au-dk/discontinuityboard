@@ -86,6 +86,19 @@
 
       <div id="configure-display">
 	<div class="loading-icon"></div>
+
+	   {% with errors = get_flashed_messages(category_filter=["general"]) %}
+	   {% if errors %}
+	   <div class="alert-message block-message error">
+	     <ul>
+	       {%- for msg in errors %}
+	       <li>{{ msg }}</li>
+	       {% endfor -%}
+	     </ul>
+	   </div>
+	   {% endif %}
+	   {% endwith %}
+
       </div>
 
       <form action="{{ url_for('configure') }}" method="post" name="configure">
@@ -180,7 +193,7 @@
 	    <label>height:</label> <span>{{eform.wbheight(size=3)}}</span>
 
 	    <hr />
-	    <label>Password:</label> <span>{{eform.old_password}}</span>
+	    <label>Password*:</label> <span>{{eform.old_password}}</span>
 
 	    {% with errors = get_flashed_messages(category_filter=["error-edit"]) %}
 	    {% if errors %}
