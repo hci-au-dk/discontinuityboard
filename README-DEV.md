@@ -1,6 +1,57 @@
 # Discontinuity Whiteboard Dev Instructions
 ====================
 
+## A Guide to Going from Zero to Server in Just a Bit of Time
+
+Start by cloning the git repository:
+
+```
+$ git clone https://github.com/hci-au-dk/discontinuityboard.git
+$ cd discontinuityboard
+```
+
+Next, get your virtual environment up and running:
+
+```
+$ sudo easy_install virtualenv # if you don't have virtualenv yet
+
+$ virtualenv venv --distribute # creates a new virtual environment named "venv"
+$ source venv/bin/activate #activates the current environment
+
+$ deactivate #when you are done with your virtual environment - Don't do this yet!
+```
+
+Next, install the required components. This requires both installing the things in `requirements.txt` and installing some other dependencies.
+
+```
+$ pip install -r requirements.txt # to install everything in the requirements
+```
+
+If you start getting errors about libraries not being available:
+
+```
+$brew install python cairo pango gdk-pixbuf libxml2 libxslt libffi # or whatever package manager you most enjoy
+```
+
+Once you have successfully installed all the requirements, you need to get your database set up:
+
+```
+$ python db_create.py
+$ python db_migrate.py # should output text telling you that you did your first migration
+```
+
+Now, you are ready to run your server. If you want it to run for a long time in a place, I would recommend using `screen`.
+
+```
+$ screen -S name_of_your_session # the name can be whatever you like
+$ python discontinuityboard.py # you should be able to connect to this server now!
+```
+
+To leave your `screen` session and keep your server running, `Ctrl-a d`. You can reattach with the command `screen -r` to see the processes you left running. To see all your screen sessions `screen -ls`.
+
+You'll want to have your pi server running also for full functionality. See the instructions in `README-DEV.md` in [whiteboard-camera](https://github.com/hci-au-dk/whiteboard-camera).
+
+
 ## Running the server
 
 To run the server locally, simply type:
