@@ -19,6 +19,18 @@ from wtforms.validators import ValidationError
 TIMESPAN_DAYS = 2
 CODE_LENGTH = 6  # should correspond with the javascript access triggers
 
+@app.before_request
+def pre_request_logging():
+    #Logging statement
+    app.logger.info('\t'.join([
+                datetime.datetime.today().ctime(),
+                request.remote_addr,
+                request.method,
+                request.url,
+                request.data,
+                ', '.join([': '.join(x) for x in request.headers])])
+                    )
+
 ##############################################################
 # Routers - View                                             #
 ##############################################################
@@ -262,7 +274,7 @@ def get_all_photos():
         return make_response(400)
 
     clear_old_photos()
-    photos = models.Photo.query.filter(models.Photo.pi_id==current_user.id)
+    photos = models.Photo.query.filter(models.Photo.pi_id==current_user.id).filter(models.Photo.deleted==False)
     data = []
     for photo in photos:
         if not photo.raw:
@@ -288,7 +300,7 @@ def delete_photo():
         return make_response(400)
 
     id = request.args.get('id')
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    photo = get_photo_from_id(id)
 
     delete_photo_and_selections(photo)
 
@@ -311,7 +323,7 @@ def take_photo():
         raw = False
 
     try:
-        r = requests.get(pilocation, timeout=20)
+        r = requests.get(pilocation, timeout=30)
     except:
         requests.exceptions.Timeout
         flash('Timeout occurred. Make sure IP address is correct and server is running.', category='general')
@@ -320,7 +332,6 @@ def take_photo():
     img = Image.open(StringIO(r.content))
     if request.args.get('configured') == 'true':
         # flip and correct for aspect ratio of the whiteboard
-        img = img.rotate(180)
         ow = img.size[0]
         h = img.size[1]
         w = ow
@@ -374,6 +385,20 @@ def configure():
         piobj['x3'] = (form.x3.data)
         piobj['y3'] = (form.y3.data)
 
+        # then set rotation
+        if form.rotate.data:
+            piobj['rotation'] = '180'
+        else:
+            piobj['rotation'] = '0'
+
+        #then delete all unconfigured photos from this pi
+        pi = models.Pi.query.filter(models.Pi.id==current_user.id).first()
+        for photo in pi.photos:
+            if photo.raw:
+                db.session.delete(photo)
+
+        db.session.commit()
+
         pilocation = get_pi_base() + 'configuration'
         headers = {'Content-type': 'application/json'}
 
@@ -385,12 +410,6 @@ def configure():
         else:
             returnobj['saved'] = False
 
-        #then delete all unconfigured photos from this pi
-        pi = models.Pi.query.filter(models.Pi.id==current_user.id).first()
-        for photo in pi.photos:
-            if photo.raw:
-                db.session.delete(photo)
-        db.session.commit()
     else:
         flash_errors(form, '-configure')
         return redirect(url_for('pi') + "#configure-modal")
@@ -407,14 +426,14 @@ def pi_upload():
         file = request.files['file']
         pi_id = request.form['id']
         if file and allowed_file(file.filename):
-           
+            pi = models.Pi.query.filter(models.Pi.id==pi_id).first()
+
             img = Image.open(file)
             # flip and correct for aspect ratio of the whiteboard
-            img = img.rotate(180)
             ow = img.size[0]
             h = img.size[1]
             w = ow
-            wbratio = models.Pi.query.filter(models.Pi.id==pi_id).first().wbratio
+            wbratio = pi.wbratio
             if ( (ow / h) != wbratio):
                 # get a new width and height that does
                 # always keep the height the same
@@ -424,7 +443,7 @@ def pi_upload():
 
             filename = secure_filename(file.filename)
             photoid = save_photo(img, filename, False, pi_id, request.form['code'])
-            photo = models.Photo.query.filter(models.Photo.id==photoid).first()
+            photo = get_photo_from_id(photoid)
 
             returnobj['timesubmitted'] = photo.time_submitted 
             returnobj['time'] = get_expiry_date(photo.time_submitted)
@@ -461,7 +480,7 @@ def get_photo():
 
     clear_old_photos()
     id = request.args.get('id')
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    photo = get_photo_from_id(id)
 
     # See if the photo does not exist
     returnobj = {}
@@ -497,7 +516,7 @@ def make_cut():
     cropped = cropped.crop((x1, y1,
                             x2, y2))
     # Get the parent
-    parent = models.Photo.query.filter(models.Photo.id==photoid).first()
+    parent = get_photo_from_id(photoid)
     
     filename = str(x1) + str(y1) + str(x2) + str(y2) + '_' + get_photo_filename(photoid)
 
@@ -527,7 +546,7 @@ def save_notes():
     content = request.form['content']
 
     if len(content) > 0:
-        photo = models.Photo.query.filter(models.Photo.id==id).first()
+        photo = get_photo_from_id(id)
         photo.notes = content
         db.session.commit()
 
@@ -542,7 +561,7 @@ def export_notes():
 
     id = request.args.get('id')
 
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    photo = get_photo_from_id(id)
     tmp = render_template('notes.html', notes=Markup(photo.notes))
 
     response = render_pdf(HTML(string=tmp), download_filename='notes.pdf')
@@ -567,6 +586,10 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
+
+def get_photo_from_id(id):
+    return models.Photo.query.filter(models.Photo.id==id).filter(models.Photo.deleted==False).first()
+
 # Clears photos that don't have notes and have
 # been around for more than TIMESPAN_DAYS
 def clear_old_photos():
@@ -576,16 +599,17 @@ def clear_old_photos():
         if (delta.days >= TIMESPAN_DAYS and photo.notes is None):
             delete_photo_and_selections(photo)
 
-# Deletes a photo and all selections associated with it
+# "Deletes" a photo and all selections associated with it
 def delete_photo_and_selections(photo):
-    path = photo.path
-    for child in photo.children:
-        os.remove(child.path)
-        db.session.delete(child)
+    #path = photo.path
+    #for child in photo.children:
+        #os.remove(child.path)
+        #db.session.delete(child)
 
-    db.session.delete(photo)
+    #db.session.delete(photo)
+    photo.deleted = True
     db.session.commit()
-    os.remove(path)
+    #os.remove(path)
 
 # Gets the human-readable date that the photo will expire
 def get_expiry_date(time_submitted):
@@ -604,14 +628,14 @@ def generate_code(size, chars):
 
 # Given an id, returns the base filename of the photo
 def get_photo_filename(id):
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    photo = get_photo_from_id(id)
     db.session.close()
     filename = os.path.basename(photo.path)
     return filename
 
 # Given an id, returns the path to where the photo is stored
 def get_photo_path(id):
-    photo = models.Photo.query.filter(models.Photo.id==id).first()
+    photo = get_photo_from_id(id)
     db.session.close()
     return photo.path
 
@@ -642,7 +666,7 @@ def save_photo(file, filename, raw, pi_id=None, code=None):
     # Now, we want to insert it into our database
     if pi_id is None:
         pi_id = current_user.id
-    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now(), pi_id=pi_id, code=code)
+    photo = models.Photo(path=savename, raw=raw, time_submitted=datetime.datetime.now(), pi_id=pi_id, code=code, deleted=False)
     db.session.add(photo)
     try:
         db.session.commit()

@@ -117,6 +117,9 @@
 	      <label>y:</label> <span>{{cform.y2(size=5)}}</span>
 	      <label>y:</label> <span>{{cform.y3(size=5)}}</span>
 	    </div>
+	  <p>
+	      Rotate 180 degrees?{{cform.rotate(value="n")}}
+	  </p>
 
 	   {% with errors = get_flashed_messages(category_filter=["error-configure"]) %}
 	   {% if errors %}

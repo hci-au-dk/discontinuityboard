@@ -1,6 +1,8 @@
 import os, tempfile
 from flask.ext.assets import Bundle
 
+LOG_FILENAME = 'python.log'
+
 ### STATIC FILES TO LOAD WITH ASSETS
 
 CSS_ALL = Bundle('css/imgareaselect-default.css', 'css/discontinuityboard.css')

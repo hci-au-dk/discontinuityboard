@@ -10,7 +10,8 @@ class Photo(db.Model):
     parent = db.relationship('Pi', primaryjoin='Pi.id==Photo.pi_id')
     code = db.Column(db.String(20), unique = True) # string that provides the access point
     notes = db.Column(db.Text())  # variably sized text field for saving the notes
-
+    deleted = db.Column(db.Boolean)
+    
     def is_authenticated(self):
         return True
 

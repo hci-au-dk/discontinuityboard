@@ -3,7 +3,7 @@ from flask.ext.wtf import Form
 from werkzeug import secure_filename
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import Required, ValidationError, Length
-from wtforms import TextField, PasswordField, HiddenField
+from wtforms import TextField, PasswordField, HiddenField, BooleanField
 
 
 class RegisterPiForm(Form):
@@ -46,6 +46,7 @@ class ConfigurePiForm(Form):
     y3 = TextField('y3', validators = [Required()])
     cwidth = HiddenField('cwidth', validators = [Required()])
     cheight = HiddenField('cheight', validators = [Required()])
+    rotate = BooleanField('rotate')
 
 class PhotoViewForm(Form):
     code = TextField('code', validators = [Required()])
@@ -57,7 +58,7 @@ class PhotoViewForm(Form):
     def get_user(self):
         # ignore case
         code = self.code.data.upper()
-        return models.Photo.query.filter(models.Photo.code==code).first()
+        return models.Photo.query.filter(models.Photo.code==code).filter(models.Photo.deleted==False).first()
 
 class LoginPiForm(Form):
     human_name = TextField('human_name', validators = [Required(), Length(min=2, message='Too short')])
