@@ -1,10 +1,11 @@
 from app import app, db
+import sys
 
 if __name__ == '__main__': 
-    host = '0.0.0.0'
+    host = sys.argv[1]
     debug = host != '0.0.0.0'
 
-    if app.debug is not True:
+    if debug is not True:
         import logging
         from logging.handlers import RotatingFileHandler
         app.logger.setLevel(logging.INFO) # use the native logger of flask

@@ -12,6 +12,8 @@ from markupsafe import Markup
 from StringIO import StringIO
 from sqlalchemy.exc import IntegrityError
 from util.perspective_transformation import transform_perspective
+import util.whiteboard
+
 from werkzeug import secure_filename
 from wtforms.validators import ValidationError
 
@@ -70,6 +72,15 @@ def view(code=None):
                            pvform = form,
                            user = photo)
 
+@app.route('/test-whiteboard/<code>')
+def process_whiteboard(code):
+    form = PhotoViewForm()
+    form.code.data = code
+    photo = form.get_user()
+    input = photo.path
+    outname = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], "process.jpg")
+    whiteboard.process(input, outname)
+    return outname
 
 ##############################################################
 # Routers - Pi                                               #
@@ -178,13 +189,27 @@ def send_location():
     pilocation = 'http://' + current_user.ip + '/' + 'register-server'
     payload = {'id': current_user.id}
     try:
-        r = requests.get(pilocation, params=payload, timeout=1)
+        r = requests.get(pilocation, params=payload, timeout=10)
         flash("Success. Pi IP verified.", category="general")
     except:
         requests.exceptions.Timeout
         flash("Timout occurred. Perhaps the Pi IP is incorrect.", "general")
     return redirect(url_for('pi'))
 
+
+@app.route('/pi-restart/', methods=['POST'])
+def pi_restart():
+    pi_id = int(request.form['id'])
+    ip = request.remote_addr
+    pi = models.Pi.query.filter(models.Pi.id==pi_id).first()
+    if pi:
+        pi.ip = ip
+    try:
+        db.session.commit()
+    except:
+        IntegrityError
+        db.session.rollback()
+    return 'Success', 200
 
 @app.route('/edit-pi/', methods=['POST'])
 def edit_pi():
@@ -238,7 +263,7 @@ def pi_delete():
 
     # even if a timeout occurs we still want to do the delete
     try:
-        r = requests.delete(pilocation, timeout=1)
+        r = requests.delete(pilocation, timeout=10)
     except:
         requests.exceptions.Timeout
         # ignore this
