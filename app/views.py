@@ -12,7 +12,6 @@ from markupsafe import Markup
 from StringIO import StringIO
 from sqlalchemy.exc import IntegrityError
 from util.perspective_transformation import transform_perspective
-import util.whiteboard
 
 from werkzeug import secure_filename
 from wtforms.validators import ValidationError
@@ -71,16 +70,6 @@ def view(code=None):
                            title = 'View | Discontinuity Board',
                            pvform = form,
                            user = photo)
-
-@app.route('/test-whiteboard/<code>')
-def process_whiteboard(code):
-    form = PhotoViewForm()
-    form.code.data = code
-    photo = form.get_user()
-    input = photo.path
-    outname = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], "process.jpg")
-    whiteboard.process(input, outname)
-    return outname
 
 ##############################################################
 # Routers - Pi                                               #

@@ -48,6 +48,7 @@ var ConfigTools = function() {
 	    div.bind("drag", dragFn);  // listen for future updates
 	    
 	    $parent.append(div);
+	    div.css("position", "absolute");
 
 	    div.trigger("drag");
 	}

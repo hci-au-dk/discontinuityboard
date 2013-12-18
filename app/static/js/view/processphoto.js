@@ -43,9 +43,16 @@ $(window).load(function() {
     // bind centering of the content
     $(window).bind("resize", fixSize);
 
+    // bind brightness/contrast button
+    $("#brightness-button").bind("click", brightenPhoto);
+
     // load the proper photo, if one can be viewed
     initializePhoto();
 });
+
+function brightenPhoto() {
+    $("#imagefile").pixastic("brightness", {brightness:30, contrast:0.9});
+}
 
 function initializePhoto() {
    var photoId = $("#photo-id").val()
