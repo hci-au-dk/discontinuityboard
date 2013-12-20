@@ -43,7 +43,7 @@ function showConfigure(modals, tools) {
     modals.showModal($("#configure-modal"));
 
     if ($(".modal #photocontainer").length == 0) {
-	$(".loading-icon").show();
+		$(".loading-icon").show();
 
         $("#configure-submit").attr("disabled", "true");
         // we also want to load an unmodified picture from the pi
@@ -53,12 +53,12 @@ function showConfigure(modals, tools) {
                 // set the hidden fields
                 $("#cwidth").val(data.width);
                 $("#cheight").val(data.width);
-		$(".loading-icon").hide();
+				$(".loading-icon").hide();
                 setNewPhotoConfigureView(data);
                 tools.cornerSelectClick($("#toolsdiv"), populateCoordinates);
                 $("#configure-submit").removeAttr("disabled");
             });
-				  },
+				 },
 				  function() {
 				      $(".loading-icon").hide();
 				      window.location.reload();

@@ -22,7 +22,9 @@ CODE_LENGTH = 6  # should correspond with the javascript access triggers
 
 @app.before_request
 def pre_request_logging():
-    #Logging statement
+    ''' 
+    Logging  - right now we just log everything
+    '''
     app.logger.info('\t'.join([
                 datetime.datetime.today().ctime(),
                 request.remote_addr,
@@ -38,6 +40,10 @@ def pre_request_logging():
 
 @app.route('/')
 def entry():
+    '''
+    Main entry point, should direct the user to a page with a
+    form to enter their access code.
+    '''
     pvform = PhotoViewForm()
     return render_template('entrypoint.html',
                            title = 'Discontinuity Board',
@@ -45,8 +51,12 @@ def entry():
 
 
 @app.route('/<code>', methods=['GET'])
-@app.route('/view/', methods=['GET', 'POST'])
+@app.route('/view/', methods=['POST'])
 def view(code=None):
+    '''
+    GET with a valid code should direct you to /view/ with your photo displayed.
+    POST a form with a valid access code and you will be directed to /view/ with the photo.
+    '''
     photo = None
     form = None
     if (request.method == 'GET' and code is not None) or request.method == 'POST':
@@ -77,6 +87,9 @@ def view(code=None):
 
 @app.route('/pi')
 def pi():
+    '''
+    Directs the user to the main entry portal for the admin interface.
+    '''
     rform = RegisterPiForm()
     cform = ConfigurePiForm()
     lform = LoginPiForm()
@@ -95,16 +108,15 @@ def pi():
                            user = user)
 
 
-@app.route('/pi/configure-modal')
-def pi_configure():
-    return pi()
-
 ##############################################################
 # Routers - Misc.                                            #
 ##############################################################
 
 @app.route('/uploads/<filename>')
 def send_file(filename):
+    '''
+    Serves photos from the database to the webpage given the url /uploads/<filename>
+    '''
     basepath = app.root_path + '/' + app.config['UPLOAD_FOLDER']
     return send_from_directory(basepath, filename)
 
@@ -114,6 +126,11 @@ def send_file(filename):
 
 @app.route('/pi/login/', methods=['POST'])
 def pi_login():
+    '''
+    POST to this url handles the login form submission.
+    On success, logs the user in and redirects to /pi, otherwise
+    displays an error message.
+    '''
     # logout any existing user
     form = LoginPiForm(request.form)
     if form.validate_on_submit():
@@ -129,6 +146,10 @@ def pi_login():
 
 @app.route('/register-pi/', methods=['POST'])
 def register_pi():
+    '''
+    POST to this url handles registeration of a pi. Success registers
+    and logs the pi in, failure displays error messages.
+    '''
     form = RegisterPiForm(request.form)
     location = url_for('pi') + '#register-modal'
     if request.method == 'POST' and form.validate():
@@ -174,6 +195,10 @@ def register_pi():
 
 @app.route('/send-location-to-pi/', methods=['GET'])
 def send_location():
+    '''
+    GET to this url pings the pi and lets the pi know that this is where
+    the server is located. Displays a message indicating success or failure.
+    '''
     # register this server and name with the pi
     pilocation = 'http://' + current_user.ip + '/' + 'register-server'
     payload = {'id': current_user.id}
@@ -188,6 +213,10 @@ def send_location():
 
 @app.route('/pi-restart/', methods=['POST'])
 def pi_restart():
+    '''
+    POST to this url sends the server the ip address associated with the id of a pi.
+    It is called by the camera server when it begins.
+    '''
     pi_id = int(request.form['id'])
     ip = request.remote_addr
     pi = models.Pi.query.filter(models.Pi.id==pi_id).first()
@@ -202,6 +231,10 @@ def pi_restart():
 
 @app.route('/edit-pi/', methods=['POST'])
 def edit_pi():
+    '''
+    POST to this url edits the pi--ip address, name, dimensions, password, etc.
+    Failure will result in displayed error messages.
+    '''
     form = EditPiForm(request.form)
     s = ''
     error = ''
@@ -240,13 +273,19 @@ def edit_pi():
 @app.route('/pi/logout/')
 @login_required
 def pi_logout():
+    '''
+    Logs the current user out of the system and redirects to /pi.
+    '''
     logout_user()
     return redirect(url_for('pi'))
 
 @app.route('/pi/delete-pi/')
 @login_required
 def pi_delete():
-
+    '''
+    Deletes a pi entry from the database and "deletes" all photos associated with it.
+    Photos and selections are kept in the database, but indicated as "deleted".
+    '''
     # delete config file on the pi
     pilocation = get_pi_base() + 'register-server'
 
@@ -268,6 +307,10 @@ def pi_delete():
 @app.route('/upload/', methods=['POST'])
 @login_required
 def upload_file():
+    '''
+    POST with an allowed filename (most picture formats, listed in the config file)
+    uploads the photo and saves it in the database.
+    '''
     filename = None
     returnobj = {}
     if request.method == 'POST':
@@ -284,6 +327,9 @@ def upload_file():
 @app.route('/get-all-photos/', methods = ['GET'])
 @login_required
 def get_all_photos():
+    '''
+    GET returns all photos associated with the currently logged in pi.
+    '''
     if request.method == 'POST':
         return make_response(400)
 
@@ -310,6 +356,9 @@ def get_all_photos():
 @app.route('/delete-photo/', methods = ['GET'])
 @login_required
 def delete_photo():
+    '''
+    GET request "deletes" the photo with id indicated in the args.
+    '''
     if request.method == 'POST':
         return make_response(400)
 
@@ -326,6 +375,11 @@ def delete_photo():
 @app.route('/take-photo/', methods = ['GET'])
 @login_required
 def take_photo():
+    '''
+    GET request sends a request to the pi to take a photo and returns
+    an object with the id of the new photo. If "configured" is true, sends to /snapshot,
+    otherwise to /rawimage on the camera server.
+    '''
     if request.method == 'POST':
         return make_response(400)
 
@@ -379,6 +433,10 @@ def take_photo():
 @app.route('/configure/', methods=['POST'])
 @login_required
 def configure():
+    '''
+    POST requst configures the camera with coordinates to capture.
+    Silent on success and will display errors on failure.
+    '''
     form = ConfigurePiForm()
     if form.validate_on_submit():
         # The coordinates given in the configuration do not map
@@ -434,6 +492,11 @@ def configure():
 
 @app.route('/pi-upload/', methods=['POST'])
 def pi_upload():
+    '''
+    POST request with a file will upload a photo directly from the camera to the database.
+    Separate from regular uploads because camera uploads come with pi ids and access coordinates
+    already generated.
+    '''
     filename = None
     returnobj = {}
     if request.method == 'POST':
@@ -473,6 +536,10 @@ def pi_upload():
 
 @app.route('/generate-access-code/', methods=['GET'])
 def generate_access_code():
+    '''
+    GET request generates a 6 letter, uppercase access code that is not
+    yet used in the database.
+    '''
     returnobj = {}
     if request.method == 'GET':
         code = get_new_access_code()
@@ -489,6 +556,11 @@ def generate_access_code():
 
 @app.route('/get-photo/', methods = ['GET'])
 def get_photo():
+    '''
+    GET request gets the photo associated with an id and returns an object
+    containing the photo's location, id, original width, original height, whether
+    or not it is raw, any notes, and the time that it will expire at.
+    '''
     if request.method == 'POST':
         return make_response(400)
 
@@ -518,6 +590,11 @@ def get_photo():
 
 @app.route('/make-cut/', methods = ['GET'])
 def make_cut():
+    '''
+    GET request selects a subsection of the photo indicated with the id
+    argument and saves the selection in the database. Returns an object with 
+    the selection's location, id, and original width and height.
+    '''
     # Load the image into a PIL Image first
     photoid = request.args.get('id')
     photo = Image.open(get_photo_path(photoid))
@@ -552,6 +629,10 @@ def make_cut():
 
 @app.route('/save-notes/', methods = ['POST'])
 def save_notes():
+    '''
+    POST request with non-empty notes saves the notes as associated
+    with this photo.
+    '''
     returnobj = {}
     if request.method == 'GET':
         return 'Bad request', 400
@@ -570,6 +651,9 @@ def save_notes():
 
 @app.route('/export-notes/', methods = ['GET'])
 def export_notes():
+    '''
+    GET request returns the notes associated with this photo in pdf form.
+    '''
     if request.method == 'POST':
         return 'Bad request', 400
 
@@ -604,17 +688,22 @@ def allowed_file(filename):
 def get_photo_from_id(id):
     return models.Photo.query.filter(models.Photo.id==id).filter(models.Photo.deleted==False).first()
 
-# Clears photos that don't have notes and have
-# been around for more than TIMESPAN_DAYS
+
 def clear_old_photos():
+    '''
+    Clears photos that don't have notes and have
+    been around for more than TIMESPAN_DAYS
+    '''
     now = datetime.datetime.now()
     for photo in models.Photo.query.all():
         delta = now - photo.time_submitted
         if (delta.days >= TIMESPAN_DAYS and photo.notes is None):
             delete_photo_and_selections(photo)
 
-# "Deletes" a photo and all selections associated with it
 def delete_photo_and_selections(photo):
+    '''
+    "Deletes" a photo and all selections associated with it.
+    '''
     #path = photo.path
     #for child in photo.children:
         #os.remove(child.path)
@@ -625,13 +714,17 @@ def delete_photo_and_selections(photo):
     db.session.commit()
     #os.remove(path)
 
-# Gets the human-readable date that the photo will expire
 def get_expiry_date(time_submitted):
+    '''
+    Gets the human-readable date that the photo will expire (e.g. Dec 22, 2013, 13:59:53)
+    '''
     left = time_submitted + timedelta(days=TIMESPAN_DAYS)
     return left.strftime("%b %d, %Y %H:%M:%S")
 
-# Returns a unique access code of length CODE_LENGTH
 def get_new_access_code(chars=string.ascii_uppercase):
+    '''
+    Returns a unique access code of length CODE_LENGTH.
+    '''
     code = generate_code(CODE_LENGTH, chars)
     while models.Photo.query.filter(models.Photo.code==code).first() is not None:
         code = generate_code(CODE_LENGTH, chars)
@@ -640,36 +733,47 @@ def get_new_access_code(chars=string.ascii_uppercase):
 def generate_code(size, chars):
     return ''.join(random.choice(chars) for x in range(size))
 
-# Given an id, returns the base filename of the photo
 def get_photo_filename(id):
+    '''
+    Given an id, returns the base filename of the photo.
+    '''
     photo = get_photo_from_id(id)
     db.session.close()
     filename = os.path.basename(photo.path)
     return filename
 
-# Given an id, returns the path to where the photo is stored
 def get_photo_path(id):
+    '''
+    Given an id, returns the path to where the photo is stored.
+    '''
     photo = get_photo_from_id(id)
     db.session.close()
     return photo.path
 
-# Get the base address of the pi that you are connected to
 def get_pi_base():
+    '''
+    Get the base address of the pi that you are connected to.
+    '''
     if current_user:
         return 'http://' + current_user.ip + '/'
     return None
 
-# Register errors associated with a form to a certain category
-# in the format "error[category]"
+
 def flash_errors(form, category):
+    '''
+    Register errors associated with a form to a certain category
+    in the format "error[category]".
+    '''
     for field, errors in form.errors.items():
         for error in errors:
             flash(u"Error in the %s field - %s" % (
                 getattr(form, field).label.text,
                 error), category='error' + category)
 
-# Save a photo in the database and in the file system
 def save_photo(file, filename, raw, pi_id=None, code=None):
+    '''
+    Save a photo in the database and in the file system.
+    '''
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
     file.save(savename)
 
@@ -693,8 +797,10 @@ def save_photo(file, filename, raw, pi_id=None, code=None):
     db.session.close()
     return photo.id
 
-# Save a selection in the database and in the file system
 def save_selection(image, filename, parent, comments=None):
+    '''
+    Save a selection in the database and in the file system.
+    '''
     savename = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
     image.save(savename)
     
