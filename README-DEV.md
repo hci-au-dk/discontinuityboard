@@ -44,7 +44,7 @@ Now, you are ready to run your server. If you want it to run for a long time in 
 
 ```
 $ screen -S name_of_your_session # the name can be whatever you like
-$ python discontinuityboard.py # you should be able to connect to this server now!
+$ python discontinuityboard.py [127.0.0.1 | 0.0.0.0] # 127.0.0.1 for localhost, 0.0.0.0 for otherwise visible host
 ```
 
 To leave your `screen` session and keep your server running, `Ctrl-a d`. You can reattach with the command `screen -r` to see the processes you left running. To see all your screen sessions `screen -ls`.
@@ -57,7 +57,7 @@ You'll want to have your pi server running also for full functionality. See the 
 To run the server locally, simply type:
 
 ```
-(venv)$ python discontinuityboard.py
+(venv)$ python discontinuityboard.py [127.0.0.1 | 0.0.0.0] # 127.0.0.1 for localhost, 0.0.0.0 for otherwise visible host
 ```
 
 ## Requirements
