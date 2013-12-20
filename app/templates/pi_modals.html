@@ -87,7 +87,7 @@
       <div id="configure-display">
 	<div class="loading-icon"></div>
 
-	   {% with errors = get_flashed_messages(category_filter=["general"]) %}
+	   {% with errors = get_flashed_messages(category_filter=["error-configure"]) %}
 	   {% if errors %}
 	   <div class="alert-message block-message error">
 	     <ul>
